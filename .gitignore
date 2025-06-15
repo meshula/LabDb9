@@ -1,0 +1,191 @@
+# LabDb .gitignore
+
+# Build directories
+build/
+cmake-build-*/
+out/
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+.eggs/
+python/labdb/*.so
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Compiled Object files
+*.o
+*.obj
+*.ko
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# Testing
+Testing/
+test_results/
+*.gcov
+*.gcda
+*.gcno
+
+# Database files (for testing)
+*.ldb/
+*.mdb
+/tmp/
+test_*.ldb
+
+# Package managers
+vcpkg_installed/
+conan.lock
+.conan/
+
+# Documentation build
+docs/_build/
+docs/build/
+
+# Logs
+*.log
+
+# Backup files
+*.bak
+*.orig
+*.rej
+
+# Python virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook (if we add them later)
+.ipynb_checkpoints
+
+# Performance results
+*.csv
+*_benchmark_results.*
+*_performance_report.*
+labdb_benchmark_results.csv
+labdb_performance_report.md
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Git merge artifacts
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+*_BACKUP_*
+*_BASE_*
+*_LOCAL_*
+*_REMOTE_*
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# CLion
+cmake-build-*/
+
+# Qt Creator
+CMakeLists.txt.user
+CMakeLists.txt.user.*
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.vcxproj.filters
+
+# Code::Blocks
+*.depend
+*.layout
+
+# Local configuration files
+config.local.*
+settings.local.*
+
+# Inception-specific test files (when we integrate)
+test_inception_*.py
+inception_test_*.ldb/
+
+# Performance test outputs
+gource-*.mp4
+
+# Any local development databases
+dev_*.ldb/
+local_*.ldb/
+scratch_*.ldb/
