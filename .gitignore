@@ -87,6 +87,9 @@ test_results/
 /test_*.py
 /test_*.sh
 
+# Development infrastructure (not committed)
+.staging/
+
 # Database files (for testing)
 *.ldb/
 *.mdb
