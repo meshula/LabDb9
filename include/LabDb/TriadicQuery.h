@@ -115,6 +115,40 @@ public:
                                            const std::string& predicate_pattern, 
                                            const std::string& object_pattern);
     
+    /// Entity Discovery & Sampling Interface
+    /// Sample N entities from Motion perspective (subjects)
+    std::vector<std::string> sample_motion_entities(size_t count, size_t offset = 0);
+    
+    /// Sample N entities from Memory perspective (predicates)
+    std::vector<std::string> sample_memory_relations(size_t count, size_t offset = 0);
+    
+    /// Sample N entities from Field perspective (objects/contexts)
+    std::vector<std::string> sample_field_contexts(size_t count, size_t offset = 0);
+    
+    /// Get paginated random sampling across all three perspectives
+    struct SamplingResult {
+        std::vector<std::string> motion_entities;
+        std::vector<std::string> memory_relations;
+        std::vector<std::string> field_contexts;
+        size_t total_motion_count;
+        size_t total_memory_count;
+        size_t total_field_count;
+    };
+    SamplingResult sample_triadic_entities(size_t motion_count = 5, 
+                                           size_t memory_count = 5,
+                                           size_t field_count = 10,
+                                           size_t offset = 0);
+    
+    /// Browse all entities by type with pagination
+    std::vector<std::string> browse_entities_by_type(Perspective perspective, 
+                                                     size_t limit = 20, 
+                                                     size_t offset = 0);
+                                                     
+    /// Random sampling from each perspective (useful for exploration)
+    std::vector<std::string> random_sample_motion(size_t count);
+    std::vector<std::string> random_sample_memory(size_t count);
+    std::vector<std::string> random_sample_field(size_t count);
+    
     /// Access to underlying store for advanced usage
     std::shared_ptr<NonoStore> get_store() const { return _store; }
     

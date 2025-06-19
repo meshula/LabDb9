@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <cmath>
+#include <random>
 
 namespace LabDb {
 
@@ -389,6 +390,139 @@ double TriadicQuery::calculate_coherence(
     }
     
     return actual_connections / total_possible;
+}
+
+// Entity Discovery & Sampling Interface Implementation
+std::vector<std::string> TriadicQuery::sample_motion_entities(size_t count, size_t offset) {
+    auto all_entities = _store->all_subjects();
+    
+    // Apply offset and limit
+    std::vector<std::string> sampled;
+    for (size_t i = offset; i < all_entities.size() && sampled.size() < count; ++i) {
+        sampled.push_back(all_entities[i]);
+    }
+    
+    return sampled;
+}
+
+std::vector<std::string> TriadicQuery::sample_memory_relations(size_t count, size_t offset) {
+    auto all_relations = _store->all_predicates();
+    
+    // Apply offset and limit
+    std::vector<std::string> sampled;
+    for (size_t i = offset; i < all_relations.size() && sampled.size() < count; ++i) {
+        sampled.push_back(all_relations[i]);
+    }
+    
+    return sampled;
+}
+
+std::vector<std::string> TriadicQuery::sample_field_contexts(size_t count, size_t offset) {
+    auto all_contexts = _store->all_objects();
+    
+    // Apply offset and limit
+    std::vector<std::string> sampled;
+    for (size_t i = offset; i < all_contexts.size() && sampled.size() < count; ++i) {
+        sampled.push_back(all_contexts[i]);
+    }
+    
+    return sampled;
+}
+
+TriadicQuery::SamplingResult TriadicQuery::sample_triadic_entities(
+    size_t motion_count, size_t memory_count, size_t field_count, size_t offset) {
+    
+    SamplingResult result;
+    
+    // Sample from each perspective
+    result.motion_entities = sample_motion_entities(motion_count, offset);
+    result.memory_relations = sample_memory_relations(memory_count, offset);
+    result.field_contexts = sample_field_contexts(field_count, offset);
+    
+    // Get total counts for pagination info
+    result.total_motion_count = _store->all_subjects().size();
+    result.total_memory_count = _store->all_predicates().size();
+    result.total_field_count = _store->all_objects().size();
+    
+    return result;
+}
+
+std::vector<std::string> TriadicQuery::browse_entities_by_type(
+    Perspective perspective, size_t limit, size_t offset) {
+    
+    switch (perspective) {
+        case Perspective::Motion:
+            return sample_motion_entities(limit, offset);
+        case Perspective::Memory:
+            return sample_memory_relations(limit, offset);
+        case Perspective::Field:
+            return sample_field_contexts(limit, offset);
+        default:
+            return {};
+    }
+}
+
+std::vector<std::string> TriadicQuery::random_sample_motion(size_t count) {
+    auto all_entities = _store->all_subjects();
+    
+    if (all_entities.size() <= count) {
+        return all_entities;
+    }
+    
+    // Modern random sampling using std::shuffle
+    std::vector<std::string> shuffled = all_entities;
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(shuffled.begin(), shuffled.end(), g);
+    
+    std::vector<std::string> sampled;
+    for (size_t i = 0; i < count && i < shuffled.size(); ++i) {
+        sampled.push_back(shuffled[i]);
+    }
+    
+    return sampled;
+}
+
+std::vector<std::string> TriadicQuery::random_sample_memory(size_t count) {
+    auto all_relations = _store->all_predicates();
+    
+    if (all_relations.size() <= count) {
+        return all_relations;
+    }
+    
+    // Modern random sampling using std::shuffle
+    std::vector<std::string> shuffled = all_relations;
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(shuffled.begin(), shuffled.end(), g);
+    
+    std::vector<std::string> sampled;
+    for (size_t i = 0; i < count && i < shuffled.size(); ++i) {
+        sampled.push_back(shuffled[i]);
+    }
+    
+    return sampled;
+}
+
+std::vector<std::string> TriadicQuery::random_sample_field(size_t count) {
+    auto all_contexts = _store->all_objects();
+    
+    if (all_contexts.size() <= count) {
+        return all_contexts;
+    }
+    
+    // Modern random sampling using std::shuffle
+    std::vector<std::string> shuffled = all_contexts;
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(shuffled.begin(), shuffled.end(), g);
+    
+    std::vector<std::string> sampled;
+    for (size_t i = 0; i < count && i < shuffled.size(); ++i) {
+        sampled.push_back(shuffled[i]);
+    }
+    
+    return sampled;
 }
 
 } // namespace LabDb
