@@ -83,6 +83,10 @@ test_results/
 *.gcda
 *.gcno
 
+# Root-level development test files (ephemera)
+/test_*.py
+/test_*.sh
+
 # Database files (for testing)
 *.ldb/
 *.mdb
