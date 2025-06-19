@@ -1,5 +1,7 @@
 # LabDb .gitignore
 
+lego-box/
+
 # Build directories
 build/
 cmake-build-*/
@@ -84,6 +86,11 @@ test_results/
 # Database files (for testing)
 *.ldb/
 *.mdb
+*.lmdb
+*.db9
+*-lock
+*.lmdb-lock
+*.db9-lock
 /tmp/
 test_*.ldb
 
