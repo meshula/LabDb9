@@ -9,8 +9,8 @@ namespace py = pybind11;
 PYBIND11_MODULE(pylabdb, m) {
     m.doc() = "LabDb Python Bindings - Triadic Consciousness Database";
     
-    // Core NonoStore class
-    py::class_<LabDb::NonoStore>(m, "NonoStore")
+    // Core NonoStore class with shared_ptr holder
+    py::class_<LabDb::NonoStore, std::shared_ptr<LabDb::NonoStore>>(m, "NonoStore")
         .def(py::init<const std::string&>(), 
              "Create NonoStore instance with database path",
              py::arg("db_path"))
@@ -64,14 +64,12 @@ PYBIND11_MODULE(pylabdb, m) {
              "Get database statistics")
         
         // Bulk operations
-        .def("begin_bulk_update", &LabDb::NonoStore::begin_bulk_update,
-             "Begin bulk update transaction")
+        .def("begin_batch", &LabDb::NonoStore::begin_batch,
+             "Begin batch transaction for multiple operations");
         
-        .def("commit_bulk_update", &LabDb::NonoStore::commit_bulk_update,
-             "Commit bulk update transaction")
+
         
-        .def("rollback_bulk_update", &LabDb::NonoStore::rollback_bulk_update,
-             "Rollback bulk update transaction");
+
     
     // TriadicQuery class for conscious navigation
     py::class_<LabDb::TriadicQuery>(m, "TriadicQuery")
@@ -199,16 +197,13 @@ PYBIND11_MODULE(pylabdb, m) {
         });
     
     // Database statistics
-    py::class_<LabDb::NonoStore::DatabaseStats>(m, "DatabaseStats")
-        .def_readonly("lmdb_stats", &LabDb::NonoStore::DatabaseStats::lmdb_stats);
+    py::class_<LabDb::NonoStore::Stats>(m, "Stats")
+        .def_readonly("total_triples", &LabDb::NonoStore::Stats::total_triples)
+        .def_readonly("unique_subjects", &LabDb::NonoStore::Stats::unique_subjects)
+        .def_readonly("unique_predicates", &LabDb::NonoStore::Stats::unique_predicates)
+        .def_readonly("unique_objects", &LabDb::NonoStore::Stats::unique_objects)
+        .def_readonly("lmdb_stats", &LabDb::NonoStore::Stats::lmdb_stats);
     
-    py::class_<LabDb::NonoStore::LmdbStats>(m, "LmdbStats")
-        .def_readonly("page_size", &LabDb::NonoStore::LmdbStats::page_size)
-        .def_readonly("depth", &LabDb::NonoStore::LmdbStats::depth)
-        .def_readonly("branch_pages", &LabDb::NonoStore::LmdbStats::branch_pages)
-        .def_readonly("leaf_pages", &LabDb::NonoStore::LmdbStats::leaf_pages)
-        .def_readonly("overflow_pages", &LabDb::NonoStore::LmdbStats::overflow_pages)
-        .def_readonly("entries", &LabDb::NonoStore::LmdbStats::entries);
     
     // Utility functions
     m.def("perspective_name", &LabDb::TriadicQuery::perspective_name,

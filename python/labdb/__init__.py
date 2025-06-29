@@ -24,7 +24,7 @@ class Perspective:
 try:
     from .pylabdb import *
     from .pylabdb import (
-        NonoStore, Triple, DatabaseStats, LmdbStats,
+        NonoStore, Triple, Stats,
         TriadicQuery, TriadicResult, TriadicStats, VocabularyBoundary,
         perspective_name, perspective_sanskrit, optimal_perspective
     )
@@ -45,7 +45,7 @@ try:
         Field = CPPPerspective.Field
     
     __all__ = [
-        'NonoStore', 'Triple', 'DatabaseStats', 'LmdbStats',
+        'NonoStore', 'Triple', 'Stats',
         'TriadicQuery', 'TriadicResult', 'TriadicStats', 'VocabularyBoundary',
         'Perspective',
         'perspective_name', 'perspective_sanskrit', 'optimal_perspective',
@@ -71,8 +71,7 @@ except ImportError:
     # Provide placeholder classes that give helpful error messages
     NonoStore = _not_available
     Triple = _not_available
-    DatabaseStats = _not_available
-    LmdbStats = _not_available
+    Stats = _not_available
     TriadicQuery = _not_available
     TriadicResult = _not_available
     TriadicStats = _not_available

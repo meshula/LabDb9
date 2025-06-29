@@ -79,30 +79,62 @@ endif()
 
 # Python bindings
 if(BUILD_PYTHON_BINDINGS)
+    # Try to find pybind11 first, if not found, fetch it
     find_package(pybind11 QUIET)
-    if(pybind11_FOUND)
-        pybind11_add_module(pylabdb python/bindings.cpp)
-        target_link_libraries(pylabdb PRIVATE labdb)
-        
-        # Set properties for proper Python module
-        set_target_properties(pylabdb PROPERTIES
-            CXX_VISIBILITY_PRESET "hidden"
-            VISIBILITY_INLINES_HIDDEN YES
+    if(NOT pybind11_FOUND)
+        message(STATUS "pybind11 not found locally, fetching via FetchContent...")
+        FetchContent_Declare(
+            pybind11
+            GIT_REPOSITORY https://github.com/pybind/pybind11.git
+            GIT_TAG v2.11.1
         )
-        
-        # Install Python module to python/labdb/ directory
-        install(TARGETS pylabdb DESTINATION python/labdb)
-        
-        message(STATUS "Python bindings enabled")
+        FetchContent_MakeAvailable(pybind11)
+        message(STATUS "pybind11 configured via FetchContent")
     else()
-        message(WARNING "pybind11 not found - skipping Python bindings")
+        message(STATUS "Using system pybind11")
     endif()
+    
+    # Now we know pybind11 is available
+    pybind11_add_module(pylabdb python/bindings.cpp)
+    target_link_libraries(pylabdb PRIVATE labdb)
+    
+    # Set properties for proper Python module
+    set_target_properties(pylabdb PROPERTIES
+        CXX_VISIBILITY_PRESET "hidden"
+        VISIBILITY_INLINES_HIDDEN YES
+        OUTPUT_NAME "pylabdb"
+        SUFFIX ".so"
+        PREFIX ""
+    )
+    
+    # Install Python module to python/labdb/ directory
+    install(TARGETS pylabdb DESTINATION python/labdb)
+    
+    # For development: copy module to python directory after build
+    add_custom_command(TARGET pylabdb POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pylabdb> ${CMAKE_SOURCE_DIR}/python/labdb/
+        COMMENT "Copying pylabdb module to python/labdb/ for development"
+    )
+    
+    message(STATUS "Python bindings enabled")
 else()
     message(STATUS "Python bindings disabled")
 endif()
 
 # Examples
 add_subdirectory(examples)
+
+# Tools
+add_executable(labdb-explore tools/labdb_explorer.cpp)
+target_link_libraries(labdb-explore PRIVATE labdb)
+target_include_directories(labdb-explore PRIVATE include)
+
+add_executable(create-test-db tools/create_test_db.cpp)
+target_link_libraries(create-test-db PRIVATE labdb)
+target_include_directories(create-test-db PRIVATE include)
+
+# Install CLI tools
+install(TARGETS labdb-explore create-test-db DESTINATION bin)
 
 # Installation
 install(TARGETS labdb lmdb_lib
