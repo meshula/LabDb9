@@ -1,0 +1,44 @@
+{
+  "build_system": "cmake",
+  "environment": {
+    "description": "LabDb - Triadic Consciousness Database development environment"
+  },
+  "commands": {
+    "configure": ["cmake", "-B", "build", "-S", ".", "-DCMAKE_BUILD_TYPE=Release"],
+    "build": ["cmake", "--build", "build", "--config", "Release"],
+    "test": ["ctest", "--test-dir", "build", "--output-on-failure"],
+    "install": ["cmake", "--install", "build"],
+    "clean": ["cmake", "--build", "build", "--target", "clean"],
+    "python_install": ["pip", "install", "-e", "."],
+    "python_test": ["python", "tests/python/test_comprehensive_python.py"]
+  },
+  "build_options": {
+    "BUILD_TESTS": "ON",
+    "BUILD_PYTHON_BINDINGS": "ON",
+    "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+  },
+  "development": {
+    "key_files": [
+      "include/LabDb/NonoStore.h",
+      "include/LabDb/TriadicQuery.h", 
+      "src/NonoStore.cpp",
+      "python/bindings.cpp",
+      "CMakeLists.txt",
+      "tests/cpp/",
+      "tests/python/"
+    ],
+    "test_commands": {
+      "unit": ["ctest", "--test-dir", "build", "--label-regex", "unit"],
+      "integration": ["ctest", "--test-dir", "build", "--label-regex", "integration"],
+      "python": ["python", "tests/python/test_comprehensive_python.py"],
+      "comprehensive": ["python", "tests/python/test_comprehensive_python.py"],
+      "cpp_unit": ["ctest", "--test-dir", "build", "--output-on-failure"],
+      "python_all": ["python", "-m", "pytest", "tests/python/", "-v"]
+    }
+  },
+  "artifacts": {
+    "libraries": ["build/liblabdb.a", "build/liblmdb_lib.a"],
+    "executables": ["build/labdb-explore", "build/create-test-db"],
+    "python_module": ["python/labdb/"]
+  }
+}
