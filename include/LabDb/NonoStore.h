@@ -6,6 +6,13 @@
 #include <vector>
 #include <memory>
 
+// Forward declarations for TID architecture
+namespace LabDb {
+    class TermDictionary;
+    class TIDSequenceGenerator;
+    class TripleStore;
+}
+
 namespace LabDb {
 
 /// Core NonoStore: Triadic consciousness database implementing nine-index architecture
@@ -157,6 +164,11 @@ private:
     std::unique_ptr<LmdbStore> _store;
     mutable Result _last_error;
     
+    // TID-based architecture components
+    std::unique_ptr<TermDictionary> _term_dict;
+    std::unique_ptr<TIDSequenceGenerator> _tid_gen;
+    std::unique_ptr<TripleStore> _triple_store;
+    
     /// Internal helpers
     bool set_error(ErrorCode code, const std::string& message);
     
@@ -175,6 +187,12 @@ private:
                          const std::string& subject,
                          const std::string& predicate,
                          const std::string& object);
+    
+    /// TID-based architecture helpers
+    std::string encode_tid_for_storage(uint64_t tid);
+    uint64_t decode_tid_from_storage(const std::string& stored);
+    std::vector<std::string> generate_tid_based_crown_keys(uint64_t subject_id, uint64_t predicate_id, uint64_t object_id);
+    std::string generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType vocab_type, uint64_t term_id);
 };
 
 } // namespace LabDb

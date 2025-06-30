@@ -107,6 +107,9 @@ public:
     };
     Stats get_stats(Transaction& txn);
     
+    /// Access to underlying LMDB environment (for advanced operations)
+    MDB_env* environment() const { return _env; }
+    
 private:
     std::string _database_path;
     MDB_env* _env;

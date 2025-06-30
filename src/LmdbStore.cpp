@@ -33,6 +33,14 @@ void LmdbStore::init() {
         throw LmdbException("Failed to set map size", rc);
     }
     
+    // Set maximum number of named databases (for crown architecture)
+    // Need: SPO, SOP, PSO, POS, OSP, OPS, S*, P*, O* (9) + dict, triple, sequence (3) = 12+ DBIs
+    rc = mdb_env_set_maxdbs(_env, 20);  // Allow up to 20 named databases for future expansion
+    if (rc != 0) {
+        mdb_env_close(_env);
+        throw LmdbException("Failed to set max databases", rc);
+    }
+    
     // Open environment
     rc = mdb_env_open(_env, _database_path.c_str(), MDB_NOSUBDIR, 0664);
     if (rc != 0) {

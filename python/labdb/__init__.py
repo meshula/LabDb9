@@ -24,8 +24,8 @@ class Perspective:
 try:
     from .pylabdb import *
     from .pylabdb import (
-        NonoStore, Triple, Stats,
-        TriadicQuery, TriadicResult, TriadicStats, VocabularyBoundary,
+        NonoStore, Triple, Stats, LmdbStats,
+        TriadicQuery, TriadicResult, TriadicStats,
         perspective_name, perspective_sanskrit, optimal_perspective
     )
     
@@ -45,8 +45,8 @@ try:
         Field = CPPPerspective.Field
     
     __all__ = [
-        'NonoStore', 'Triple', 'Stats',
-        'TriadicQuery', 'TriadicResult', 'TriadicStats', 'VocabularyBoundary',
+        'NonoStore', 'Triple', 'Stats', 'LmdbStats',
+        'TriadicQuery', 'TriadicResult', 'TriadicStats',
         'Perspective',
         'perspective_name', 'perspective_sanskrit', 'optimal_perspective',
         'EnhancedNonoStore', 'EnhancedTriadicResult', 'EnhancedTriadicResults'
@@ -72,10 +72,10 @@ except ImportError:
     NonoStore = _not_available
     Triple = _not_available
     Stats = _not_available
+    LmdbStats = _not_available
     TriadicQuery = _not_available
     TriadicResult = _not_available
     TriadicStats = _not_available
-    VocabularyBoundary = _not_available
     perspective_name = _not_available
     perspective_sanskrit = _not_available
     optimal_perspective = _not_available
