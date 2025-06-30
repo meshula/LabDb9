@@ -149,19 +149,32 @@ install(FILES
 
 # Package configuration
 include(CMakePackageConfigHelpers)
+
+# Configure the config file from template
+configure_package_config_file(
+    cmake/LabDbConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/LabDbConfig.cmake"
+    INSTALL_DESTINATION lib/cmake/LabDb
+    PATH_VARS CMAKE_INSTALL_PREFIX
+)
+
+# Generate version file
 write_basic_package_version_file(
-    LabDbConfigVersion.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/LabDbConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
+# Install the targets export
 install(EXPORT LabDbTargets
     FILE LabDbTargets.cmake
+    NAMESPACE LabDb::
     DESTINATION lib/cmake/LabDb
 )
 
+# Install the config files
 install(FILES
-    cmake/LabDbConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/LabDbConfigVersion.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/LabDbConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/LabDbConfigVersion.cmake"
     DESTINATION lib/cmake/LabDb
 )

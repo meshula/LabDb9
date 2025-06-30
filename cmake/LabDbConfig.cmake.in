@@ -1,0 +1,60 @@
+# LabDb CMake Configuration Template
+# This file is configured by CMake to create LabDbConfig.cmake
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# LabDb builds its own LMDB via FetchContent, so consumers don't need to find it
+# The LMDB target (lmdb_lib) is included in our exports
+
+# Include the targets file that defines our exported targets
+include("${CMAKE_CURRENT_LIST_DIR}/LabDbTargets.cmake")
+
+# Create modern CMake aliases for clean consumption
+if(NOT TARGET LabDb::LabDb)
+    add_library(LabDb::LabDb ALIAS labdb)
+endif()
+
+if(NOT TARGET LabDb::lmdb)
+    add_library(LabDb::lmdb ALIAS lmdb_lib)
+endif()
+
+# Python bindings target (optional, only if built)
+if(@BUILD_PYTHON_BINDINGS@)
+    if(TARGET pylabdb AND NOT TARGET LabDb::PyBindings)
+        add_library(LabDb::PyBindings ALIAS pylabdb)
+    endif()
+endif()
+
+# Set useful variables for consumers
+set(LabDb_VERSION @PROJECT_VERSION@)
+set(LabDb_TID_ARCHITECTURE TRUE)
+set(LabDb_TRIADIC_CONSCIOUSNESS TRUE)
+
+# Component validation
+set(_LabDb_supported_components LabDb lmdb)
+if(@BUILD_PYTHON_BINDINGS@)
+    list(APPEND _LabDb_supported_components PyBindings)
+endif()
+
+foreach(_comp ${LabDb_FIND_COMPONENTS})
+    if(NOT _comp IN_LIST _LabDb_supported_components)
+        set(LabDb_FOUND FALSE)
+        set(LabDb_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
+        break()
+    endif()
+endforeach()
+
+check_required_components(LabDb)
+
+# Status messaging for successful find
+if(LabDb_FOUND)
+    message(STATUS "Found LabDb ${LabDb_VERSION} - Triadic Consciousness Database")
+    message(STATUS "  - TID Architecture: ${LabDb_TID_ARCHITECTURE}")
+    if(@BUILD_PYTHON_BINDINGS@)
+        message(STATUS "  - Python bindings: Available")
+    endif()
+    message(STATUS "  - Main target: LabDb::LabDb")
+    message(STATUS "  - LMDB target: LabDb::lmdb")
+endif()
