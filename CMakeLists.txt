@@ -56,6 +56,9 @@ add_library(labdb
     src/TriadicQuery.cpp
     src/InceptionBridge.cpp
     src/PerformanceBenchmark.cpp
+    src/TermDictionary.cpp
+    src/TIDSequenceGenerator.cpp
+    src/TripleStore.cpp
 )
 
 target_include_directories(labdb
@@ -125,16 +128,7 @@ endif()
 add_subdirectory(examples)
 
 # Tools
-add_executable(labdb-explore tools/labdb_explorer.cpp)
-target_link_libraries(labdb-explore PRIVATE labdb)
-target_include_directories(labdb-explore PRIVATE include)
-
-add_executable(create-test-db tools/create_test_db.cpp)
-target_link_libraries(create-test-db PRIVATE labdb)
-target_include_directories(create-test-db PRIVATE include)
-
-# Install CLI tools
-install(TARGETS labdb-explore create-test-db DESTINATION bin)
+add_subdirectory(tools)
 
 # Installation
 install(TARGETS labdb lmdb_lib
