@@ -32,6 +32,20 @@ add_executable(test_triadic_interface
 target_link_libraries(test_triadic_interface labdb)
 add_test(NAME TriadicInterfaceTest COMMAND test_triadic_interface)
 
+# TermDictionary test
+add_executable(test_term_dictionary
+    test_term_dictionary.cpp
+)
+target_link_libraries(test_term_dictionary labdb)
+add_test(NAME TermDictionaryTest COMMAND test_term_dictionary)
+
+# TripleStore test
+add_executable(test_triple_store
+    test_triple_store.cpp
+)
+target_link_libraries(test_triple_store labdb)
+add_test(NAME TripleStoreTest COMMAND test_triple_store)
+
 # Performance Benchmark (not a test, but a benchmark tool)
 add_executable(benchmark_performance
     cpp/benchmark_performance.cpp
