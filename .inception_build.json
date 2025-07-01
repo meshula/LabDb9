@@ -9,8 +9,12 @@
     "test": ["ctest", "--test-dir", "build", "--output-on-failure"],
     "install": ["cmake", "--install", "build"],
     "clean": ["cmake", "--build", "build", "--target", "clean"],
-    "python_install": ["pip", "install", "-e", "."],
-    "python_test": ["python", "tests/python/test_comprehensive_python.py"]
+    "python_install": ["pip", "install", "-e", "python/"],
+    "python_test": ["python", "tests/python/test_comprehensive_python.py"],
+    "db9_setup": ["pip", "install", "-r", "db9-mcp-server/requirements.txt"],
+    "db9_test": ["python", "db9-mcp-server/test_basic_functionality.py"],
+    "db9_server": ["python", "-m", "src.db9_server"],
+    "full_stack": ["bash", "-c", "cmake --build build && pip install -e python/ && pip install -r db9-mcp-server/requirements.txt"]
   },
   "build_options": {
     "BUILD_TESTS": "ON",
@@ -25,7 +29,8 @@
       "python/bindings.cpp",
       "CMakeLists.txt",
       "tests/cpp/",
-      "tests/python/"
+      "tests/python/",
+      "db9-mcp-server/"
     ],
     "test_commands": {
       "unit": ["ctest", "--test-dir", "build", "--label-regex", "unit"],
@@ -33,12 +38,34 @@
       "python": ["python", "tests/python/test_comprehensive_python.py"],
       "comprehensive": ["python", "tests/python/test_comprehensive_python.py"],
       "cpp_unit": ["ctest", "--test-dir", "build", "--output-on-failure"],
-      "python_all": ["python", "-m", "pytest", "tests/python/", "-v"]
+      "python_all": ["python", "-m", "pytest", "tests/python/", "-v"],
+      "db9_validation": ["python", "db9-mcp-server/test_basic_functionality.py"],
+      "db9_full": ["bash", "-c", "cd db9-mcp-server && python test_basic_functionality.py"]
     }
   },
   "artifacts": {
     "libraries": ["build/liblabdb.a", "build/liblmdb_lib.a"],
     "executables": ["build/labdb-explore", "build/create-test-db"],
-    "python_module": ["python/labdb/"]
+    "python_module": ["python/labdb/"],
+    "db9_server": ["db9-mcp-server/src/"]
+  },
+  "workflows": {
+    "setup_development": [
+      "configure",
+      "build", 
+      "python_install",
+      "db9_setup"
+    ],
+    "run_all_tests": [
+      "test",
+      "python_test", 
+      "db9_test"
+    ],
+    "deploy_full_stack": [
+      "build",
+      "python_install",
+      "db9_setup",
+      "db9_test"
+    ]
   }
 }
