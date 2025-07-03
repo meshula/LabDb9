@@ -3,7 +3,7 @@
 
 database:
   # Path to LabDb database file
-  path: "../triadic.db9"
+  path: "/Users/nporcino/dev/Lab/LabDb/triadic.db9"
   
   # Domain classification for this database
   domain_type: "mixed"

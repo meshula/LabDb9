@@ -27,7 +27,7 @@ class TriadicResult:
 @dataclass
 class DatabaseStats:
     """Mock database statistics"""
-    triple_count: int
+    total_triples: int
     
     
 class MockNonoStore:
@@ -73,7 +73,7 @@ class MockNonoStore:
     
     def get_stats(self) -> DatabaseStats:
         """Get mock database statistics"""
-        return DatabaseStats(triple_count=len(self.sample_triples))
+        return DatabaseStats(total_triples=len(self.sample_triples))
     
     def all_subjects(self) -> List[str]:
         """Get all subjects (Motion entities)"""
@@ -113,7 +113,12 @@ class MockTriadicQuery:
     
     def motion_from(self, entity: str) -> TriadicResult:
         """Mock Motion (स्पन्द) perspective query"""
-        triples = self.nonostore.query_triples(subject=entity)
+        # Use real NonoStore query method if available, fallback to mock
+        if hasattr(self.nonostore, 'query'):
+            real_triples = self.nonostore.query(entity, "*", "*")
+            triples = [Triple(t.subject, t.predicate, t.object) for t in real_triples]
+        else:
+            triples = self.nonostore.query_triples(subject=entity)
         return TriadicResult(
             triples=triples,
             perspective="motion",
@@ -122,7 +127,12 @@ class MockTriadicQuery:
     
     def memory_relations(self, predicate: str) -> TriadicResult:
         """Mock Memory (स्मृति) perspective query"""
-        triples = self.nonostore.query_triples(predicate=predicate)
+        # Use real NonoStore query method if available, fallback to mock
+        if hasattr(self.nonostore, 'query'):
+            real_triples = self.nonostore.query("*", predicate, "*")
+            triples = [Triple(t.subject, t.predicate, t.object) for t in real_triples]
+        else:
+            triples = self.nonostore.query_triples(predicate=predicate)
         return TriadicResult(
             triples=triples,
             perspective="memory", 
@@ -131,7 +141,12 @@ class MockTriadicQuery:
     
     def field_contexts(self, context: str) -> TriadicResult:
         """Mock Field (क्षेत्र) perspective query"""
-        triples = self.nonostore.query_triples(object=context)
+        # Use real NonoStore query method if available, fallback to mock
+        if hasattr(self.nonostore, 'query'):
+            real_triples = self.nonostore.query("*", "*", context)
+            triples = [Triple(t.subject, t.predicate, t.object) for t in real_triples]
+        else:
+            triples = self.nonostore.query_triples(object=context)
         return TriadicResult(
             triples=triples,
             perspective="field",
