@@ -88,7 +88,7 @@ PerformanceBenchmark::BenchmarkResult PerformanceBenchmark::benchmark_insertions
                 std::string subject = "entity_" + std::to_string(gen() % config.num_subjects);
                 std::string predicate = "relation_" + std::to_string(gen() % config.num_predicates);
                 std::string object = "value_" + std::to_string(gen() % config.num_objects);
-                temp_store->connect(subject, predicate, object);
+                temp_store->add_triple(subject, predicate, object);
             }
             
             auto stats = temp_store->get_stats();
@@ -237,7 +237,7 @@ void PerformanceBenchmark::generate_random_dataset(const DatasetConfig& config) 
         std::string subject = "entity_" + std::to_string(gen() % config.num_subjects);
         std::string predicate = "relation_" + std::to_string(gen() % config.num_predicates);
         std::string object = "value_" + std::to_string(gen() % config.num_objects);
-        _store->connect(subject, predicate, object);
+        _store->add_triple(subject, predicate, object);
     }
 }
 
@@ -675,20 +675,20 @@ void PerformanceBenchmark::generate_hierarchical_dataset(const DatasetConfig& co
         // Level 1 children
         for (size_t j = 0; j < nodes_per_level; ++j) {
             std::string child1 = "level1_" + std::to_string(i * nodes_per_level + j);
-            _store->connect(root, "hasChild", child1);
-            _store->connect(child1, "parentOf", root);
+            _store->add_triple(root, "hasChild", child1);
+            _store->add_triple(child1, "parentOf", root);
             
             // Level 2 children
             for (size_t k = 0; k < nodes_per_level && 
                  _store->get_stats().lmdb_stats.entries < config.num_triples; ++k) {
                 std::string child2 = "level2_" + std::to_string(j * nodes_per_level + k);
-                _store->connect(child1, "hasChild", child2);
-                _store->connect(child2, "parentOf", child1);
+                _store->add_triple(child1, "hasChild", child2);
+                _store->add_triple(child2, "parentOf", child1);
                 
                 // Add some cross-connections
                 if (gen() % 10 < config.relationship_density * 10) {
                     std::string sibling = "level2_" + std::to_string((j * nodes_per_level + k + 1) % (nodes_per_level * nodes_per_level));
-                    _store->connect(child2, "relatedTo", sibling);
+                    _store->add_triple(child2, "relatedTo", sibling);
                 }
             }
         }
@@ -708,13 +708,13 @@ void PerformanceBenchmark::generate_clustered_dataset(const DatasetConfig& confi
         // Dense intra-cluster connections
         for (size_t i = 0; i < entities_per_cluster; ++i) {
             std::string entity1 = "entity_" + std::to_string(cluster * entities_per_cluster + i);
-            _store->connect(entity1, "memberOf", cluster_name);
+            _store->add_triple(entity1, "memberOf", cluster_name);
             
             for (size_t j = i + 1; j < entities_per_cluster; ++j) {
                 if (gen() % 10 < config.relationship_density * 10) {
                     std::string entity2 = "entity_" + std::to_string(cluster * entities_per_cluster + j);
                     std::string relation = "intra_" + std::to_string(gen() % config.num_predicates);
-                    _store->connect(entity1, relation, entity2);
+                    _store->add_triple(entity1, relation, entity2);
                 }
             }
         }
@@ -722,7 +722,7 @@ void PerformanceBenchmark::generate_clustered_dataset(const DatasetConfig& confi
         // Sparse inter-cluster connections
         if (cluster > 0 && gen() % 10 < 2) { // 20% chance of inter-cluster connection
             std::string other_cluster = "cluster_" + std::to_string(gen() % cluster);
-            _store->connect(cluster_name, "connectedTo", other_cluster);
+            _store->add_triple(cluster_name, "connectedTo", other_cluster);
         }
     }
 }

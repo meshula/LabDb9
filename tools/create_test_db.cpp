@@ -13,25 +13,25 @@ int main() {
         std::cout << "Adding Motion/Memory/Field relationships...\n";
         
         // Motion-oriented entities (subjects that act)
-        store->connect("granite", "isA", "rock");
-        store->connect("granite", "hasColor", "gray");
-        store->connect("granite", "hasHardness", "6");
-        store->connect("quartz", "isA", "mineral");
-        store->connect("quartz", "hasColor", "clear");
-        store->connect("diamond", "isA", "mineral");
-        store->connect("diamond", "hasHardness", "10");
+        store->add_triple("granite", "isA", "rock");
+        store->add_triple("granite", "hasColor", "gray");
+        store->add_triple("granite", "hasHardness", "6");
+        store->add_triple("quartz", "isA", "mineral");
+        store->add_triple("quartz", "hasColor", "clear");
+        store->add_triple("diamond", "isA", "mineral");
+        store->add_triple("diamond", "hasHardness", "10");
         
         // More complex triadic relationships
-        store->connect("consciousness", "manifests", "awareness");
-        store->connect("awareness", "emerges", "through_attention");
-        store->connect("attention", "focuses", "present_moment");
-        store->connect("mind", "creates", "thoughts");
-        store->connect("thoughts", "arise_in", "consciousness");
+        store->add_triple("consciousness", "manifests", "awareness");
+        store->add_triple("awareness", "emerges", "through_attention");
+        store->add_triple("attention", "focuses", "present_moment");
+        store->add_triple("mind", "creates", "thoughts");
+        store->add_triple("thoughts", "arise_in", "consciousness");
         
         // Field contexts (what receives and grounds)
-        store->connect("wisdom", "flows_through", "understanding");
-        store->connect("understanding", "bridges", "knowledge");
-        store->connect("knowledge", "rests_in", "memory");
+        store->add_triple("wisdom", "flows_through", "understanding");
+        store->add_triple("understanding", "bridges", "knowledge");
+        store->add_triple("knowledge", "rests_in", "memory");
         
         // Get statistics
         LabDb::TriadicQuery query(store);

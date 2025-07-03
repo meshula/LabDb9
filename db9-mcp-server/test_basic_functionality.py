@@ -45,7 +45,7 @@ async def test_database_connection():
             if health['status'] == 'healthy':
                 stats = health['stats']
                 print(f"📊 Database stats:")
-                print(f"  • Triples: {stats['triple_count']}")
+                print(f"  • Triples: {stats['total_triples']}")
                 print(f"  • Motion entities: {stats['motion_entities']}")
                 print(f"  • Memory relations: {stats['memory_relations']}")
                 print(f"  • Field contexts: {stats['field_contexts']}")

@@ -42,9 +42,9 @@ def test_triadic_python_integration():
             
             print("✅ Knowledge base created with triadic relationships")
             
-            # Create TriadicQuery instance - need to pass shared_ptr
-            triadic = labdb.TriadicQuery(store)
-            print("✅ TriadicQuery instance created")
+            # Create TriadicQuery instance using factory pattern (solves pybind11 holder type issues)
+            triadic = store.create_triadic_query()
+            print("✅ TriadicQuery instance created using factory pattern")
             
             # Test Motion queries (स्पन्द perspective)
             motion_results = triadic.motion_from("granite")
@@ -141,7 +141,7 @@ def test_pythonic_interface():
             print("✅ Vocabulary methods return Python lists")
             
             # Test triadic result iteration
-            triadic = labdb.TriadicQuery(store)
+            triadic = store.create_triadic_query()
             motion_results = triadic.motion_from("python")
             
             for result in motion_results:
