@@ -48,6 +48,9 @@ message(STATUS "LMDB configured via FetchContent")
 # Option for Python bindings
 option(BUILD_PYTHON_BINDINGS "Build Python bindings" ON)
 
+# Option for MCP server
+option(LABDB_BUILD_MCP "Build LabDb MCP server with installation structure" ON)
+
 # Core library
 add_library(labdb
     src/LmdbStore.cpp
@@ -129,6 +132,13 @@ add_subdirectory(examples)
 
 # Tools
 add_subdirectory(tools)
+
+# MCP server (if enabled)
+if(LABDB_BUILD_MCP)
+    message(STATUS "Configuring LabDb MCP server...")
+    add_subdirectory(db9-mcp-server)
+    message(STATUS "LabDb MCP server configured")
+endif()
 
 # Installation
 install(TARGETS labdb lmdb_lib

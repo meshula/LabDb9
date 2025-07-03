@@ -11,13 +11,14 @@ namespace LabDb {
     class TermDictionary;
     class TIDSequenceGenerator;
     class TripleStore;
+    class TriadicQuery; // Forward declaration for factory method
 }
 
 namespace LabDb {
 
 /// Core NonoStore: Triadic consciousness database implementing nine-index architecture
 /// Combines LmdbStore with NonostoreKeys for complete crown manifestation
-class NonoStore {
+class NonoStore : public std::enable_shared_from_this<NonoStore> {
 public:
     /// Constructor - creates/opens database at specified path
     explicit NonoStore(const std::string& database_path, 
@@ -35,14 +36,14 @@ public:
     /// Core triadic operations
     
     /// Connect entities through relationship (atomic across all nine indices)
-    bool connect(const std::string& subject, 
-                 const std::string& predicate, 
-                 const std::string& object);
-    
-    /// Disconnect entities (atomic removal from all nine indices)
-    bool disconnect(const std::string& subject, 
+    bool add_triple(const std::string& subject, 
                     const std::string& predicate, 
                     const std::string& object);
+    
+    /// Disconnect entities (atomic removal from all nine indices)
+    bool remove_triple(const std::string& subject, 
+                       const std::string& predicate, 
+                       const std::string& object);
     
     /// Query result structure
     struct Triple {
@@ -67,6 +68,11 @@ public:
     
     /// Field vocabulary discovery (all contexts/properties)
     std::vector<std::string> all_objects();
+    
+    /// Factory pattern for TriadicQuery creation
+    /// Creates TriadicQuery with weak_ptr to avoid pybind11 holder type issues
+    /// This enables safe lifecycle management and prevents circular references
+    std::unique_ptr<TriadicQuery> create_triadic_query();
     
     /// Convenience query methods for common patterns
     
@@ -94,8 +100,27 @@ public:
         size_t unique_predicates;
         size_t unique_objects;
         LmdbStore::Stats lmdb_stats;
+        
+        // TID architecture statistics
+        size_t term_dictionary_size;     // Number of terms in TID dictionary
+        size_t subject_vocabulary_size;  // Number of subject terms
+        size_t predicate_vocabulary_size; // Number of predicate terms
+        size_t object_vocabulary_size;   // Number of object terms
+        size_t hexastore_indices_size;   // Total size of hexastore indices
+        size_t crown_indices_size;       // Total size of crown indices (if implemented)
     };
     Stats get_stats();
+    
+    /// Get detailed TID architecture metrics
+    struct TIDMetrics {
+        size_t term_dict_entries;        // Total entries in term dictionary
+        size_t subject_tid_range;        // Highest subject TID allocated
+        size_t predicate_tid_range;      // Highest predicate TID allocated
+        size_t object_tid_range;         // Highest object TID allocated
+        size_t total_tids_allocated;     // Total TIDs allocated across all types
+        double storage_efficiency;      // Ratio of logical triples to storage entries
+    };
+    TIDMetrics get_tid_metrics();
     
     /// Check if a specific triple exists
     bool exists(const std::string& subject, 
@@ -177,13 +202,13 @@ private:
         const std::vector<std::pair<std::string, std::string>>& raw_results,
         NonostoreKeys::IndexType index_type);
     
-    /// Internal implementation for connect/disconnect
-    bool connect_impl(LmdbStore::Transaction& txn,
+    /// Internal implementation for add_triple/remove_triple
+    bool add_triple_impl(LmdbStore::Transaction& txn,
                       const std::string& subject,
                       const std::string& predicate,
                       const std::string& object);
     
-    bool disconnect_impl(LmdbStore::Transaction& txn,
+    bool remove_triple_impl(LmdbStore::Transaction& txn,
                          const std::string& subject,
                          const std::string& predicate,
                          const std::string& object);
