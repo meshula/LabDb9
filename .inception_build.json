@@ -4,7 +4,7 @@
     "description": "LabDb - Triadic Consciousness Database development environment"
   },
   "commands": {
-    "configure": ["cmake", "-B", "build", "-S", ".", "-DCMAKE_BUILD_TYPE=Release"],
+    "configure": ["cmake", "-B", "build", "-S", ".", "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_INSTALL_PREFIX=build/install"],
     "build": ["cmake", "--build", "build", "--config", "Release"],
     "test": ["ctest", "--test-dir", "build", "--output-on-failure"],
     "install": ["cmake", "--install", "build"],
@@ -13,7 +13,7 @@
     "python_test": ["python", "tests/python/test_comprehensive_python.py"],
     "db9_setup": ["pip", "install", "-r", "db9-mcp-server/requirements.txt"],
     "db9_test": ["python", "db9-mcp-server/test_basic_functionality.py"],
-    "db9_server": ["python", "-m", "src.db9_server"],
+    "db9_server": ["build/install/bin/labdb-mcp-server.py"],
     "full_stack": ["bash", "-c", "cmake --build build && pip install -e python/ && pip install -r db9-mcp-server/requirements.txt"]
   },
   "build_options": {
@@ -66,6 +66,12 @@
       "python_install",
       "db9_setup",
       "db9_test"
+    ],
+    "install_and_run": [
+      "configure",
+      "build", 
+      "install",
+      "db9_server"
     ]
   }
 }
