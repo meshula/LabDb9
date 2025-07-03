@@ -15,7 +15,7 @@ void test_basic_operations() {
         LabDb::NonoStore store(test_db);
         
         // Test basic connect operation
-        bool result = store.connect("granite", "isA", "rock");
+        bool result = store.add_triple("granite", "isA", "rock");
         assert(result && "Connect operation failed");
         assert(store.get_last_error().success() && "Error after successful connect");
         
@@ -43,11 +43,11 @@ void test_query_patterns() {
         LabDb::NonoStore store(test_db);
         
         // Insert test data
-        assert(store.connect("granite", "isA", "rock") && "Failed to insert granite-isA-rock");
-        assert(store.connect("granite", "hasColor", "gray") && "Failed to insert granite-hasColor-gray");
-        assert(store.connect("marble", "isA", "rock") && "Failed to insert marble-isA-rock");
-        assert(store.connect("sandstone", "isA", "rock") && "Failed to insert sandstone-isA-rock");
-        assert(store.connect("marble", "hasColor", "white") && "Failed to insert marble-hasColor-white");
+        assert(store.add_triple("granite", "isA", "rock") && "Failed to insert granite-isA-rock");
+        assert(store.add_triple("granite", "hasColor", "gray") && "Failed to insert granite-hasColor-gray");
+        assert(store.add_triple("marble", "isA", "rock") && "Failed to insert marble-isA-rock");
+        assert(store.add_triple("sandstone", "isA", "rock") && "Failed to insert sandstone-isA-rock");
+        assert(store.add_triple("marble", "hasColor", "white") && "Failed to insert marble-hasColor-white");
         
         // Test subject-driven queries (granite-*-*)
         auto granite_props = store.properties_of("granite");
@@ -86,11 +86,11 @@ void test_vocabulary_discovery() {
         LabDb::NonoStore store(test_db);
         
         // Insert diverse test data
-        store.connect("granite", "isA", "rock");
-        store.connect("granite", "hasColor", "gray");
-        store.connect("marble", "isA", "rock");
-        store.connect("diamond", "isA", "mineral");
-        store.connect("diamond", "hasHardness", "10");
+        store.add_triple("granite", "isA", "rock");
+        store.add_triple("granite", "hasColor", "gray");
+        store.add_triple("marble", "isA", "rock");
+        store.add_triple("diamond", "isA", "mineral");
+        store.add_triple("diamond", "hasHardness", "10");
         
         // Test Motion vocabulary (all subjects)
         auto subjects = store.all_subjects();
@@ -125,6 +125,98 @@ void test_vocabulary_discovery() {
     }
 }
 
+void test_adding_triples() {
+    std::cout << "Testing triple addition and vocabulary statistics...\n";
+    
+    std::string test_db = "/tmp/labdb_adding_test";
+    std::filesystem::remove_all(test_db);
+    
+    try {
+        LabDb::NonoStore store(test_db);
+        
+        // Check initial state
+        auto initial_stats = store.get_stats();
+        assert(initial_stats.total_triples == 0 && "Initial database should be empty");
+        assert(initial_stats.unique_subjects == 0 && "Initial subjects should be 0");
+        assert(initial_stats.unique_predicates == 0 && "Initial predicates should be 0");
+        assert(initial_stats.unique_objects == 0 && "Initial objects should be 0");
+        
+        std::cout << "  Initial state: " << initial_stats.total_triples << " triples, "
+                  << initial_stats.unique_subjects << " subjects, "
+                  << initial_stats.unique_predicates << " predicates, "
+                  << initial_stats.unique_objects << " objects\n";
+        
+        // Add first triple: beetle -> has_wings -> two_pairs
+        bool result1 = store.add_triple("beetle", "has_wings", "two_pairs");
+        assert(result1 && "First triple addition failed");
+        
+        auto stats_after_1 = store.get_stats();
+        assert(stats_after_1.total_triples == 1 && "Should have 1 triple after first addition");
+        assert(stats_after_1.unique_subjects == 1 && "Should have 1 unique subject");
+        assert(stats_after_1.unique_predicates == 1 && "Should have 1 unique predicate");
+        assert(stats_after_1.unique_objects == 1 && "Should have 1 unique object");
+        
+        std::cout << "  After 1st triple: " << stats_after_1.total_triples << " triples, "
+                  << stats_after_1.unique_subjects << " subjects, "
+                  << stats_after_1.unique_predicates << " predicates, "
+                  << stats_after_1.unique_objects << " objects\n";
+        
+        // Add second triple: beetle -> is_type -> insect (reuses subject)
+        bool result2 = store.add_triple("beetle", "is_type", "insect");
+        assert(result2 && "Second triple addition failed");
+        
+        auto stats_after_2 = store.get_stats();
+        assert(stats_after_2.total_triples == 2 && "Should have 2 triples after second addition");
+        assert(stats_after_2.unique_subjects == 1 && "Should still have 1 unique subject (beetle reused)");
+        assert(stats_after_2.unique_predicates == 2 && "Should have 2 unique predicates");
+        assert(stats_after_2.unique_objects == 2 && "Should have 2 unique objects");
+        
+        std::cout << "  After 2nd triple: " << stats_after_2.total_triples << " triples, "
+                  << stats_after_2.unique_subjects << " subjects, "
+                  << stats_after_2.unique_predicates << " predicates, "
+                  << stats_after_2.unique_objects << " objects\n";
+        
+        // Add third triple: cricket -> is_type -> insect (reuses predicate and object)
+        bool result3 = store.add_triple("cricket", "is_type", "insect");
+        assert(result3 && "Third triple addition failed");
+        
+        auto stats_after_3 = store.get_stats();
+        assert(stats_after_3.total_triples == 3 && "Should have 3 triples after third addition");
+        assert(stats_after_3.unique_subjects == 2 && "Should have 2 unique subjects");
+        assert(stats_after_3.unique_predicates == 2 && "Should still have 2 unique predicates (is_type reused)");
+        assert(stats_after_3.unique_objects == 2 && "Should still have 2 unique objects (insect reused)");
+        
+        std::cout << "  After 3rd triple: " << stats_after_3.total_triples << " triples, "
+                  << stats_after_3.unique_subjects << " subjects, "
+                  << stats_after_3.unique_predicates << " predicates, "
+                  << stats_after_3.unique_objects << " objects\n";
+        
+        // Verify the triples exist
+        assert(store.exists("beetle", "has_wings", "two_pairs") && "First triple should exist");
+        assert(store.exists("beetle", "is_type", "insect") && "Second triple should exist");
+        assert(store.exists("cricket", "is_type", "insect") && "Third triple should exist");
+        
+        // Verify vocabulary discovery works correctly
+        auto subjects = store.all_subjects();
+        auto predicates = store.all_predicates();
+        auto objects = store.all_objects();
+        
+        assert(subjects.size() == 2 && "Should find 2 subjects in vocabulary");
+        assert(predicates.size() == 2 && "Should find 2 predicates in vocabulary");
+        assert(objects.size() == 2 && "Should find 2 objects in vocabulary");
+        
+        std::cout << "  ✅ Vocabulary statistics correctly updated after each triple addition\n";
+        std::cout << "  ✅ Triple existence verification passed\n";
+        std::cout << "  ✅ Vocabulary discovery matches statistics\n";
+        
+        std::cout << "✅ Adding triples test passed\n";
+        
+    } catch (const LabDb::LmdbException& e) {
+        std::cerr << "❌ Adding triples test failed: " << e.what() << std::endl;
+        exit(1);
+    }
+}
+
 void demonstrate_triadic_crown() {
     std::cout << "\n=== Demonstrating Complete Triadic Crown ===\n";
     
@@ -135,14 +227,14 @@ void demonstrate_triadic_crown() {
         LabDb::NonoStore store(test_db);
         
         // Build a small knowledge graph
-        store.connect("granite", "isA", "rock");
-        store.connect("granite", "hasColor", "gray");
-        store.connect("granite", "hasHardness", "6");
-        store.connect("marble", "isA", "rock");
-        store.connect("marble", "hasColor", "white");
-        store.connect("diamond", "isA", "mineral");
-        store.connect("diamond", "hasHardness", "10");
-        store.connect("quartz", "isA", "mineral");
+        store.add_triple("granite", "isA", "rock");
+        store.add_triple("granite", "hasColor", "gray");
+        store.add_triple("granite", "hasHardness", "6");
+        store.add_triple("marble", "isA", "rock");
+        store.add_triple("marble", "hasColor", "white");
+        store.add_triple("diamond", "isA", "mineral");
+        store.add_triple("diamond", "hasHardness", "10");
+        store.add_triple("quartz", "isA", "mineral");
         
         std::cout << "Knowledge Graph Built:\n";
         std::cout << "  8 triples stored across 9 indices\n\n";
@@ -221,6 +313,7 @@ int main() {
     test_basic_operations();
     test_query_patterns();
     test_vocabulary_discovery();
+    test_adding_triples();
     
     demonstrate_triadic_crown();
     

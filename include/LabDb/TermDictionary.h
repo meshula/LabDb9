@@ -70,6 +70,12 @@ public:
         Iterator(MDB_txn* txn, TermDictionary& dict, bool reverse_order = false);
         ~Iterator();
         
+        // Make Iterator move-only (no copying)
+        Iterator(const Iterator&) = delete;
+        Iterator& operator=(const Iterator&) = delete;
+        Iterator(Iterator&&) noexcept;
+        Iterator& operator=(Iterator&&) noexcept;
+        
         /// Move to first term
         bool first();
         

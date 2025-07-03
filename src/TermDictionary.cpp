@@ -407,6 +407,45 @@ TermDictionary::Iterator::~Iterator() {
     }
 }
 
+// Move constructor
+TermDictionary::Iterator::Iterator(Iterator&& other) noexcept
+    : _txn(other._txn)
+    , _dict(other._dict)
+    , _cursor(other._cursor)
+    , _reverse_order(other._reverse_order)
+    , _valid(other._valid)
+    , _key(other._key)
+    , _value(other._value) {
+    
+    // Transfer ownership of cursor
+    other._cursor = nullptr;
+    other._valid = false;
+}
+
+// Move assignment operator
+TermDictionary::Iterator& TermDictionary::Iterator::operator=(Iterator&& other) noexcept {
+    if (this != &other) {
+        // Clean up current resources
+        if (_cursor) {
+            mdb_cursor_close(_cursor);
+        }
+        
+        // Transfer ownership (note: _dict is a reference, so we don't reassign it)
+        _txn = other._txn;
+        // _dict = other._dict;  // Can't reassign reference!
+        _cursor = other._cursor;
+        _reverse_order = other._reverse_order;
+        _valid = other._valid;
+        _key = other._key;
+        _value = other._value;
+        
+        // Invalidate source
+        other._cursor = nullptr;
+        other._valid = false;
+    }
+    return *this;
+}
+
 bool TermDictionary::Iterator::first() {
     int rc = mdb_cursor_get(_cursor, &_key, &_value, _reverse_order ? MDB_LAST : MDB_FIRST);
     _valid = (rc == 0);

@@ -2,8 +2,10 @@
 #include "LabDb/TripleStore.h"
 #include "LabDb/TermDictionary.h"
 #include "LabDb/TIDSequenceGenerator.h"
+#include "LabDb/TriadicQuery.h"
 #include <algorithm>
 #include <set>
+#include <iostream>
 
 namespace LabDb {
 
@@ -35,33 +37,33 @@ NonoStore::NonoStore(const std::string& database_path, size_t map_size)
 
 NonoStore::~NonoStore() = default;
 
-bool NonoStore::connect(const std::string& subject, 
-                        const std::string& predicate, 
-                        const std::string& object) {
-    try {
-        LmdbStore::Transaction txn(*_store);
-        bool result = connect_impl(txn, subject, predicate, object);
-        if (result) {
-            txn.commit();
-        }
-        return result;
-    } catch (const LmdbException& e) {
-        return set_error(ErrorCode::TransactionError, "Connect failed: " + std::string(e.what()));
-    }
-}
-
-bool NonoStore::disconnect(const std::string& subject, 
+bool NonoStore::add_triple(const std::string& subject, 
                            const std::string& predicate, 
                            const std::string& object) {
     try {
         LmdbStore::Transaction txn(*_store);
-        bool result = disconnect_impl(txn, subject, predicate, object);
+        bool result = add_triple_impl(txn, subject, predicate, object);
         if (result) {
             txn.commit();
         }
         return result;
     } catch (const LmdbException& e) {
-        return set_error(ErrorCode::TransactionError, "Disconnect failed: " + std::string(e.what()));
+        return set_error(ErrorCode::TransactionError, "Add triple failed: " + std::string(e.what()));
+    }
+}
+
+bool NonoStore::remove_triple(const std::string& subject, 
+                              const std::string& predicate, 
+                              const std::string& object) {
+    try {
+        LmdbStore::Transaction txn(*_store);
+        bool result = remove_triple_impl(txn, subject, predicate, object);
+        if (result) {
+            txn.commit();
+        }
+        return result;
+    } catch (const LmdbException& e) {
+        return set_error(ErrorCode::TransactionError, "Remove triple failed: " + std::string(e.what()));
     }
 }
 
@@ -107,10 +109,26 @@ std::vector<std::string> NonoStore::all_subjects() {
         auto raw_results = _store->query_prefix(txn, prefix);
         
         std::vector<std::string> subjects;
+        MDB_txn* mdb_txn = txn.handle();
+        
         for (const auto& [key, value] : raw_results) {
-            auto parsed = NonostoreKeys::parse_key(key);
-            if (parsed.is_vocabulary) {
-                subjects.push_back(parsed.term);
+            // Extract TermID from vocabulary key format: ~subjects~0000000000000001
+            if (key.length() > prefix.length()) {
+                std::string term_id_hex = key.substr(prefix.length());
+                
+                // Convert hex string to TermID
+                try {
+                    TermDictionary::TermID term_id = std::stoull(term_id_hex, nullptr, 16);
+                    
+                    // Use TermDictionary to resolve TermID back to string
+                    auto resolved_term = _term_dict->resolve(mdb_txn, term_id);
+                    if (resolved_term.has_value()) {
+                        subjects.push_back(*resolved_term);
+                    }
+                } catch (const std::exception& e) {
+                    // Skip malformed keys
+                    std::cerr << "Warning: Failed to parse vocabulary key: " << key << std::endl;
+                }
             }
         }
         return subjects;
@@ -128,10 +146,26 @@ std::vector<std::string> NonoStore::all_predicates() {
         auto raw_results = _store->query_prefix(txn, prefix);
         
         std::vector<std::string> predicates;
+        MDB_txn* mdb_txn = txn.handle();
+        
         for (const auto& [key, value] : raw_results) {
-            auto parsed = NonostoreKeys::parse_key(key);
-            if (parsed.is_vocabulary) {
-                predicates.push_back(parsed.term);
+            // Extract TermID from vocabulary key format: ~predicates~0000000000000002
+            if (key.length() > prefix.length()) {
+                std::string term_id_hex = key.substr(prefix.length());
+                
+                // Convert hex string to TermID
+                try {
+                    TermDictionary::TermID term_id = std::stoull(term_id_hex, nullptr, 16);
+                    
+                    // Use TermDictionary to resolve TermID back to string
+                    auto resolved_term = _term_dict->resolve(mdb_txn, term_id);
+                    if (resolved_term.has_value()) {
+                        predicates.push_back(*resolved_term);
+                    }
+                } catch (const std::exception& e) {
+                    // Skip malformed keys
+                    std::cerr << "Warning: Failed to parse vocabulary key: " << key << std::endl;
+                }
             }
         }
         return predicates;
@@ -149,10 +183,26 @@ std::vector<std::string> NonoStore::all_objects() {
         auto raw_results = _store->query_prefix(txn, prefix);
         
         std::vector<std::string> objects;
+        MDB_txn* mdb_txn = txn.handle();
+        
         for (const auto& [key, value] : raw_results) {
-            auto parsed = NonostoreKeys::parse_key(key);
-            if (parsed.is_vocabulary) {
-                objects.push_back(parsed.term);
+            // Extract TermID from vocabulary key format: ~objects~0000000000000003
+            if (key.length() > prefix.length()) {
+                std::string term_id_hex = key.substr(prefix.length());
+                
+                // Convert hex string to TermID
+                try {
+                    TermDictionary::TermID term_id = std::stoull(term_id_hex, nullptr, 16);
+                    
+                    // Use TermDictionary to resolve TermID back to string
+                    auto resolved_term = _term_dict->resolve(mdb_txn, term_id);
+                    if (resolved_term.has_value()) {
+                        objects.push_back(*resolved_term);
+                    }
+                } catch (const std::exception& e) {
+                    // Skip malformed keys
+                    std::cerr << "Warning: Failed to parse vocabulary key: " << key << std::endl;
+                }
             }
         }
         return objects;
@@ -161,6 +211,12 @@ std::vector<std::string> NonoStore::all_objects() {
         set_error(ErrorCode::DatabaseError, "Failed to get objects: " + std::string(e.what()));
         return {};
     }
+}
+
+std::unique_ptr<TriadicQuery> NonoStore::create_triadic_query() {
+    // Factory pattern implementation using weak_ptr to avoid pybind11 holder type issues
+    // This enables proper lifecycle management and prevents circular references
+    return std::make_unique<TriadicQuery>(std::weak_ptr<NonoStore>(shared_from_this()));
 }
 
 NonoStore::Stats NonoStore::get_stats() {
@@ -172,20 +228,170 @@ NonoStore::Stats NonoStore::get_stats() {
         // Get LMDB stats
         stats.lmdb_stats = _store->get_stats(txn);
         
-        // Count vocabulary items for unique counts
-        stats.unique_subjects = all_subjects().size();
-        stats.unique_predicates = all_predicates().size();
-        stats.unique_objects = all_objects().size();
+        // Count vocabulary items for unique counts - use the SAME transaction!
+        // Note: We need to call vocabulary methods with our transaction instead of
+        // letting them create their own, to avoid potential LMDB nested transaction issues
+        
+        // For now, call the vocabulary methods directly with our transaction
+        std::vector<std::string> subjects_list;
+        std::vector<std::string> predicates_list; 
+        std::vector<std::string> objects_list;
+        
+        // Inline the all_subjects() logic to use our transaction
+        {
+            std::string prefix = NonostoreKeys::get_vocabulary_prefix(NonostoreKeys::IndexType::SUBJECTS);
+            auto raw_results = _store->query_prefix(txn, prefix);
+            
+            MDB_txn* mdb_txn = txn.handle();
+            
+            for (const auto& [key, value] : raw_results) {
+                if (key.length() > prefix.length()) {
+                    std::string term_id_hex = key.substr(prefix.length());
+                    
+                    try {
+                        TermDictionary::TermID term_id = std::stoull(term_id_hex, nullptr, 16);
+                        auto resolved_term = _term_dict->resolve(mdb_txn, term_id);
+                        if (resolved_term.has_value()) {
+                            subjects_list.push_back(*resolved_term);
+                        }
+                    } catch (const std::exception&) {
+                        // Skip invalid term IDs
+                    }
+                }
+            }
+        }
+        
+        // Inline the all_predicates() logic
+        {
+            std::string prefix = NonostoreKeys::get_vocabulary_prefix(NonostoreKeys::IndexType::PREDICATES);
+            auto raw_results = _store->query_prefix(txn, prefix);
+            
+            MDB_txn* mdb_txn = txn.handle();
+            
+            for (const auto& [key, value] : raw_results) {
+                if (key.length() > prefix.length()) {
+                    std::string term_id_hex = key.substr(prefix.length());
+                    
+                    try {
+                        TermDictionary::TermID term_id = std::stoull(term_id_hex, nullptr, 16);
+                        auto resolved_term = _term_dict->resolve(mdb_txn, term_id);
+                        if (resolved_term.has_value()) {
+                            predicates_list.push_back(*resolved_term);
+                        }
+                    } catch (const std::exception&) {
+                        // Skip invalid term IDs
+                    }
+                }
+            }
+        }
+        
+        // Inline the all_objects() logic
+        {
+            std::string prefix = NonostoreKeys::get_vocabulary_prefix(NonostoreKeys::IndexType::OBJECTS);
+            auto raw_results = _store->query_prefix(txn, prefix);
+            
+            MDB_txn* mdb_txn = txn.handle();
+            
+            for (const auto& [key, value] : raw_results) {
+                if (key.length() > prefix.length()) {
+                    std::string term_id_hex = key.substr(prefix.length());
+                    
+                    try {
+                        TermDictionary::TermID term_id = std::stoull(term_id_hex, nullptr, 16);
+                        auto resolved_term = _term_dict->resolve(mdb_txn, term_id);
+                        if (resolved_term.has_value()) {
+                            objects_list.push_back(*resolved_term);
+                        }
+                    } catch (const std::exception&) {
+                        // Skip invalid term IDs
+                    }
+                }
+            }
+        }
+        
+        stats.unique_subjects = subjects_list.size();
+        stats.unique_predicates = predicates_list.size();
+        stats.unique_objects = objects_list.size();
         
         // Estimate total triples by counting SPO index entries
         auto spo_results = _store->query_prefix(txn, "~spo~");
         stats.total_triples = spo_results.size();
+        
+        // TID architecture statistics - simplified for now
+        // TODO: Implement proper TID architecture metrics when components support them
+        stats.term_dictionary_size = 0;  // _term_dict->size() when available
+        stats.subject_vocabulary_size = stats.unique_subjects;    // Fallback to vocabulary counts
+        stats.predicate_vocabulary_size = stats.unique_predicates;
+        stats.object_vocabulary_size = stats.unique_objects;
+        
+        // Storage architecture statistics
+        // Count different index types
+        stats.hexastore_indices_size = _store->query_prefix(txn, "~spo~").size() +
+                                       _store->query_prefix(txn, "~sop~").size() +
+                                       _store->query_prefix(txn, "~pso~").size() +
+                                       _store->query_prefix(txn, "~pos~").size() +
+                                       _store->query_prefix(txn, "~ops~").size() +
+                                       _store->query_prefix(txn, "~osp~").size();
+        
+        // Crown indices (if implemented) - for now set to 0
+        stats.crown_indices_size = 0;
         
     } catch (const LmdbException& e) {
         set_error(ErrorCode::DatabaseError, "Failed to get stats: " + std::string(e.what()));
     }
     
     return stats;
+}
+
+NonoStore::TIDMetrics NonoStore::get_tid_metrics() {
+    TIDMetrics metrics = {};
+    
+    try {
+        LmdbStore::Transaction txn(*_store, true);
+        
+        // Simplified TID metrics - using available data
+        // TODO: Implement proper TID architecture metrics when components support them
+        
+        if (_term_dict && _tid_gen) {
+            // For now, use fallback values based on vocabulary counts
+            metrics.term_dict_entries = all_subjects().size() + all_predicates().size() + all_objects().size();
+            
+            // Placeholder TID ranges - would need proper TID tracking
+            metrics.subject_tid_range = all_subjects().size();
+            metrics.predicate_tid_range = all_predicates().size();
+            metrics.object_tid_range = all_objects().size();
+            
+            metrics.total_tids_allocated = metrics.subject_tid_range + 
+                                          metrics.predicate_tid_range + 
+                                          metrics.object_tid_range;
+            
+            // Calculate storage efficiency
+            // Efficiency = logical triples / total storage entries
+            size_t logical_triples = _store->query_prefix(txn, "~spo~").size();
+            size_t total_storage_entries = _store->get_stats(txn).entries;
+            
+            if (total_storage_entries > 0) {
+                metrics.storage_efficiency = static_cast<double>(logical_triples) / total_storage_entries;
+            } else {
+                metrics.storage_efficiency = 0.0;
+            }
+        } else {
+            // TID components not available
+            metrics.term_dict_entries = 0;
+            metrics.subject_tid_range = 0;
+            metrics.predicate_tid_range = 0;
+            metrics.object_tid_range = 0;
+            metrics.total_tids_allocated = 0;
+            metrics.storage_efficiency = 0.0;
+        }
+        
+    } catch (const LmdbException& e) {
+        set_error(ErrorCode::DatabaseError, "Failed to get TID metrics: " + std::string(e.what()));
+        // Return zero metrics on error
+        metrics = {};
+    }
+    
+    return metrics;
 }
 
 bool NonoStore::exists(const std::string& subject, 
@@ -311,7 +517,7 @@ std::vector<NonoStore::Triple> NonoStore::parse_query_results(
     return triples;
 }
 
-bool NonoStore::connect_impl(LmdbStore::Transaction& txn,
+bool NonoStore::add_triple_impl(LmdbStore::Transaction& txn,
                              const std::string& subject,
                              const std::string& predicate,
                              const std::string& object) {
@@ -344,9 +550,24 @@ bool NonoStore::connect_impl(LmdbStore::Transaction& txn,
         std::string predicate_vocab_key = generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType::PREDICATES, predicate_id);
         std::string object_vocab_key = generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType::OBJECTS, object_id);
         
-        _store->put(txn, subject_vocab_key, tid_value);
-        _store->put(txn, predicate_vocab_key, tid_value);
-        _store->put(txn, object_vocab_key, tid_value);
+        // Sanity check: ensure vocabulary keys are not empty
+        if (subject_vocab_key.empty()) {
+            std::cerr << "ERROR: subject_vocab_key is empty!" << std::endl;
+            return set_error(ErrorCode::KeyGenerationError, "Generated empty subject vocabulary key");
+        }
+        if (predicate_vocab_key.empty()) {
+            std::cerr << "ERROR: predicate_vocab_key is empty!" << std::endl;
+            return set_error(ErrorCode::KeyGenerationError, "Generated empty predicate vocabulary key");
+        }
+        if (object_vocab_key.empty()) {
+            std::cerr << "ERROR: object_vocab_key is empty!" << std::endl;
+            return set_error(ErrorCode::KeyGenerationError, "Generated empty object vocabulary key");
+        }
+        
+        // Store vocabulary keys 
+        bool subject_put_success = _store->put(txn, subject_vocab_key, tid_value);
+        bool predicate_put_success = _store->put(txn, predicate_vocab_key, tid_value);
+        bool object_put_success = _store->put(txn, object_vocab_key, tid_value);
         
         _last_error = {ErrorCode::Success, ""};
         return true;
@@ -356,7 +577,7 @@ bool NonoStore::connect_impl(LmdbStore::Transaction& txn,
     }
 }
 
-bool NonoStore::disconnect_impl(LmdbStore::Transaction& txn,
+bool NonoStore::remove_triple_impl(LmdbStore::Transaction& txn,
                                 const std::string& subject,
                                 const std::string& predicate,
                                 const std::string& object) {
