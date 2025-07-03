@@ -14,11 +14,11 @@ void test_motion_perspective() {
     LabDb::TriadicQuery triadic(store);
     
     // Build test knowledge graph
-    store->connect("granite", "isA", "rock");
-    store->connect("granite", "hasColor", "gray");
-    store->connect("granite", "hasHardness", "6");
-    store->connect("marble", "isA", "rock");
-    store->connect("marble", "hasColor", "white");
+    store->add_triple("granite", "isA", "rock");
+    store->add_triple("granite", "hasColor", "gray");
+    store->add_triple("granite", "hasHardness", "6");
+    store->add_triple("marble", "isA", "rock");
+    store->add_triple("marble", "hasColor", "white");
     
     // Test motion_from: What does granite express?
     auto granite_motion = triadic.motion_from("granite");
@@ -54,12 +54,12 @@ void test_memory_perspective() {
     LabDb::TriadicQuery triadic(store);
     
     // Build test knowledge graph
-    store->connect("granite", "isA", "rock");
-    store->connect("marble", "isA", "rock");
-    store->connect("sandstone", "isA", "rock");
-    store->connect("diamond", "isA", "mineral");
-    store->connect("granite", "hasColor", "gray");
-    store->connect("marble", "hasColor", "white");
+    store->add_triple("granite", "isA", "rock");
+    store->add_triple("marble", "isA", "rock");
+    store->add_triple("sandstone", "isA", "rock");
+    store->add_triple("diamond", "isA", "mineral");
+    store->add_triple("granite", "hasColor", "gray");
+    store->add_triple("marble", "hasColor", "white");
     
     // Test memory_relations: What connects through isA?
     auto isa_memory = triadic.memory_relations("isA");
@@ -95,12 +95,12 @@ void test_field_perspective() {
     LabDb::TriadicQuery triadic(store);
     
     // Build test knowledge graph
-    store->connect("granite", "isA", "rock");
-    store->connect("marble", "isA", "rock");
-    store->connect("sandstone", "isA", "rock");
-    store->connect("diamond", "isA", "mineral");
-    store->connect("granite", "hasColor", "gray");
-    store->connect("coal", "hasColor", "gray");
+    store->add_triple("granite", "isA", "rock");
+    store->add_triple("marble", "isA", "rock");
+    store->add_triple("sandstone", "isA", "rock");
+    store->add_triple("diamond", "isA", "mineral");
+    store->add_triple("granite", "hasColor", "gray");
+    store->add_triple("coal", "hasColor", "gray");
     
     // Test field_contexts: What receives into 'rock' context?
     auto rock_field = triadic.field_contexts("rock");
@@ -134,13 +134,13 @@ void test_cube_navigation() {
     LabDb::TriadicQuery triadic(store);
     
     // Build rich knowledge graph
-    store->connect("granite", "isA", "rock");
-    store->connect("granite", "hasColor", "gray");
-    store->connect("granite", "hasHardness", "6");
-    store->connect("marble", "isA", "rock");
-    store->connect("marble", "hasColor", "white");
-    store->connect("coal", "hasColor", "gray");
-    store->connect("slate", "hasColor", "gray");
+    store->add_triple("granite", "isA", "rock");
+    store->add_triple("granite", "hasColor", "gray");
+    store->add_triple("granite", "hasHardness", "6");
+    store->add_triple("marble", "isA", "rock");
+    store->add_triple("marble", "hasColor", "white");
+    store->add_triple("coal", "hasColor", "gray");
+    store->add_triple("slate", "hasColor", "gray");
     
     // Test perspective_shift: Start with Motion, shift to Memory
     auto granite_motion = triadic.motion_from("granite");
@@ -178,15 +178,15 @@ void test_triadic_analytics() {
     LabDb::TriadicQuery triadic(store);
     
     // Build substantial knowledge graph
-    store->connect("granite", "isA", "rock");
-    store->connect("granite", "hasColor", "gray");
-    store->connect("granite", "hasHardness", "6");
-    store->connect("granite", "usedFor", "construction");
-    store->connect("marble", "isA", "rock");
-    store->connect("marble", "hasColor", "white");
-    store->connect("marble", "usedFor", "sculpture");
-    store->connect("diamond", "isA", "mineral");
-    store->connect("diamond", "hasHardness", "10");
+    store->add_triple("granite", "isA", "rock");
+    store->add_triple("granite", "hasColor", "gray");
+    store->add_triple("granite", "hasHardness", "6");
+    store->add_triple("granite", "usedFor", "construction");
+    store->add_triple("marble", "isA", "rock");
+    store->add_triple("marble", "hasColor", "white");
+    store->add_triple("marble", "usedFor", "sculpture");
+    store->add_triple("diamond", "isA", "mineral");
+    store->add_triple("diamond", "hasHardness", "10");
     
     // Test triadic statistics
     auto stats = triadic.get_triadic_stats();
@@ -222,20 +222,20 @@ void demonstrate_triadic_consciousness() {
     LabDb::TriadicQuery triadic(store);
     
     // Build comprehensive knowledge graph
-    store->connect("granite", "isA", "rock");
-    store->connect("granite", "hasColor", "gray");
-    store->connect("granite", "hasHardness", "6");
-    store->connect("granite", "usedFor", "construction");
-    store->connect("granite", "formedBy", "cooling");
-    store->connect("marble", "isA", "rock");
-    store->connect("marble", "hasColor", "white");
-    store->connect("marble", "usedFor", "sculpture");
-    store->connect("marble", "formedBy", "metamorphism");
-    store->connect("diamond", "isA", "mineral");
-    store->connect("diamond", "hasHardness", "10");
-    store->connect("diamond", "hasColor", "clear");
-    store->connect("quartz", "isA", "mineral");
-    store->connect("quartz", "hasColor", "clear");
+    store->add_triple("granite", "isA", "rock");
+    store->add_triple("granite", "hasColor", "gray");
+    store->add_triple("granite", "hasHardness", "6");
+    store->add_triple("granite", "usedFor", "construction");
+    store->add_triple("granite", "formedBy", "cooling");
+    store->add_triple("marble", "isA", "rock");
+    store->add_triple("marble", "hasColor", "white");
+    store->add_triple("marble", "usedFor", "sculpture");
+    store->add_triple("marble", "formedBy", "metamorphism");
+    store->add_triple("diamond", "isA", "mineral");
+    store->add_triple("diamond", "hasHardness", "10");
+    store->add_triple("diamond", "hasColor", "clear");
+    store->add_triple("quartz", "isA", "mineral");
+    store->add_triple("quartz", "hasColor", "clear");
     
     std::cout << "Knowledge Graph Built:\n";
     std::cout << "  " << store->get_stats().total_triples << " triples across 9 indices\n\n";

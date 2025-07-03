@@ -17,13 +17,18 @@ PYBIND11_MODULE(pylabdb, m) {
              "Create NonoStore instance with TID-based architecture",
              py::arg("db_path"))
         
+        // Factory method for TriadicQuery creation (solves pybind11 holder type issues)
+        .def("create_triadic_query", &LabDb::NonoStore::create_triadic_query,
+             "Create TriadicQuery with weak_ptr to avoid pybind11 holder type issues",
+             py::return_value_policy::take_ownership)
+        
         // Core operations (now using TID architecture internally)
-        .def("connect", &LabDb::NonoStore::connect,
-             "Connect subject to object via predicate (TID-based)",
+        .def("add_triple", &LabDb::NonoStore::add_triple,
+             "Add subject to object via predicate (TID-based)",
              py::arg("subject"), py::arg("predicate"), py::arg("object"))
         
-        .def("disconnect", &LabDb::NonoStore::disconnect,
-             "Disconnect specific triple (TID-based)",
+        .def("remove_triple", &LabDb::NonoStore::remove_triple,
+             "Remove specific triple (TID-based)",
              py::arg("subject"), py::arg("predicate"), py::arg("object"))
         
         .def("exists", &LabDb::NonoStore::exists,
@@ -63,13 +68,14 @@ PYBIND11_MODULE(pylabdb, m) {
         
         // Statistics - should show TID efficiency
         .def("get_stats", &LabDb::NonoStore::get_stats,
-             "Get TID-based database statistics");
+             "Get TID-based database statistics")
+        
+        .def("get_tid_metrics", &LabDb::NonoStore::get_tid_metrics,
+             "Get detailed TID architecture metrics");
     
     // TriadicQuery class for conscious navigation (TID-aware)
+    // Note: Use NonoStore.create_triadic_query() factory method instead of direct construction
     py::class_<LabDb::TriadicQuery>(m, "TriadicQuery")
-        .def(py::init<std::shared_ptr<LabDb::NonoStore>>(),
-             "Create TriadicQuery with TID-based NonoStore",
-             py::arg("store"))
         
         // Motion-driven queries (स्पन्द perspective)
         .def("motion_from", &LabDb::TriadicQuery::motion_from,
@@ -114,7 +120,20 @@ PYBIND11_MODULE(pylabdb, m) {
         
         .def("bridge_entities", &LabDb::TriadicQuery::bridge_entities,
              "Find bridge entities (TID-based)",
-             py::arg("connectivity_threshold") = 2.0);
+             py::arg("connectivity_threshold") = 2.0)
+        
+        // Cube architecture navigation
+        .def("crown_exploration", &LabDb::TriadicQuery::crown_exploration,
+             "Explore crown structure around focal point (TID-based)",
+             py::arg("focal_entity"), py::arg("focal_relation") = "*", py::arg("focal_context") = "*")
+        
+        .def("triadic_traverse", &LabDb::TriadicQuery::triadic_traverse,
+             "Traverse triadic cube from starting point (TID-based)",
+             py::arg("starting_point"), py::arg("max_depth") = 3)
+        
+        .def("perspective_shift", &LabDb::TriadicQuery::perspective_shift,
+             "Switch perspective while maintaining query focus (TID-based)",
+             py::arg("results"), py::arg("new_perspective"));
     
     // Triadic perspective enumeration
     py::enum_<LabDb::TriadicQuery::Perspective>(m, "Perspective")
@@ -161,7 +180,22 @@ PYBIND11_MODULE(pylabdb, m) {
         .def_readonly("unique_subjects", &LabDb::NonoStore::Stats::unique_subjects)
         .def_readonly("unique_predicates", &LabDb::NonoStore::Stats::unique_predicates)
         .def_readonly("unique_objects", &LabDb::NonoStore::Stats::unique_objects)
-        .def_readonly("lmdb_stats", &LabDb::NonoStore::Stats::lmdb_stats);
+        .def_readonly("lmdb_stats", &LabDb::NonoStore::Stats::lmdb_stats)
+        .def_readonly("term_dictionary_size", &LabDb::NonoStore::Stats::term_dictionary_size)
+        .def_readonly("subject_vocabulary_size", &LabDb::NonoStore::Stats::subject_vocabulary_size)
+        .def_readonly("predicate_vocabulary_size", &LabDb::NonoStore::Stats::predicate_vocabulary_size)
+        .def_readonly("object_vocabulary_size", &LabDb::NonoStore::Stats::object_vocabulary_size)
+        .def_readonly("hexastore_indices_size", &LabDb::NonoStore::Stats::hexastore_indices_size)
+        .def_readonly("crown_indices_size", &LabDb::NonoStore::Stats::crown_indices_size);
+    
+    // TID architecture metrics
+    py::class_<LabDb::NonoStore::TIDMetrics>(m, "TIDMetrics")
+        .def_readonly("term_dict_entries", &LabDb::NonoStore::TIDMetrics::term_dict_entries)
+        .def_readonly("subject_tid_range", &LabDb::NonoStore::TIDMetrics::subject_tid_range)
+        .def_readonly("predicate_tid_range", &LabDb::NonoStore::TIDMetrics::predicate_tid_range)
+        .def_readonly("object_tid_range", &LabDb::NonoStore::TIDMetrics::object_tid_range)
+        .def_readonly("total_tids_allocated", &LabDb::NonoStore::TIDMetrics::total_tids_allocated)
+        .def_readonly("storage_efficiency", &LabDb::NonoStore::TIDMetrics::storage_efficiency);
     
     // LMDB stats structure
     py::class_<LabDb::LmdbStore::Stats>(m, "LmdbStats")

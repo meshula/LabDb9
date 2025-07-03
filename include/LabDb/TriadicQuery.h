@@ -36,8 +36,9 @@ public:
         double vocabulary_density;  // Vocabulary richness measure
     };
     
-    /// Construct triadic query interface around a NonoStore
-    explicit TriadicQuery(std::shared_ptr<NonoStore> store);
+    /// Construct triadic query interface around a NonoStore (weak reference)
+    /// Use NonoStore::create_triadic_query() factory method instead
+    explicit TriadicQuery(std::weak_ptr<NonoStore> store);
     
     /// Motion-driven queries (स्पन्द perspective)
     /// What does this entity express, act upon, or initiate?
@@ -149,15 +150,21 @@ public:
     std::vector<std::string> random_sample_memory(size_t count);
     std::vector<std::string> random_sample_field(size_t count);
     
-    /// Access to underlying store for advanced usage
-    std::shared_ptr<NonoStore> get_store() const { return _store; }
+    /// Access to underlying store for advanced usage (returns shared_ptr from weak_ptr)
+    /// Returns nullptr if the NonoStore has been destroyed
+    std::shared_ptr<NonoStore> get_store() const { 
+        return _store.lock(); 
+    }
     
 private:
-    std::shared_ptr<NonoStore> _store;
+    std::weak_ptr<NonoStore> _store;  // Weak reference to prevent circular dependencies
     
     /// Internal helpers
     std::vector<TriadicResult> convert_triples(const std::vector<NonoStore::Triple>& triples,
                                                Perspective perspective);
+    
+    /// Get store safely from weak_ptr with graceful degradation
+    std::shared_ptr<NonoStore> get_store_safe() const;
     
     double calculate_connectivity_ratio();
     double calculate_vocabulary_density();

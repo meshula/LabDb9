@@ -7,25 +7,49 @@
 
 namespace LabDb {
 
-TriadicQuery::TriadicQuery(std::shared_ptr<NonoStore> store) : _store(store) {
+TriadicQuery::TriadicQuery(std::weak_ptr<NonoStore> store) : _store(store) {
+}
+
+std::shared_ptr<NonoStore> TriadicQuery::get_store_safe() const {
+    auto store = _store.lock();
+    if (!store) {
+        // Store has been destroyed - this is expected graceful degradation
+        // Methods calling this will return empty results
+    }
+    return store;
 }
 
 // Motion-driven queries (स्पन्द perspective)
 std::vector<TriadicQuery::TriadicResult> TriadicQuery::motion_from(const std::string& entity) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation if store destroyed
+    }
+    
     // Query all properties and relationships where entity is the subject
-    auto properties = _store->properties_of(entity);
+    auto properties = store->properties_of(entity);
     return convert_triples(properties, Perspective::Motion);
 }
 
 std::vector<TriadicQuery::TriadicResult> TriadicQuery::motion_through(const std::string& relation) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation if store destroyed
+    }
+    
     // Query all entities that express through this relationship
-    auto entities = _store->entities_with_relation(relation);
+    auto entities = store->entities_with_relation(relation);
     return convert_triples(entities, Perspective::Motion);
 }
 
 std::vector<std::string> TriadicQuery::entity_expressions(const std::string& entity) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    
     // Get all unique predicates that this entity uses to express itself
-    auto properties = _store->properties_of(entity);
+    auto properties = store->properties_of(entity);
     std::unordered_set<std::string> unique_predicates;
     
     for (const auto& triple : properties) {
@@ -37,22 +61,32 @@ std::vector<std::string> TriadicQuery::entity_expressions(const std::string& ent
 
 // Memory-driven queries (स्मृति perspective)
 std::vector<TriadicQuery::TriadicResult> TriadicQuery::memory_relations(const std::string& predicate) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    
     // Query all connections using this predicate
-    auto connections = _store->query("*", predicate, "*");
+    auto connections = store->query("*", predicate, "*");
     return convert_triples(connections, Perspective::Memory);
 }
 
 std::vector<TriadicQuery::TriadicResult> TriadicQuery::memory_between(const std::string& entity1, 
                                                                        const std::string& entity2) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    
     std::vector<TriadicResult> results;
     
     // Find direct relationships entity1 -> entity2
-    auto forward = _store->query(entity1, "*", entity2);
+    auto forward = store->query(entity1, "*", entity2);
     auto forward_results = convert_triples(forward, Perspective::Memory);
     results.insert(results.end(), forward_results.begin(), forward_results.end());
     
     // Find reverse relationships entity2 -> entity1
-    auto reverse = _store->query(entity2, "*", entity1);
+    auto reverse = store->query(entity2, "*", entity1);
     auto reverse_results = convert_triples(reverse, Perspective::Memory);
     results.insert(results.end(), reverse_results.begin(), reverse_results.end());
     
@@ -60,11 +94,16 @@ std::vector<TriadicQuery::TriadicResult> TriadicQuery::memory_between(const std:
 }
 
 std::vector<std::pair<std::string, size_t>> TriadicQuery::relation_frequencies() {
-    auto predicates = _store->all_predicates();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    
+    auto predicates = store->all_predicates();
     std::vector<std::pair<std::string, size_t>> frequencies;
     
     for (const auto& predicate : predicates) {
-        size_t count = _store->count("*", predicate, "*");
+        size_t count = store->count("*", predicate, "*");
         frequencies.emplace_back(predicate, count);
     }
     
@@ -77,24 +116,39 @@ std::vector<std::pair<std::string, size_t>> TriadicQuery::relation_frequencies()
 
 // Field-driven queries (क्षेत्र perspective)
 std::vector<TriadicQuery::TriadicResult> TriadicQuery::field_contexts(const std::string& object) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    
     // Query all relationships that ground into this object/context
-    auto connections = _store->connections_to(object);
+    auto connections = store->connections_to(object);
     return convert_triples(connections, Perspective::Field);
 }
 
 std::vector<TriadicQuery::TriadicResult> TriadicQuery::field_for_relation(const std::string& relation) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    
     // Query all contexts that ground this type of relationship
-    auto contexts = _store->query("*", relation, "*");
+    auto contexts = store->query("*", relation, "*");
     return convert_triples(contexts, Perspective::Field);
 }
 
 std::vector<std::string> TriadicQuery::primary_contexts() {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    
     // Find the most frequently used objects/contexts
-    auto objects = _store->all_objects();
+    auto objects = store->all_objects();
     
     std::vector<std::pair<std::string, size_t>> object_frequencies;
     for (const auto& object : objects) {
-        size_t count = _store->count("*", "*", object);
+        size_t count = store->count("*", "*", object);
         object_frequencies.emplace_back(object, count);
     }
     
@@ -206,13 +260,18 @@ std::vector<TriadicQuery::TriadicResult> TriadicQuery::crown_exploration(
 
 // Analytics and insights
 TriadicQuery::TriadicStats TriadicQuery::get_triadic_stats() {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation - return default-constructed stats
+    }
+    
     TriadicStats stats;
     
-    stats.motion_entities = _store->all_subjects().size();
-    stats.memory_relations = _store->all_predicates().size();
-    stats.field_contexts = _store->all_objects().size();
+    stats.motion_entities = store->all_subjects().size();
+    stats.memory_relations = store->all_predicates().size();
+    stats.field_contexts = store->all_objects().size();
     
-    auto store_stats = _store->get_stats();
+    auto store_stats = store->get_stats();
     stats.total_connections = store_stats.total_triples;
     
     stats.connectivity_ratio = calculate_connectivity_ratio();
@@ -222,11 +281,16 @@ TriadicQuery::TriadicStats TriadicQuery::get_triadic_stats() {
 }
 
 std::vector<std::string> TriadicQuery::bridge_entities(double connectivity_threshold) {
-    auto subjects = _store->all_subjects();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    
+    auto subjects = store->all_subjects();
     std::vector<std::string> bridges;
     
     for (const auto& subject : subjects) {
-        auto properties = _store->properties_of(subject);
+        auto properties = store->properties_of(subject);
         double connectivity = static_cast<double>(properties.size());
         
         if (connectivity >= connectivity_threshold) {
@@ -238,17 +302,26 @@ std::vector<std::string> TriadicQuery::bridge_entities(double connectivity_thres
 }
 
 std::vector<std::vector<std::string>> TriadicQuery::detect_relationship_clusters() {
-    auto subjects = _store->all_subjects();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    auto subjects = store->all_subjects();
     return cluster_by_relations(subjects);
 }
 
 std::vector<TriadicQuery::VocabularyBoundary> TriadicQuery::detect_vocabulary_boundaries() {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+
     // Simplified implementation - in practice this would use more sophisticated clustering
     std::vector<VocabularyBoundary> boundaries;
     
-    auto subjects = _store->all_subjects();
-    auto predicates = _store->all_predicates();
-    auto objects = _store->all_objects();
+    auto subjects = store->all_subjects();
+    auto predicates = store->all_predicates();
+    auto objects = store->all_objects();
     
     // Create a simple boundary based on relationship types
     VocabularyBoundary general_domain;
@@ -328,12 +401,17 @@ std::vector<TriadicQuery::TriadicResult> TriadicQuery::convert_triples(
 }
 
 double TriadicQuery::calculate_connectivity_ratio() {
-    auto subjects = _store->all_subjects();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+
+    auto subjects = store->all_subjects();
     if (subjects.empty()) return 0.0;
     
     double total_connections = 0.0;
     for (const auto& subject : subjects) {
-        auto properties = _store->properties_of(subject);
+        auto properties = store->properties_of(subject);
         total_connections += properties.size();
     }
     
@@ -341,7 +419,12 @@ double TriadicQuery::calculate_connectivity_ratio() {
 }
 
 double TriadicQuery::calculate_vocabulary_density() {
-    auto stats = _store->get_stats();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+
+    auto stats = store->get_stats();
     if (stats.total_triples == 0) return 0.0;
     
     double total_vocabulary = stats.unique_subjects + stats.unique_predicates + stats.unique_objects;
@@ -374,6 +457,10 @@ std::vector<std::vector<std::string>> TriadicQuery::cluster_by_relations(
 double TriadicQuery::calculate_coherence(
     const std::vector<std::string>& entities,
     const std::vector<std::string>& relations) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
     
     if (entities.empty() || relations.empty()) return 0.0;
     
@@ -383,7 +470,7 @@ double TriadicQuery::calculate_coherence(
     
     for (const auto& entity : entities) {
         for (const auto& relation : relations) {
-            if (_store->count(entity, relation, "*") > 0) {
+            if (store->count(entity, relation, "*") > 0) {
                 actual_connections += 1.0;
             }
         }
@@ -394,7 +481,11 @@ double TriadicQuery::calculate_coherence(
 
 // Entity Discovery & Sampling Interface Implementation
 std::vector<std::string> TriadicQuery::sample_motion_entities(size_t count, size_t offset) {
-    auto all_entities = _store->all_subjects();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    auto all_entities = store->all_subjects();
     
     // Apply offset and limit
     std::vector<std::string> sampled;
@@ -406,7 +497,12 @@ std::vector<std::string> TriadicQuery::sample_motion_entities(size_t count, size
 }
 
 std::vector<std::string> TriadicQuery::sample_memory_relations(size_t count, size_t offset) {
-    auto all_relations = _store->all_predicates();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+
+    auto all_relations = store->all_predicates();
     
     // Apply offset and limit
     std::vector<std::string> sampled;
@@ -418,7 +514,11 @@ std::vector<std::string> TriadicQuery::sample_memory_relations(size_t count, siz
 }
 
 std::vector<std::string> TriadicQuery::sample_field_contexts(size_t count, size_t offset) {
-    auto all_contexts = _store->all_objects();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    auto all_contexts = store->all_objects();
     
     // Apply offset and limit
     std::vector<std::string> sampled;
@@ -431,6 +531,10 @@ std::vector<std::string> TriadicQuery::sample_field_contexts(size_t count, size_
 
 TriadicQuery::SamplingResult TriadicQuery::sample_triadic_entities(
     size_t motion_count, size_t memory_count, size_t field_count, size_t offset) {
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
     
     SamplingResult result;
     
@@ -440,9 +544,9 @@ TriadicQuery::SamplingResult TriadicQuery::sample_triadic_entities(
     result.field_contexts = sample_field_contexts(field_count, offset);
     
     // Get total counts for pagination info
-    result.total_motion_count = _store->all_subjects().size();
-    result.total_memory_count = _store->all_predicates().size();
-    result.total_field_count = _store->all_objects().size();
+    result.total_motion_count = store->all_subjects().size();
+    result.total_memory_count = store->all_predicates().size();
+    result.total_field_count = store->all_objects().size();
     
     return result;
 }
@@ -463,7 +567,11 @@ std::vector<std::string> TriadicQuery::browse_entities_by_type(
 }
 
 std::vector<std::string> TriadicQuery::random_sample_motion(size_t count) {
-    auto all_entities = _store->all_subjects();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    auto all_entities = store->all_subjects();
     
     if (all_entities.size() <= count) {
         return all_entities;
@@ -484,7 +592,11 @@ std::vector<std::string> TriadicQuery::random_sample_motion(size_t count) {
 }
 
 std::vector<std::string> TriadicQuery::random_sample_memory(size_t count) {
-    auto all_relations = _store->all_predicates();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    auto all_relations = store->all_predicates();
     
     if (all_relations.size() <= count) {
         return all_relations;
@@ -505,7 +617,11 @@ std::vector<std::string> TriadicQuery::random_sample_memory(size_t count) {
 }
 
 std::vector<std::string> TriadicQuery::random_sample_field(size_t count) {
-    auto all_contexts = _store->all_objects();
+    auto store = get_store_safe();
+    if (!store) {
+        return {}; // Graceful degradation
+    }
+    auto all_contexts = store->all_objects();
     
     if (all_contexts.size() <= count) {
         return all_contexts;
