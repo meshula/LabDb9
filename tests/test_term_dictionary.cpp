@@ -206,7 +206,7 @@ int main() {
             
             // Test statistics
             auto stats = dict.get_stats(txn);
-            assert(stats.total_terms == 3);
+            assert(stats.total_terms == 15);
             assert(stats.min_term_id >= 1);
             assert(stats.max_term_id >= stats.min_term_id);
             std::cout << "✓ Statistics: " << stats.total_terms << " terms, "

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <set>
 #include <iostream>
+#include <cstring>
 
 namespace LabDb {
 
@@ -42,13 +43,61 @@ bool NonoStore::add_triple(const std::string& subject,
                            const std::string& object) {
     try {
         LmdbStore::Transaction txn(*_store);
-        bool result = add_triple_impl(txn, subject, predicate, object);
-        if (result) {
-            txn.commit();
+
+        // 1. Store triple in central TripleStore to get TID
+        MDB_txn* mdb_txn = txn.handle();
+        TripleStore::TID tid = _triple_store->store_triple(mdb_txn, subject, predicate, object);
+        
+        // 2. Get TermIDs for crown indices
+        TermDictionary::TermID subject_id = _term_dict->intern(mdb_txn, subject);
+        TermDictionary::TermID predicate_id = _term_dict->intern(mdb_txn, predicate);
+        TermDictionary::TermID object_id = _term_dict->intern(mdb_txn, object);
+        
+        // 3. Generate crown index keys with TermIDs (not strings!)
+        std::string tid_value = encode_tid_for_storage(tid);
+        
+        // SPO/SOP/PSO/POS/OSP/OPS indices store TermID triplets → TID
+        auto crown_keys = generate_tid_based_crown_keys(subject_id, predicate_id, object_id);
+        for (const auto& key : crown_keys) {
+            bool success = _store->put(txn, key, tid_value);
+            if (!success) {
+                set_error(ErrorCode::DatabaseError, "Failed to insert crown key: " + key);
+                return false;
+            }
         }
-        return result;
+        
+        // 4. Vocabulary indices store TermID → TID (for discovery)
+        std::string subject_vocab_key = generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType::SUBJECTS, subject_id);
+        std::string predicate_vocab_key = generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType::PREDICATES, predicate_id);
+        std::string object_vocab_key = generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType::OBJECTS, object_id);
+        
+        // Sanity check: ensure vocabulary keys are not empty
+        if (subject_vocab_key.empty()) {
+            std::cerr << "ERROR: subject_vocab_key is empty!" << std::endl;
+            return set_error(ErrorCode::KeyGenerationError, "Generated empty subject vocabulary key");
+        }
+        if (predicate_vocab_key.empty()) {
+            std::cerr << "ERROR: predicate_vocab_key is empty!" << std::endl;
+            return set_error(ErrorCode::KeyGenerationError, "Generated empty predicate vocabulary key");
+        }
+        if (object_vocab_key.empty()) {
+            std::cerr << "ERROR: object_vocab_key is empty!" << std::endl;
+            return set_error(ErrorCode::KeyGenerationError, "Generated empty object vocabulary key");
+        }
+        
+        // Store vocabulary keys 
+        bool subject_put_success = _store->put(txn, subject_vocab_key, tid_value);
+        bool predicate_put_success = _store->put(txn, predicate_vocab_key, tid_value);
+        bool object_put_success = _store->put(txn, object_vocab_key, tid_value);
+        
+        _last_error = {ErrorCode::Success, ""};
+
+        txn.commit();
+        return true;
     } catch (const LmdbException& e) {
         return set_error(ErrorCode::TransactionError, "Add triple failed: " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        return set_error(ErrorCode::KeyGenerationError, "TID-based connect failed: " + std::string(e.what()));
     }
 }
 
@@ -57,13 +106,64 @@ bool NonoStore::remove_triple(const std::string& subject,
                               const std::string& object) {
     try {
         LmdbStore::Transaction txn(*_store);
-        bool result = remove_triple_impl(txn, subject, predicate, object);
-        if (result) {
-            txn.commit();
+
+        // 1. Find the existing triple in TripleStore to get TID
+        MDB_txn* mdb_txn = txn.handle();
+        
+        // Get TermIDs
+        auto subject_id_opt = _term_dict->lookup(mdb_txn, subject);
+        auto predicate_id_opt = _term_dict->lookup(mdb_txn, predicate);
+        auto object_id_opt = _term_dict->lookup(mdb_txn, object);
+        
+        // If any term doesn't exist, the triple can't exist
+        if (!subject_id_opt || !predicate_id_opt || !object_id_opt) {
+            _last_error = {ErrorCode::Success, ""}; // Not an error - triple doesn't exist
+            return true;
         }
-        return result;
+        
+        TermDictionary::TermID subject_id = *subject_id_opt;
+        TermDictionary::TermID predicate_id = *predicate_id_opt;
+        TermDictionary::TermID object_id = *object_id_opt;
+        
+        // 2. Find TIDs for this triple pattern from crown indices
+        std::string query_key = "~spo~" + 
+                               TermDictionary::encode_term_id_for_storage(subject_id) +
+                               TermDictionary::encode_term_id_for_storage(predicate_id) +
+                               TermDictionary::encode_term_id_for_storage(object_id);
+        
+        // Query SPO index to find the TID
+        auto query_results = _store->query_prefix(txn, query_key);
+        if (query_results.empty()) {
+            _last_error = {ErrorCode::Success, ""}; // Triple doesn't exist
+            return true;
+        }
+        
+        // 3. Remove from TripleStore and crown indices
+        for (const auto& [key, tid_value] : query_results) {
+            uint64_t tid = decode_tid_from_storage(tid_value);
+            
+            // Remove from central TripleStore
+            _triple_store->remove_triple(mdb_txn, tid);
+            
+            // Remove from all crown indices
+            auto crown_keys = generate_tid_based_crown_keys(subject_id, predicate_id, object_id);
+            for (const auto& crown_key : crown_keys) {
+                _store->del(txn, crown_key);
+            }
+            
+            // Remove from vocabulary indices (only if this was the last reference)
+            // Note: For now, we'll leave vocabulary entries - they can be cleaned up separately
+            // This avoids the complexity of reference counting in this initial implementation
+        }
+        
+        _last_error = {ErrorCode::Success, ""};
+        
+            txn.commit();
+        return true;
     } catch (const LmdbException& e) {
         return set_error(ErrorCode::TransactionError, "Remove triple failed: " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        return set_error(ErrorCode::KeyGenerationError, "TID-based disconnect failed: " + std::string(e.what()));
     }
 }
 
@@ -72,32 +172,55 @@ std::vector<NonoStore::Triple> NonoStore::query(const std::string& subject_patte
                                                  const std::string& object_pattern) {
     try {
         LmdbStore::Transaction txn(*_store, true); // read-only
+        MDB_txn* mdb_txn = txn.handle();
         
-        // Generate optimal query prefix based on patterns
-        std::string query_prefix = NonostoreKeys::generate_query_prefix(
-            subject_pattern, predicate_pattern, object_pattern);
+        // TID-based query: convert patterns to TermIDs first
+        bool subj_wild = (subject_pattern == "*");
+        bool pred_wild = (predicate_pattern == "*");
+        bool obj_wild = (object_pattern == "*");
         
-        // Determine which index we're using for parsing
-        NonostoreKeys::IndexType index_type;
-        if (query_prefix.find("~spo~") == 0) index_type = NonostoreKeys::IndexType::SPO;
-        else if (query_prefix.find("~sop~") == 0) index_type = NonostoreKeys::IndexType::SOP;
-        else if (query_prefix.find("~pso~") == 0) index_type = NonostoreKeys::IndexType::PSO;
-        else if (query_prefix.find("~pos~") == 0) index_type = NonostoreKeys::IndexType::POS;
-        else if (query_prefix.find("~osp~") == 0) index_type = NonostoreKeys::IndexType::OSP;
-        else if (query_prefix.find("~ops~") == 0) index_type = NonostoreKeys::IndexType::OPS;
-        else {
-            set_error(ErrorCode::InvalidQuery, "Invalid query pattern");
-            return {};
+        // For specific terms, look up TermIDs (early exit if not found)
+        std::optional<uint64_t> subject_id, predicate_id, object_id;
+        
+        if (!subj_wild) {
+            auto sid = _term_dict->lookup(mdb_txn, subject_pattern);
+            if (!sid.has_value()) {
+                // Subject doesn't exist - early exit with empty results
+                return {};
+            }
+            subject_id = *sid;
         }
+        
+        if (!pred_wild) {
+            auto pid = _term_dict->lookup(mdb_txn, predicate_pattern);
+            if (!pid.has_value()) {
+                // Predicate doesn't exist - early exit with empty results
+                return {};
+            }
+            predicate_id = *pid;
+        }
+        
+        if (!obj_wild) {
+            auto oid = _term_dict->lookup(mdb_txn, object_pattern);
+            if (!oid.has_value()) {
+                // Object doesn't exist - early exit with empty results
+                return {};
+            }
+            object_id = *oid;
+        }
+        
+        // Generate TID-based query prefix
+        std::string query_prefix = generate_tid_based_query_prefix(
+            subject_id, predicate_id, object_id);
         
         // Execute prefix query
         auto raw_results = _store->query_prefix(txn, query_prefix);
         
-        // Parse results into triples
-        return parse_query_results(raw_results, index_type);
+        // Parse results using TID resolution
+        return parse_query_results_tid(raw_results, mdb_txn);
         
     } catch (const LmdbException& e) {
-        set_error(ErrorCode::DatabaseError, "Query failed: " + std::string(e.what()));
+        set_error(ErrorCode::DatabaseError, "TID-based query failed: " + std::string(e.what()));
         return {};
     }
 }
@@ -399,10 +522,14 @@ bool NonoStore::exists(const std::string& subject,
                        const std::string& object) {
     try {
         LmdbStore::Transaction txn(*_store, true);
-        std::string key = NonostoreKeys::generate_key(
-            NonostoreKeys::IndexType::SPO, subject, predicate, object);
-        return _store->exists(txn, key);
+        MDB_txn* mdb_txn = txn.handle();
+
+        TermDictionary::TermID subject_id = _term_dict->intern(mdb_txn, subject);
+        TermDictionary::TermID predicate_id = _term_dict->intern(mdb_txn, predicate);
+        TermDictionary::TermID object_id = _term_dict->intern(mdb_txn, object);
         
+        std::string key = generate_tid_based_crown_key(NonostoreKeys::IndexType::SPO, subject_id, predicate_id, object_id);
+        return _store->exists(txn, key);
     } catch (const LmdbException& e) {
         set_error(ErrorCode::DatabaseError, "Exists check failed: " + std::string(e.what()));
         return false;
@@ -413,14 +540,54 @@ size_t NonoStore::count(const std::string& subject_pattern,
                         const std::string& predicate_pattern,
                         const std::string& object_pattern) {
     try {
-        LmdbStore::Transaction txn(*_store, true);
-        std::string query_prefix = NonostoreKeys::generate_query_prefix(
-            subject_pattern, predicate_pattern, object_pattern);
+        LmdbStore::Transaction txn(*_store, true); // read-only
+        MDB_txn* mdb_txn = txn.handle();
+        
+        // TID-based query: convert patterns to TermIDs first (same logic as query())
+        bool subj_wild = (subject_pattern == "*");
+        bool pred_wild = (predicate_pattern == "*");
+        bool obj_wild = (object_pattern == "*");
+        
+        // For specific terms, look up TermIDs (early exit if not found)
+        std::optional<uint64_t> subject_id, predicate_id, object_id;
+        
+        if (!subj_wild) {
+            auto sid = _term_dict->lookup(mdb_txn, subject_pattern);
+            if (!sid.has_value()) {
+                // Subject doesn't exist - early exit with zero count
+                return 0;
+            }
+            subject_id = *sid;
+        }
+        
+        if (!pred_wild) {
+            auto pid = _term_dict->lookup(mdb_txn, predicate_pattern);
+            if (!pid.has_value()) {
+                // Predicate doesn't exist - early exit with zero count
+                return 0;
+            }
+            predicate_id = *pid;
+        }
+        
+        if (!obj_wild) {
+            auto oid = _term_dict->lookup(mdb_txn, object_pattern);
+            if (!oid.has_value()) {
+                // Object doesn't exist - early exit with zero count
+                return 0;
+            }
+            object_id = *oid;
+        }
+        
+        // Generate TID-based query prefix (same as query())
+        std::string query_prefix = generate_tid_based_query_prefix(
+            subject_id, predicate_id, object_id);
+        
+        // Execute prefix query and return count
         auto raw_results = _store->query_prefix(txn, query_prefix);
         return raw_results.size();
         
     } catch (const LmdbException& e) {
-        set_error(ErrorCode::DatabaseError, "Count failed: " + std::string(e.what()));
+        set_error(ErrorCode::DatabaseError, "TID-based count failed: " + std::string(e.what()));
         return 0;
     }
 }
@@ -437,18 +604,20 @@ NonoStore::BatchTransaction::~BatchTransaction() {
     }
 }
 
-void NonoStore::BatchTransaction::connect(const std::string& subject, 
-                                          const std::string& predicate, 
-                                          const std::string& object) {
+void NonoStore::BatchTransaction::add_triple(
+                                   const std::string& subject,
+                                   const std::string& predicate, 
+                                   const std::string& object) {
     if (!_active) return;
     
     auto keys = NonostoreKeys::generate_all_keys(subject, predicate, object);
     _connect_keys.push_back(keys);
 }
 
-void NonoStore::BatchTransaction::disconnect(const std::string& subject, 
-                                             const std::string& predicate, 
-                                             const std::string& object) {
+void NonoStore::BatchTransaction::remove_triple(
+                                    const std::string& subject, 
+                                    const std::string& predicate, 
+                                    const std::string& object) {
     if (!_active) return;
     
     auto keys = NonostoreKeys::generate_all_keys(subject, predicate, object);
@@ -462,14 +631,14 @@ bool NonoStore::BatchTransaction::commit() {
         // Execute all disconnects first
         for (const auto& keys : _disconnect_keys) {
             for (const auto& key : keys) {
-                _store._store->del(*_txn, key);
+                _store._store->del(*_txn, key.key);
             }
         }
         
         // Then execute all connects
         for (const auto& keys : _connect_keys) {
             for (const auto& key : keys) {
-                _store._store->put(*_txn, key, "{}"); // Empty JSON value
+                _store._store->put(*_txn, key.key, "{}"); // Empty JSON value
             }
         }
         
@@ -508,7 +677,7 @@ std::vector<NonoStore::Triple> NonoStore::parse_query_results(
     triples.reserve(raw_results.size());
     
     for (const auto& [key, value] : raw_results) {
-        auto parsed = NonostoreKeys::parse_key(key);
+        auto parsed = NonostoreKeys::parse_key({key});
         if (!parsed.is_vocabulary) {
             triples.emplace_back(parsed.subject, parsed.predicate, parsed.object);
         }
@@ -517,130 +686,95 @@ std::vector<NonoStore::Triple> NonoStore::parse_query_results(
     return triples;
 }
 
-bool NonoStore::add_triple_impl(LmdbStore::Transaction& txn,
-                             const std::string& subject,
-                             const std::string& predicate,
-                             const std::string& object) {
-    try {
-        // Phase 2.3: TID-based architecture implementation
-        // 1. Store triple in central TripleStore to get TID
-        MDB_txn* mdb_txn = txn.handle();
-        TripleStore::TID tid = _triple_store->store_triple(mdb_txn, subject, predicate, object);
+/// TID-based query result parsing
+std::vector<NonoStore::Triple> NonoStore::parse_query_results_tid(
+    const std::vector<std::pair<std::string, std::string>>& raw_results,
+    MDB_txn* mdb_txn) {
+    
+    std::vector<Triple> triples;
+    triples.reserve(raw_results.size());
+    
+    for (const auto& [key, value] : raw_results) {
+        // TID-based crown indices never contain vocabulary entries by design
+        // Skip the incompatible NonostoreKeys::parse_key() vocabulary check
+        // which expects string-based keys but we have binary TID-based keys
         
-        // 2. Get TermIDs for crown indices
-        TermDictionary::TermID subject_id = _term_dict->intern(mdb_txn, subject);
-        TermDictionary::TermID predicate_id = _term_dict->intern(mdb_txn, predicate);
-        TermDictionary::TermID object_id = _term_dict->intern(mdb_txn, object);
-        
-        // 3. Generate crown index keys with TermIDs (not strings!)
-        std::string tid_value = encode_tid_for_storage(tid);
-        
-        // SPO/SOP/PSO/POS/OSP/OPS indices store TermID triplets → TID
-        auto crown_keys = generate_tid_based_crown_keys(subject_id, predicate_id, object_id);
-        for (const auto& key : crown_keys) {
-            bool success = _store->put(txn, key, tid_value);
-            if (!success) {
-                set_error(ErrorCode::DatabaseError, "Failed to insert crown key: " + key);
-                return false;
+        // Extract TID from value (16-character hex string)
+        if (value.length() == 16) {
+            uint64_t tid = decode_tid_from_storage(value);
+            
+            // Resolve TID to triple strings using TripleStore
+            auto resolved = _triple_store->get_triple_as_strings(mdb_txn, tid);
+            if (resolved.has_value()) {
+                triples.emplace_back(
+                    resolved->subject,
+                    resolved->predicate,
+                    resolved->object
+                );
             }
         }
-        
-        // 4. Vocabulary indices store TermID → TID (for discovery)
-        std::string subject_vocab_key = generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType::SUBJECTS, subject_id);
-        std::string predicate_vocab_key = generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType::PREDICATES, predicate_id);
-        std::string object_vocab_key = generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType::OBJECTS, object_id);
-        
-        // Sanity check: ensure vocabulary keys are not empty
-        if (subject_vocab_key.empty()) {
-            std::cerr << "ERROR: subject_vocab_key is empty!" << std::endl;
-            return set_error(ErrorCode::KeyGenerationError, "Generated empty subject vocabulary key");
-        }
-        if (predicate_vocab_key.empty()) {
-            std::cerr << "ERROR: predicate_vocab_key is empty!" << std::endl;
-            return set_error(ErrorCode::KeyGenerationError, "Generated empty predicate vocabulary key");
-        }
-        if (object_vocab_key.empty()) {
-            std::cerr << "ERROR: object_vocab_key is empty!" << std::endl;
-            return set_error(ErrorCode::KeyGenerationError, "Generated empty object vocabulary key");
-        }
-        
-        // Store vocabulary keys 
-        bool subject_put_success = _store->put(txn, subject_vocab_key, tid_value);
-        bool predicate_put_success = _store->put(txn, predicate_vocab_key, tid_value);
-        bool object_put_success = _store->put(txn, object_vocab_key, tid_value);
-        
-        _last_error = {ErrorCode::Success, ""};
-        return true;
-        
-    } catch (const std::exception& e) {
-        return set_error(ErrorCode::KeyGenerationError, "TID-based connect failed: " + std::string(e.what()));
     }
-}
-
-bool NonoStore::remove_triple_impl(LmdbStore::Transaction& txn,
-                                const std::string& subject,
-                                const std::string& predicate,
-                                const std::string& object) {
-    try {
-        // Phase 2.3: TID-based architecture disconnect
-        // 1. Find the existing triple in TripleStore to get TID
-        MDB_txn* mdb_txn = txn.handle();
-        
-        // Get TermIDs
-        auto subject_id_opt = _term_dict->lookup(mdb_txn, subject);
-        auto predicate_id_opt = _term_dict->lookup(mdb_txn, predicate);
-        auto object_id_opt = _term_dict->lookup(mdb_txn, object);
-        
-        // If any term doesn't exist, the triple can't exist
-        if (!subject_id_opt || !predicate_id_opt || !object_id_opt) {
-            _last_error = {ErrorCode::Success, ""}; // Not an error - triple doesn't exist
-            return true;
-        }
-        
-        TermDictionary::TermID subject_id = *subject_id_opt;
-        TermDictionary::TermID predicate_id = *predicate_id_opt;
-        TermDictionary::TermID object_id = *object_id_opt;
-        
-        // 2. Find TIDs for this triple pattern from crown indices
-        std::string query_key = "~spo~" + 
-                               TermDictionary::encode_term_id_for_storage(subject_id) +
-                               TermDictionary::encode_term_id_for_storage(predicate_id) +
-                               TermDictionary::encode_term_id_for_storage(object_id);
-        
-        // Query SPO index to find the TID
-        auto query_results = _store->query_prefix(txn, query_key);
-        if (query_results.empty()) {
-            _last_error = {ErrorCode::Success, ""}; // Triple doesn't exist
-            return true;
-        }
-        
-        // 3. Remove from TripleStore and crown indices
-        for (const auto& [key, tid_value] : query_results) {
-            uint64_t tid = decode_tid_from_storage(tid_value);
-            
-            // Remove from central TripleStore
-            _triple_store->remove_triple(mdb_txn, tid);
-            
-            // Remove from all crown indices
-            auto crown_keys = generate_tid_based_crown_keys(subject_id, predicate_id, object_id);
-            for (const auto& crown_key : crown_keys) {
-                _store->del(txn, crown_key);
-            }
-            
-            // Remove from vocabulary indices (only if this was the last reference)
-            // Note: For now, we'll leave vocabulary entries - they can be cleaned up separately
-            // This avoids the complexity of reference counting in this initial implementation
-        }
-        
-        _last_error = {ErrorCode::Success, ""};
-        return true;
-        
-    } catch (const std::exception& e) {
-        return set_error(ErrorCode::KeyGenerationError, "TID-based disconnect failed: " + std::string(e.what()));
-    }
+    
+    return triples;
 }
 
 // TID-based architecture helper methods
+
+std::string NonoStore::generate_tid_based_query_prefix(
+    std::optional<uint64_t> subject_id,
+    std::optional<uint64_t> predicate_id,
+    std::optional<uint64_t> object_id) {
+    
+    // Choose optimal index based on which terms are specified
+    std::string prefix;
+    
+    if (subject_id.has_value() && predicate_id.has_value() && object_id.has_value()) {
+        // Specific triple: s-p-o -> use SPO index
+        prefix = "~spo~" + 
+                TermDictionary::encode_term_id_for_storage(*subject_id) +
+                TermDictionary::encode_term_id_for_storage(*predicate_id) +
+                TermDictionary::encode_term_id_for_storage(*object_id);
+    }
+    else if (subject_id.has_value() && predicate_id.has_value()) {
+        // s-p-* pattern: use SPO index
+        prefix = "~spo~" +
+                TermDictionary::encode_term_id_for_storage(*subject_id) +
+                TermDictionary::encode_term_id_for_storage(*predicate_id);
+    }
+    else if (subject_id.has_value() && object_id.has_value()) {
+        // s-*-o pattern: use SOP index  
+        prefix = "~sop~" +
+                TermDictionary::encode_term_id_for_storage(*subject_id) +
+                TermDictionary::encode_term_id_for_storage(*object_id);
+    }
+    else if (predicate_id.has_value() && object_id.has_value()) {
+        // *-p-o pattern: use POS index
+        prefix = "~pos~" +
+                TermDictionary::encode_term_id_for_storage(*predicate_id) +
+                TermDictionary::encode_term_id_for_storage(*object_id);
+    }
+    else if (subject_id.has_value()) {
+        // s-*-* pattern: use SPO index
+        prefix = "~spo~" +
+                TermDictionary::encode_term_id_for_storage(*subject_id);
+    }
+    else if (predicate_id.has_value()) {
+        // *-p-* pattern: use PSO index
+        prefix = "~pso~" +
+                TermDictionary::encode_term_id_for_storage(*predicate_id);
+    }
+    else if (object_id.has_value()) {
+        // *-*-o pattern: use OSP index
+        prefix = "~osp~" +
+                TermDictionary::encode_term_id_for_storage(*object_id);
+    }
+    else {
+        // *-*-* pattern: use SPO index (could use any)
+        prefix = "~spo~";
+    }
+    
+    return prefix;
+}
 
 std::string NonoStore::encode_tid_for_storage(uint64_t tid) {
     // Use same encoding as TIDSequenceGenerator for consistency
@@ -650,6 +784,27 @@ std::string NonoStore::encode_tid_for_storage(uint64_t tid) {
 uint64_t NonoStore::decode_tid_from_storage(const std::string& stored) {
     // Use same decoding as TIDSequenceGenerator for consistency
     return TIDSequenceGenerator::decode_tid_from_storage(stored);
+}
+
+std::string NonoStore::generate_tid_based_crown_key(NonostoreKeys::IndexType type,
+                                                    uint64_t subject_id,
+                                                    uint64_t predicate_id,
+                                                    uint64_t object_id) {
+    std::string ret;
+    switch (type) {
+        case NonostoreKeys::IndexType::SPO: ret = "~spo~"; break;
+        case NonostoreKeys::IndexType::SOP: ret = "~sop~"; break;
+        case NonostoreKeys::IndexType::PSO: ret = "~pso~"; break;
+        case NonostoreKeys::IndexType::POS: ret = "~pos~"; break;
+        case NonostoreKeys::IndexType::OSP: ret = "~osp~"; break;
+        case NonostoreKeys::IndexType::OPS: ret = "~ops~"; break;
+        case NonostoreKeys::IndexType::SUBJECTS: ret = "~subjects~"; break;
+        case NonostoreKeys::IndexType::PREDICATES: ret = "~predicates~"; break;
+        case NonostoreKeys::IndexType::OBJECTS: ret = "~objects~"; break;
+    }
+    return ret + TermDictionary::encode_term_id_for_storage(subject_id) +
+                     TermDictionary::encode_term_id_for_storage(predicate_id) +
+                     TermDictionary::encode_term_id_for_storage(object_id);
 }
 
 std::vector<std::string> NonoStore::generate_tid_based_crown_keys(uint64_t subject_id, uint64_t predicate_id, uint64_t object_id) {

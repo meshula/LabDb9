@@ -8,12 +8,12 @@ namespace LabDb {
 // Static constexpr definition
 constexpr const char* NonostoreKeys::INDEX_PREFIXES[];
 
-std::array<std::string, 9> NonostoreKeys::generate_all_keys(
+std::array<NonostoreKeys::Key, 9> NonostoreKeys::generate_all_keys(
     const std::string& subject,
     const std::string& predicate,
     const std::string& object) {
     
-    std::array<std::string, 9> keys;
+    std::array<NonostoreKeys::Key, 9> keys;
     
     // Generate all six content indices (traditional hexastore)
     for (int i = 0; i < 6; ++i) {
@@ -28,46 +28,46 @@ std::array<std::string, 9> NonostoreKeys::generate_all_keys(
     return keys;
 }
 
-std::string NonostoreKeys::generate_key(
+NonostoreKeys::Key NonostoreKeys::generate_key(
     IndexType index,
     const std::string& subject,
     const std::string& predicate,
     const std::string& object) {
     
     // Escape the input terms to handle special characters
-    std::string esc_subj = escape_term(subject);
-    std::string esc_pred = escape_term(predicate);
-    std::string esc_obj = escape_term(object);
+    NonostoreKeys::Key esc_subj = generate_vocabulary_key(IndexType::SUBJECTS, subject);
+    NonostoreKeys::Key esc_pred = generate_vocabulary_key(IndexType::PREDICATES, predicate);
+    NonostoreKeys::Key esc_obj = generate_vocabulary_key(IndexType::OBJECTS, object);
     
     std::string prefix = INDEX_PREFIXES[static_cast<int>(index)];
     
     switch (index) {
         case IndexType::SPO:
-            return prefix + esc_subj + SEPARATOR + esc_pred + SEPARATOR + esc_obj;
+            return {prefix + esc_subj.key + SEPARATOR + esc_pred.key + SEPARATOR + esc_obj.key};
         case IndexType::SOP:
-            return prefix + esc_subj + SEPARATOR + esc_obj + SEPARATOR + esc_pred;
+            return {prefix + esc_subj.key + SEPARATOR + esc_obj.key + SEPARATOR + esc_pred.key};
         case IndexType::PSO:
-            return prefix + esc_pred + SEPARATOR + esc_subj + SEPARATOR + esc_obj;
+            return {prefix + esc_pred.key + SEPARATOR + esc_subj.key + SEPARATOR + esc_obj.key};
         case IndexType::POS:
-            return prefix + esc_pred + SEPARATOR + esc_obj + SEPARATOR + esc_subj;
+            return {prefix + esc_pred.key + SEPARATOR + esc_obj.key + SEPARATOR + esc_subj.key};
         case IndexType::OSP:
-            return prefix + esc_obj + SEPARATOR + esc_subj + SEPARATOR + esc_pred;
+            return {prefix + esc_obj.key + SEPARATOR + esc_subj.key + SEPARATOR + esc_pred.key};
         case IndexType::OPS:
-            return prefix + esc_obj + SEPARATOR + esc_pred + SEPARATOR + esc_subj;
+            return {prefix + esc_obj.key + SEPARATOR + esc_pred.key + SEPARATOR + esc_subj.key};
         default:
             // Vocabulary indices shouldn't use this method
             assert(false && "Use generate_vocabulary_key for vocabulary indices");
-            return "";
+            return {""}; // Return empty key for invalid index
     }
 }
 
-std::string NonostoreKeys::generate_vocabulary_key(IndexType vocab_index, const std::string& term) {
+NonostoreKeys::Key NonostoreKeys::generate_vocabulary_key(IndexType vocab_index, const std::string& term) {
     assert(vocab_index >= IndexType::SUBJECTS && vocab_index <= IndexType::OBJECTS);
     
     std::string prefix = INDEX_PREFIXES[static_cast<int>(vocab_index)];
     std::string esc_term = escape_term(term);
     
-    return prefix + esc_term + SEPARATOR + VOCABULARY_VALUE;
+    return {prefix + esc_term + SEPARATOR + VOCABULARY_VALUE};
 }
 
 std::string NonostoreKeys::generate_query_prefix(
@@ -145,18 +145,18 @@ std::string NonostoreKeys::get_vocabulary_prefix(IndexType vocab_index) {
     return INDEX_PREFIXES[static_cast<int>(vocab_index)];
 }
 
-NonostoreKeys::ParsedKey NonostoreKeys::parse_key(const std::string& key) {
+NonostoreKeys::ParsedKey NonostoreKeys::parse_key(const NonostoreKeys::Key& key) {
     ParsedKey result;
     result.is_vocabulary = false;
     
     // Find which prefix matches
     for (int i = 0; i < 9; ++i) {
         std::string prefix = INDEX_PREFIXES[i];
-        if (key.substr(0, prefix.length()) == prefix) {
+        if (key.key.substr(0, prefix.length()) == prefix) {
             result.index_type = static_cast<IndexType>(i);
             
             // Extract the remainder after prefix
-            std::string remainder = key.substr(prefix.length());
+            std::string remainder = key.key.substr(prefix.length());
             
             if (i >= 6) { // Vocabulary index
                 result.is_vocabulary = true;

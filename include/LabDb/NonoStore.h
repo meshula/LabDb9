@@ -35,12 +35,12 @@ public:
     
     /// Core triadic operations
     
-    /// Connect entities through relationship (atomic across all nine indices)
+    /// add entities through relationship (atomic across all nine indices)
     bool add_triple(const std::string& subject, 
                     const std::string& predicate, 
                     const std::string& object);
     
-    /// Disconnect entities (atomic removal from all nine indices)
+    /// remove entities (atomic removal from all nine indices)
     bool remove_triple(const std::string& subject, 
                        const std::string& predicate, 
                        const std::string& object);
@@ -77,17 +77,17 @@ public:
     /// Convenience query methods for common patterns
     
     /// What properties does this entity have? (subject-*-*)
-    std::vector<Triple> properties_of(const std::string& subject) {
+    std::vector<Triple> entities_with_subject(const std::string& subject) {
         return query(subject, "*", "*");
     }
     
     /// What entities have this relationship? (*-predicate-*)
-    std::vector<Triple> entities_with_relation(const std::string& predicate) {
+    std::vector<Triple> entities_with_predicate(const std::string& predicate) {
         return query("*", predicate, "*");
     }
     
     /// What connects to this context? (*-*-object)
-    std::vector<Triple> connections_to(const std::string& object) {
+    std::vector<Triple> entities_with_object(const std::string& object) {
         return query("*", "*", object);
     }
     
@@ -141,12 +141,12 @@ public:
         ~BatchTransaction();
         
         /// Add operations to batch
-        void connect(const std::string& subject, 
-                     const std::string& predicate, 
-                     const std::string& object);
-        void disconnect(const std::string& subject, 
+        void add_triple(const std::string& subject, 
                         const std::string& predicate, 
                         const std::string& object);
+        void remove_triple(const std::string& subject, 
+                           const std::string& predicate, 
+                           const std::string& object);
         
         /// Execute all operations atomically
         bool commit();
@@ -157,8 +157,8 @@ public:
     private:
         NonoStore& _store;
         std::unique_ptr<LmdbStore::Transaction> _txn;
-        std::vector<std::array<std::string, 9>> _connect_keys;
-        std::vector<std::array<std::string, 9>> _disconnect_keys;
+        std::vector<std::array<NonostoreKeys::Key, 9>> _connect_keys;
+        std::vector<std::array<NonostoreKeys::Key, 9>> _disconnect_keys;
         bool _active;
     };
     
@@ -202,11 +202,16 @@ private:
         const std::vector<std::pair<std::string, std::string>>& raw_results,
         NonostoreKeys::IndexType index_type);
     
-    /// Internal implementation for add_triple/remove_triple
-    bool add_triple_impl(LmdbStore::Transaction& txn,
-                      const std::string& subject,
-                      const std::string& predicate,
-                      const std::string& object);
+    /// Parse TID-based query results
+    std::vector<Triple> parse_query_results_tid(
+        const std::vector<std::pair<std::string, std::string>>& raw_results,
+        MDB_txn* mdb_txn);
+    
+    /// Generate TID-based query prefix for efficient binary key matching
+    std::string generate_tid_based_query_prefix(
+        std::optional<uint64_t> subject_id,
+        std::optional<uint64_t> predicate_id,
+        std::optional<uint64_t> object_id);
     
     bool remove_triple_impl(LmdbStore::Transaction& txn,
                          const std::string& subject,
@@ -216,6 +221,7 @@ private:
     /// TID-based architecture helpers
     std::string encode_tid_for_storage(uint64_t tid);
     uint64_t decode_tid_from_storage(const std::string& stored);
+    std::string generate_tid_based_crown_key(NonostoreKeys::IndexType, uint64_t subject_id, uint64_t predicate_id, uint64_t object_id);
     std::vector<std::string> generate_tid_based_crown_keys(uint64_t subject_id, uint64_t predicate_id, uint64_t object_id);
     std::string generate_vocabulary_key_for_term_id(NonostoreKeys::IndexType vocab_type, uint64_t term_id);
 };

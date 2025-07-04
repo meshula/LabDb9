@@ -27,7 +27,7 @@ std::vector<TriadicQuery::TriadicResult> TriadicQuery::motion_from(const std::st
     }
     
     // Query all properties and relationships where entity is the subject
-    auto properties = store->properties_of(entity);
+    auto properties = store->entities_with_subject(entity);
     return convert_triples(properties, Perspective::Motion);
 }
 
@@ -38,7 +38,7 @@ std::vector<TriadicQuery::TriadicResult> TriadicQuery::motion_through(const std:
     }
     
     // Query all entities that express through this relationship
-    auto entities = store->entities_with_relation(relation);
+    auto entities = store->entities_with_predicate(relation);
     return convert_triples(entities, Perspective::Motion);
 }
 
@@ -49,7 +49,7 @@ std::vector<std::string> TriadicQuery::entity_expressions(const std::string& ent
     }
     
     // Get all unique predicates that this entity uses to express itself
-    auto properties = store->properties_of(entity);
+    auto properties = store->entities_with_subject(entity);
     std::unordered_set<std::string> unique_predicates;
     
     for (const auto& triple : properties) {
@@ -122,7 +122,7 @@ std::vector<TriadicQuery::TriadicResult> TriadicQuery::field_contexts(const std:
     }
     
     // Query all relationships that ground into this object/context
-    auto connections = store->connections_to(object);
+    auto connections = store->entities_with_object(object);
     return convert_triples(connections, Perspective::Field);
 }
 
@@ -290,7 +290,7 @@ std::vector<std::string> TriadicQuery::bridge_entities(double connectivity_thres
     std::vector<std::string> bridges;
     
     for (const auto& subject : subjects) {
-        auto properties = store->properties_of(subject);
+        auto properties = store->entities_with_subject(subject);
         double connectivity = static_cast<double>(properties.size());
         
         if (connectivity >= connectivity_threshold) {
@@ -411,7 +411,7 @@ double TriadicQuery::calculate_connectivity_ratio() {
     
     double total_connections = 0.0;
     for (const auto& subject : subjects) {
-        auto properties = store->properties_of(subject);
+        auto properties = store->entities_with_subject(subject);
         total_connections += properties.size();
     }
     

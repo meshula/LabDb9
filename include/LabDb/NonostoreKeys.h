@@ -6,6 +6,7 @@
 
 namespace LabDb {
 
+
 /// Nine-index key generation for nonostore (hexastore + vocabulary discovery)
 class NonostoreKeys {
 public:
@@ -21,16 +22,19 @@ public:
         PREDICATES = 7,  // Vocabulary: all predicates
         OBJECTS = 8   // Vocabulary: all objects
     };
+    struct Key {
+        std::string key;
+    };
     
     /// Generate all nine keys for a subject-predicate-object triple
-    static std::array<std::string, 9> generate_all_keys(
+    static std::array<Key, 9> generate_all_keys(
         const std::string& subject,
         const std::string& predicate, 
         const std::string& object
     );
     
     /// Generate a specific index key
-    static std::string generate_key(
+    static Key generate_key(
         IndexType index,
         const std::string& subject,
         const std::string& predicate,
@@ -38,7 +42,7 @@ public:
     );
     
     /// Generate vocabulary key for a specific term
-    static std::string generate_vocabulary_key(IndexType vocab_index, const std::string& term);
+    static Key generate_vocabulary_key(IndexType vocab_index, const std::string& term);
     
     /// Generate prefix for queries like "granite-*-*" or "*-isA-*"
     static std::string generate_query_prefix(
@@ -59,7 +63,7 @@ public:
         bool is_vocabulary;
         std::string term; // for vocabulary keys
     };
-    static ParsedKey parse_key(const std::string& key);
+    static ParsedKey parse_key(const Key& key);
     
     /// Get human-readable name for index type
     static std::string index_name(IndexType index);

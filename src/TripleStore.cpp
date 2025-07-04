@@ -84,7 +84,8 @@ TripleStore::TID TripleStore::store_triple(MDB_txn* txn,
     TermID predicate_id = _term_dict.intern(txn, predicate);
     TermID object_id = _term_dict.intern(txn, object);
     
-    return store_triple(txn, subject_id, predicate_id, object_id, source, confidence, flags);
+    TripleData data(subject_id, predicate_id, object_id, source, confidence, flags);
+    return store_triple(txn, data);
 }
 
 TripleStore::TID TripleStore::store_triple(MDB_txn* txn,
