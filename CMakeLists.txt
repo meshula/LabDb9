@@ -68,8 +68,8 @@ target_include_directories(labdb
     PUBLIC 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
-    PRIVATE
-        ${LMDB_INCLUDE_DIRS}
+        $<BUILD_INTERFACE:${LMDB_INCLUDE_DIRS}>
+        $<INSTALL_INTERFACE:include/lmdb>
 )
 
 target_link_libraries(labdb 
