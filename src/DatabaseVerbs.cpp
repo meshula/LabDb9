@@ -1,4 +1,5 @@
 #include "LabDb/DatabaseVerbs.h"
+#include "LabDb/EntityId.h"
 #include "LabDb/LabText.hpp"
 #include <chrono>
 #include <filesystem>
@@ -78,6 +79,38 @@ std::vector<std::string> DatabaseManager::getActiveDbids() const {
 
 std::string DatabaseManager::generateDbid() {
     return "db" + std::to_string(_next_id++);
+}
+
+std::string DatabaseManager::createDatabase(const std::string& path) {
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    try {
+        // Check if file already exists
+        if (std::filesystem::exists(path)) {
+            throw std::runtime_error("Database file already exists: " + path);
+        }
+
+        // Ensure parent directory exists
+        std::filesystem::path db_path(path);
+        std::filesystem::path parent_dir = db_path.parent_path();
+        if (!parent_dir.empty() && !std::filesystem::exists(parent_dir)) {
+            std::filesystem::create_directories(parent_dir);
+        }
+
+        // Create NonoStore instance (which creates/initializes the database)
+        auto store = std::make_shared<NonoStore>(path);
+
+        // Generate unique DBID
+        std::string dbid = generateDbid();
+
+        // Store in registry
+        _databases[dbid] = store;
+
+        return dbid;
+
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Failed to create database: " + std::string(e.what()));
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -164,6 +197,64 @@ Db9Response OpenDatabaseVerb::execute(const lab::Text::Sexpr& sexpr) {
             "", 
             "open_database_failed", 
             e.what(), 
+            metrics
+        };
+    }
+}
+
+//-----------------------------------------------------------------------------
+// CreateDatabaseVerb Implementation
+//-----------------------------------------------------------------------------
+
+Db9Response CreateDatabaseVerb::execute(const lab::Text::Sexpr& sexpr) {
+    auto start_time = std::chrono::steady_clock::now();
+
+    try {
+        std::string path = extractStringParam(sexpr, "path");
+
+        // Create database through manager
+        std::string dbid = DatabaseManager::instance().createDatabase(path);
+
+        // Calculate metrics
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        metrics.items_processed = 1;
+
+        // Build result JSON
+        std::ostringstream result;
+        result << "{\"status\": \"created\", \"dbid\": \"" << dbid << "\", \"path\": \"" << path << "\", \"initialized\": true}";
+
+        return Db9Response{
+            Db9Response::Success,
+            result.str(),
+            "",
+            "",
+            metrics
+        };
+
+    } catch (const std::exception& e) {
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+
+        // Check for specific error types
+        std::string error_code = "create_database_failed";
+        if (std::string(e.what()).find("already exists") != std::string::npos) {
+            error_code = "database_exists";
+        } else if (std::string(e.what()).find("path") != std::string::npos) {
+            error_code = "path_invalid";
+        }
+
+        return Db9Response{
+            Db9Response::Error,
+            "",
+            error_code,
+            e.what(),
             metrics
         };
     }
@@ -320,12 +411,13 @@ Db9Response AddEntityVerb::execute(const lab::Text::Sexpr& sexpr) {
             throw std::runtime_error("Failed to add entity to database");
         }
         
-        // Generate entity ID (EID) - use a simple counter-based approach for now
-        // In a real implementation, this would be based on the actual TermID
-        static uint64_t entityCounter = 1;
-        std::ostringstream eidStream;
-        eidStream << "eid:" << std::hex << entityCounter++;
-        std::string eid = eidStream.str();
+        // Generate EID using proper EntityId mechanism with actual TID from TermDictionary
+        EntityId entityId = EntityId::fromName(value, *store);
+        if (!entityId.isValid()) {
+            throw std::runtime_error("Failed to create EntityId for: " + value);
+        }
+        
+        std::string eid = entityId.eid();
         
         auto end_time = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
@@ -385,41 +477,14 @@ Db9Response GetEntityVerb::execute(const lab::Text::Sexpr& sexpr) {
             };
         }
         
-        // For now, implement a simple mapping strategy:
-        // Since AddEntityVerb stores triples as "entityValue isA entity", 
-        // and generates EIDs like "eid:1", we need to map EIDs back to entity values.
-        // This is a temporary solution - a real implementation would have proper EID management.
-        
-        // Extract the numeric part from the EID (e.g., "eid:1" -> "1")
-        std::string eidNumeric = eid;
-        if (eid.substr(0, 4) == "eid:") {
-            eidNumeric = eid.substr(4);
+        // Use proper EntityId factory with NonoStore integration
+        EntityId entityId = EntityId::fromEid(eid, *store);
+        if (!entityId.isValid() || !entityId.exists()) {
+            throw std::runtime_error("Entity not found for EID: " + eid);
         }
         
-        // For this MVP, we'll use a simple approach:
-        // Get all subjects that have "isA entity" relationship and return the Nth one
-        auto allSubjects = store->all_subjects();
-        std::vector<std::string> entityValues;
-        
-        for (const auto& subject : allSubjects) {
-            if (store->exists(subject, "isA", "entity")) {
-                entityValues.push_back(subject);
-            }
-        }
-        
-        // Convert EID to index (hex to decimal)
-        size_t entityIndex = 0;
-        try {
-            entityIndex = std::stoul(eidNumeric, nullptr, 16);
-            if (entityIndex < 1 || entityIndex > entityValues.size()) {
-                throw std::runtime_error("Entity not found for EID: " + eid);
-            }
-            entityIndex--; // Convert to 0-based index
-        } catch (const std::exception&) {
-            throw std::runtime_error("Invalid EID format: " + eid);
-        }
-        
-        std::string entityValue = entityValues[entityIndex];
+        // Get entity name through proper TID-based lookup
+        std::string entityValue = entityId.name();
         
         auto end_time = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
@@ -728,6 +793,162 @@ Db9Response FindTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
     }
 }
 
+Db9Response GetTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
+    auto start_time = std::chrono::steady_clock::now();
+    
+    try {
+        // Extract required parameters - all three required for exact match
+        std::string subject = extractStringParam(sexpr, "subject");
+        std::string predicate = extractStringParam(sexpr, "predicate");
+        std::string object = extractStringParam(sexpr, "object");
+        std::string dbid = extractStringParam(sexpr, "dbid");
+        
+        // Get database
+        auto& manager = DatabaseManager::instance();
+        auto store = manager.getDatabase(dbid);
+        if (!store) {
+            AutoReflexiveMetrics metrics;
+            return Db9Response{
+                Db9Response::Error,
+                "",
+                "invalid_dbid",
+                "Database ID not found: " + dbid,
+                metrics
+            };
+        }
+        
+        // Check if the exact triple exists
+        bool exists = store->exists(subject, predicate, object);
+        
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        metrics.items_processed = exists ? 1 : 0;
+        
+        if (exists) {
+            // Build result JSON with the requested triple
+            std::ostringstream result;
+            result << "{";
+            result << "\"subject\": \"" << subject << "\", ";
+            result << "\"predicate\": \"" << predicate << "\", ";
+            result << "\"object\": \"" << object << "\"";
+            result << "}";
+            
+            return Db9Response{
+                Db9Response::Success,
+                result.str(),
+                "",
+                "",
+                metrics
+            };
+        } else {
+            return Db9Response{
+                Db9Response::Error,
+                "",
+                "triple_not_found",
+                "Triple not found: " + subject + " " + predicate + " " + object,
+                metrics
+            };
+        }
+        
+    } catch (const std::exception& e) {
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        
+        return Db9Response{
+            Db9Response::Error,
+            "",
+            "get_triple_failed",
+            e.what(),
+            metrics
+        };
+    }
+}
+
+Db9Response RemoveTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
+    auto start_time = std::chrono::steady_clock::now();
+    
+    try {
+        // Extract required parameters - all three required for exact removal
+        std::string subject = extractStringParam(sexpr, "subject");
+        std::string predicate = extractStringParam(sexpr, "predicate");
+        std::string object = extractStringParam(sexpr, "object");
+        std::string dbid = extractStringParam(sexpr, "dbid");
+        
+        // Get database
+        auto& manager = DatabaseManager::instance();
+        auto store = manager.getDatabase(dbid);
+        if (!store) {
+            AutoReflexiveMetrics metrics;
+            return Db9Response{
+                Db9Response::Error,
+                "",
+                "invalid_dbid",
+                "Database ID not found: " + dbid,
+                metrics
+            };
+        }
+        
+        // First check if the triple exists
+        bool exists = store->exists(subject, predicate, object);
+        if (!exists) {
+            AutoReflexiveMetrics metrics;
+            return Db9Response{
+                Db9Response::Error,
+                "",
+                "triple_not_found",
+                "Triple not found for removal: " + subject + " " + predicate + " " + object,
+                metrics
+            };
+        }
+        
+        // Remove the triple from all indices
+        bool success = store->remove_triple(subject, predicate, object);
+        
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        metrics.items_processed = 1;  // We know it exists, so we removed 1
+        
+        // Build result JSON with removal confirmation
+        std::ostringstream result;
+        result << "{\"status\": \"removed\", ";
+        result << "\"subject\": \"" << subject << "\", ";
+        result << "\"predicate\": \"" << predicate << "\", ";
+        result << "\"object\": \"" << object << "\"}";
+        
+        return Db9Response{
+            Db9Response::Success,
+            result.str(),
+            "",
+            "",
+            metrics
+        };
+        
+    } catch (const std::exception& e) {
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        
+        return Db9Response{
+            Db9Response::Error,
+            "",
+            "remove_triple_failed",
+            e.what(),
+            metrics
+        };
+    }
+}
+
 Db9Dispatcher& getGlobalDb9Dispatcher();
 
 } // namespace LabDb
@@ -749,6 +970,10 @@ void initDatabaseVerbRegistration() {
         // Phase 3: Triple Operations Verbs
         dispatcher.registerVerb(std::make_unique<LabDb::AddTripleVerb>());
         dispatcher.registerVerb(std::make_unique<LabDb::FindTripleVerb>());
+        dispatcher.registerVerb(std::make_unique<LabDb::GetTripleVerb>());
+        dispatcher.registerVerb(std::make_unique<LabDb::RemoveTripleVerb>());
+        // Phase 4: Database Creation & Advanced Operations
+        dispatcher.registerVerb(std::make_unique<LabDb::CreateDatabaseVerb>());
         registered = true;
     }
 }

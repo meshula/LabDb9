@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LabDb/Db9Dispatcher.h"
+#include "LabDb/EntityId.h"
 #include "LabDb/NonoStore.h"
 #include <memory>
 #include <unordered_map>
@@ -19,6 +20,9 @@ public:
     
     /// Open database and return unique DBID
     std::string openDatabase(const std::string& path);
+    
+    /// Create new database and return unique DBID
+    std::string createDatabase(const std::string& path);
     
     /// Close database by DBID  
     bool closeDatabase(const std::string& dbid);
@@ -52,6 +56,15 @@ public:
     
 private:
     std::string extractPath(const lab::Text::Sexpr& sexpr);
+};
+
+/// Create Database Verb Implementation
+class CreateDatabaseVerb : public IDb9Verb {
+public:
+    std::string getVerbName() const override { return "create-database"; }
+    std::string getDescription() const override { return "Create new database file and return unique database ID"; }
+    
+    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
 
 /// Database Health Check Verb Implementation  
@@ -127,6 +140,24 @@ class FindTripleVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-triple"; }
     std::string getDescription() const override { return "Find triples matching subject, predicate, object patterns"; }
+    
+    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
+};
+
+/// Get Triple Verb Implementation
+class GetTripleVerb : public IDb9Verb {
+public:
+    std::string getVerbName() const override { return "get-triple"; }
+    std::string getDescription() const override { return "Retrieve specific triple by exact subject, predicate, object match"; }
+    
+    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
+};
+
+/// Remove Triple Verb Implementation
+class RemoveTripleVerb : public IDb9Verb {
+public:
+    std::string getVerbName() const override { return "remove-triple"; }
+    std::string getDescription() const override { return "Remove triple from database by subject, predicate, object"; }
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };

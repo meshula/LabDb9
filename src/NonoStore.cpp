@@ -158,7 +158,7 @@ bool NonoStore::remove_triple(const std::string& subject,
         
         _last_error = {ErrorCode::Success, ""};
         
-            txn.commit();
+        txn.commit();
         return true;
     } catch (const LmdbException& e) {
         return set_error(ErrorCode::TransactionError, "Remove triple failed: " + std::string(e.what()));
@@ -590,6 +590,65 @@ size_t NonoStore::count(const std::string& subject_pattern,
         set_error(ErrorCode::DatabaseError, "TID-based count failed: " + std::string(e.what()));
         return 0;
     }
+}
+
+// SynchronousTransaction implementation
+NonoStore::SynchronousTransaction::SynchronousTransaction(NonoStore& store)
+    : _store(store) {
+}
+
+NonoStore::SynchronousTransaction::~SynchronousTransaction() {
+}
+
+EntityId NonoStore::SynchronousTransaction::intern_eid(const std::string& term) {
+    try {
+        auto txn = LmdbStore::Transaction(_store.getLmdbStore());
+        auto &term_dict = _store.getTermDictionary();
+        auto tid = term_dict.intern(txn.handle(), term);
+        auto eid = EntityId::generateEidString(tid);
+        txn.commit();
+        return EntityId(term, eid, tid, true);
+    } catch (const std::exception&) {
+        return EntityId(term, "", INVALID_TID, false);
+    }
+}
+
+EntityId NonoStore::SynchronousTransaction::resolve_eid(const std::string& eid) {
+    try {
+        auto tid = EntityId::parseEidNumeric(eid);
+        if (tid == INVALID_TID) {
+            return EntityId("", eid, INVALID_TID, false);
+        }
+        
+        auto txn = LmdbStore::Transaction(_store.getLmdbStore());
+        auto &term_dict = _store.getTermDictionary();
+        auto name_opt = term_dict.resolve(txn.handle(), tid);
+        bool exists = name_opt.has_value();
+        std::string name = exists ? name_opt.value() : "";
+        txn.commit();
+        return EntityId(name, eid, tid, exists);
+    } catch (const std::exception&) {
+        return EntityId("", eid, INVALID_TID, false);
+    }
+}
+
+EntityId NonoStore::SynchronousTransaction::resolve_tid(const TID& tid) {
+    try {
+        auto txn = LmdbStore::Transaction(_store.getLmdbStore());
+        auto &term_dict = _store.getTermDictionary();
+        auto name_opt = term_dict.resolve(txn.handle(), tid);
+        auto eid = EntityId::generateEidString(tid);
+        bool exists = name_opt.has_value();
+        std::string name = exists ? name_opt.value() : "";
+        txn.commit();
+        return EntityId(name, eid, tid, exists);
+    } catch (const std::exception&) {
+        return EntityId("", "", tid, false);
+    }
+}
+
+std::unique_ptr<NonoStore::SynchronousTransaction> NonoStore::begin_sync() {
+    return std::make_unique<SynchronousTransaction>(*this);
 }
 
 // BatchTransaction implementation

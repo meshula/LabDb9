@@ -2,6 +2,7 @@
 
 #include "LabDb/LmdbStore.h"
 #include "LabDb/NonostoreKeys.h"
+#include "LabDb/EntityId.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -134,6 +135,29 @@ public:
     
     /// Advanced operations
     
+    /// Synchronous transaction for EntityId operations
+    /// Encapsulates transaction management without leaking MDB_txn* details
+    class SynchronousTransaction {
+    public:
+        SynchronousTransaction(NonoStore& store);
+        ~SynchronousTransaction();
+        
+        /// Intern a term and return EntityId (get-or-create)
+        EntityId intern_eid(const std::string& term);
+        
+        /// Resolve EID to EntityId (lookup existing)
+        EntityId resolve_eid(const std::string& eid);
+        
+        /// Resolve TID to EntityId (lookup existing)
+        EntityId resolve_tid(const TID& tid);
+        
+    private:
+        NonoStore& _store;
+    };
+    
+    /// Create a synchronous transaction for EntityId operations
+    std::unique_ptr<SynchronousTransaction> begin_sync();
+    
     /// Batch operations for efficiency
     class BatchTransaction {
     public:
@@ -184,6 +208,11 @@ public:
     
     /// Get last error (for debugging)
     Result get_last_error() const { return _last_error; }
+    
+    /// Access to TermDictionary for EntityId integration
+    TermDictionary& getTermDictionary() { return *_term_dict; }
+    
+    LmdbStore& getLmdbStore() { return *_store; }
     
 private:
     std::unique_ptr<LmdbStore> _store;

@@ -36,6 +36,7 @@ struct TestState {
     LabDb::Db9Dispatcher* dispatcher;
     int tests_run{0};
     int tests_passed{0};
+    int verbosity{1}; // 0=minimal, 1=normal, 2=verbose
     
     TestState() : test_db_path("/tmp/labdb_db9_test"), dispatcher(nullptr) {}
 };
@@ -70,6 +71,17 @@ void validateResponse(const LabDb::Db9Response& response,
     } else {
         AXIOM(response.status != LabDb::Db9Response::Success,
               context + " - Expected failure but got success");
+    }
+    
+    // Verbosity-controlled output
+    if (g_test.verbosity >= 2) {
+        std::cout << "    Response result: " << response.result << "\n";
+    } else if (g_test.verbosity >= 1 && !response.result.empty()) {
+        // Show first 200 chars for normal verbosity
+        std::string preview = response.result.length() > 200 ? 
+                             response.result.substr(0, 200) + "..." : 
+                             response.result;
+        std::cout << "    " << context << " result: " << preview << "\n";
     }
 }
 
@@ -143,7 +155,7 @@ void test_dispatcher_basic_functionality() {
     TEST_SUCCESS("Dispatcher Basic Functionality");
 }
 
-void test_database_lifecycle() {
+std::pair<std::string, std::string> test_database_lifecycle() {
     TEST_START("Database Lifecycle Operations");
     
     // Test 1: Create test database file using NonoStore directly
@@ -187,23 +199,230 @@ void test_database_lifecycle() {
     response = g_test.dispatcher->executeCommand(invalidCmd);
     validateResponse(response, LabDb::Db9Response::Error, "Invalid path should fail");
     
+    // Test 5: Test create-database verb with equivalent results
+    TEST_SECTION("Testing create-database verb");
+    std::string created_db_path = "/tmp/labdb_created_test";
+    
+    // Remove test file if it exists
+    std::filesystem::remove_all(created_db_path);
+    
+    // Create database using create-database verb
+    std::string createCmd = "(create-database :path \"" + created_db_path + "\")";
+    auto createResponse = g_test.dispatcher->executeCommand(createCmd);
+    validateResponse(createResponse, LabDb::Db9Response::Success, "Database creation should succeed");
+    
+    std::string created_dbid = extractJsonField(createResponse.result, "dbid");
+    AXIOM(!created_dbid.empty(), "Should return a database ID for created database");
+    std::cout << "    Created database with DBID: " << created_dbid << "\n";
+    
+    // Verify created database file exists
+    AXIOM(std::filesystem::exists(created_db_path), "Created database file should exist");
+    
+    // Add test triple to created database to make it equivalent
+    std::string addTripleCmd = "(add-triple :dbid " + created_dbid + " :subject \"test\" :predicate \"isA\" :object \"placeholder\")";
+    auto tripleResponse = g_test.dispatcher->executeCommand(addTripleCmd);
+    validateResponse(tripleResponse, LabDb::Db9Response::Success, "Adding test triple to created database");
+
     TEST_SUCCESS("Database Lifecycle Operations");
+    
+    // Return both dbids for comparative testing
+    return std::make_pair(dbid, created_dbid);
 }
 
-void test_entity_operations_success_cases() {
-    TEST_START("Entity Operations - Success Cases");
+void test_database_isolation() {
+    TEST_START("Database Isolation Verification");
     
-    // First, open a database to get a valid DBID
-    std::string openCmd = "(open-database :path \"" + g_test.test_db_path + "\")";
-    auto openResponse = g_test.dispatcher->executeCommand(openCmd);
-    validateResponse(openResponse, LabDb::Db9Response::Success, "Opening database for entity tests");
+    // Create three separate databases with distinct content
+    std::vector<std::string> db_paths = {
+        "/tmp/labdb_isolation_test_1",
+        "/tmp/labdb_isolation_test_2", 
+        "/tmp/labdb_isolation_test_3"
+    };
     
-    std::string dbid = extractJsonField(openResponse.result, "dbid");
-    AXIOM(!dbid.empty(), "Should get valid database ID");
-    std::cout << "    Using database ID: " << dbid << "\n";
+    // Three entities per database for comprehensive testing
+    std::vector<std::vector<std::string>> test_entities = {
+        {"test_1a", "test_1b", "test_1c"},      // db1
+        {"granite_2a", "granite_2b", "granite_2c"},   // db2  
+        {"grass_3a", "grass_3b", "grass_3c"}    // db3
+    };
+    
+    std::vector<std::string> dbids;
+    std::vector<std::vector<std::string>> all_eids(3); // Store EIDs for each database
+    
+    // Clean up any existing test databases
+    for (const auto& path : db_paths) {
+        std::filesystem::remove_all(path);
+    }
+    
+    TEST_SECTION("Creating three isolated databases");
+    
+    // Create databases first
+    for (size_t i = 0; i < db_paths.size(); ++i) {
+        std::string createCmd = "(create-database :path \"" + db_paths[i] + "\")";
+        auto createResponse = g_test.dispatcher->executeCommand(createCmd);
+        validateResponse(createResponse, LabDb::Db9Response::Success, 
+                        "Database " + std::to_string(i+1) + " creation should succeed");
+        
+        std::string dbid = extractJsonField(createResponse.result, "dbid");
+        AXIOM(!dbid.empty(), "Should return database ID for database " + std::to_string(i+1));
+        dbids.push_back(dbid);
+        
+        std::cout << "    Created database " << (i+1) << " with DBID: " << dbid 
+                  << " at path: " << db_paths[i] << "\n";
+    }
+    
+    TEST_SECTION("Adding entities in interleaved pattern (1,2,3,1,2,3,1,2,3)");
+    
+    // Add entities in interleaved pattern: db1-entity1, db2-entity1, db3-entity1, db1-entity2, etc.
+    for (size_t entity_idx = 0; entity_idx < 3; ++entity_idx) {
+        for (size_t db_idx = 0; db_idx < dbids.size(); ++db_idx) {
+            std::string entity_name = test_entities[db_idx][entity_idx];
+            std::string addEntityCmd = "(add-entity :dbid " + dbids[db_idx] + " :value \"" + entity_name + "\")";
+            auto addResponse = g_test.dispatcher->executeCommand(addEntityCmd);
+            validateResponse(addResponse, LabDb::Db9Response::Success, 
+                            "Adding entity '" + entity_name + "' to database " + std::to_string(db_idx+1));
+            
+            std::string eid = extractJsonField(addResponse.result, "eid");
+            all_eids[db_idx].push_back(eid);
+            std::cout << "    Added '" << entity_name << "' with EID: " << eid 
+                      << " to database " << (db_idx+1) << "\n";
+        }
+    }
+    
+    TEST_SECTION("Verifying comprehensive database isolation - all entity retrieval");
+    
+    // Verify each database can retrieve ALL its entities correctly
+    for (size_t db_idx = 0; db_idx < dbids.size(); ++db_idx) {
+        std::cout << "    Testing database " << (db_idx+1) << " (DBID: " << dbids[db_idx] << "):\n";
+        
+        for (size_t entity_idx = 0; entity_idx < 3; ++entity_idx) {
+            std::string expected_entity = test_entities[db_idx][entity_idx];
+            std::string eid = all_eids[db_idx][entity_idx];
+            
+            std::string getCmd = "(get-entity :dbid " + dbids[db_idx] + " :eid \"" + eid + "\")";
+            auto getResponse = g_test.dispatcher->executeCommand(getCmd);
+            validateResponse(getResponse, LabDb::Db9Response::Success, 
+                            "Getting entity '" + expected_entity + "' from database " + std::to_string(db_idx+1));
+            
+            std::string retrieved = extractJsonField(getResponse.result, "value");
+            std::cout << "      EID " << eid << " → '" << retrieved << "' (expected: '" << expected_entity << "')\n";
+            
+            AXIOM(retrieved == expected_entity, 
+                  "Database " + std::to_string(db_idx+1) + " EID " + eid + " should return '" + expected_entity + 
+                  "' but returned '" + retrieved + "'");
+        }
+    }
+    
+    TEST_SECTION("Verifying cross-database EID isolation");
+    
+    // Verify databases don't return each other's entities when using cross-database EIDs
+    for (size_t db_idx = 0; db_idx < dbids.size(); ++db_idx) {
+        for (size_t other_db_idx = 0; other_db_idx < dbids.size(); ++other_db_idx) {
+            if (db_idx == other_db_idx) continue; // Skip same database
+            
+            // Try to use other database's EIDs in this database
+            for (size_t entity_idx = 0; entity_idx < 3; ++entity_idx) {
+                std::string foreign_eid = all_eids[other_db_idx][entity_idx];
+                std::string foreign_entity = test_entities[other_db_idx][entity_idx];
+                
+                std::string getCmd = "(get-entity :dbid " + dbids[db_idx] + " :eid \"" + foreign_eid + "\")";
+                auto getResponse = g_test.dispatcher->executeCommand(getCmd);
+                
+                // Should fail - foreign EID should not resolve in this database
+                validateResponse(getResponse, LabDb::Db9Response::Error, 
+                                "Foreign EID " + foreign_eid + " should not resolve in database " + std::to_string(db_idx+1));
+                
+                std::cout << "      ✓ Database " << (db_idx+1) << " correctly rejects foreign EID " 
+                          << foreign_eid << " (from db" << (other_db_idx+1) << ")\n";
+            }
+        }
+    }
+    
+    TEST_SECTION("Verifying entity name isolation");
+    
+    // Verify databases don't return each other's entities by name search
+    for (size_t db_idx = 0; db_idx < dbids.size(); ++db_idx) {
+        for (size_t other_db_idx = 0; other_db_idx < dbids.size(); ++other_db_idx) {
+            if (db_idx == other_db_idx) continue; // Skip same database
+            
+            for (size_t entity_idx = 0; entity_idx < 3; ++entity_idx) {
+                std::string foreign_entity = test_entities[other_db_idx][entity_idx];
+                
+                std::string findCmd = "(find-entity :dbid " + dbids[db_idx] + 
+                                     " :pattern \"" + foreign_entity + "\")";
+                auto findResponse = g_test.dispatcher->executeCommand(findCmd);
+                validateResponse(findResponse, LabDb::Db9Response::Success, 
+                                "Find operation should succeed even if no results");
+                
+                // Should return empty array since entity doesn't exist in this database
+                std::string results = findResponse.result;
+                AXIOM(results == "[]", 
+                      "Database " + std::to_string(db_idx+1) + " should not contain entity '" + 
+                      foreign_entity + "' but find returned: " + results);
+            }
+        }
+    }
+    
+    TEST_SECTION("Testing database lookup verification");
+    
+    // Test invalid database ID
+    std::string invalidCmd = "(get-entity :dbid invalid_db_999 :eid \"eid:1\")";
+    auto invalidResponse = g_test.dispatcher->executeCommand(invalidCmd);
+    validateResponse(invalidResponse, LabDb::Db9Response::Error, "Invalid DBID should fail");
+    std::cout << "    ✓ Invalid DBID correctly rejected\n";
+    
+    TEST_SECTION("Cleanup - closing databases");
+    
+    // Close all test databases
+    for (size_t i = 0; i < dbids.size(); ++i) {
+        std::string closeCmd = "(close-database :dbid " + dbids[i] + ")";
+        auto closeResponse = g_test.dispatcher->executeCommand(closeCmd);
+        validateResponse(closeResponse, LabDb::Db9Response::Success, 
+                        "Closing database " + std::to_string(i+1));
+        std::cout << "    Closed database " << (i+1) << " (DBID: " << dbids[i] << ")\n";
+    }
+    
+    // Clean up test files
+    for (const auto& path : db_paths) {
+        std::filesystem::remove_all(path);
+    }
+    
+    TEST_SUCCESS("Database Isolation Verification");
+}
+
+
+// Helper function to create fresh database for testing
+std::string create_fresh_database(const std::string& name_suffix) {
+    std::string db_path = "/tmp/labdb_fresh_" + name_suffix;
+    
+    // Clean up any existing database
+    std::filesystem::remove_all(db_path);
+    
+    // Create fresh database
+    std::string createCmd = "(create-database :path \"" + db_path + "\")";
+    auto response = g_test.dispatcher->executeCommand(createCmd);
+    
+    if (response.status != LabDb::Db9Response::Success) {
+        throw std::runtime_error("Failed to create fresh database: " + response.error_message);
+    }
+    
+    std::string dbid = extractJsonField(response.result, "dbid");
+    if (dbid.empty()) {
+        throw std::runtime_error("Failed to get DBID from fresh database creation");
+    }
+    
+    return dbid;
+}
+
+void test_entity_operations_success_cases(const std::string& test_name) {
+    TEST_START("Entity Operations - Success Cases (" + test_name + ")");
+    
+    // Create fresh database for this test
+    std::string dbid = create_fresh_database("entity_success_" + test_name);
+    std::cout << "    Using fresh database ID: " << dbid << "\n";
     
     // Test 1: Add entity - basic case
-    TEST_SECTION("Adding basic entity");
+    TEST_SECTION("Adding basic entity: granite");
     std::string addCmd = "(add-entity :dbid " + dbid + " :value \"granite\")";
     auto response = g_test.dispatcher->executeCommand(addCmd);
     
@@ -212,13 +431,24 @@ void test_entity_operations_success_cases() {
         std::cout << "    Error: " << response.error_message << "\n";
     }
     validateResponse(response, LabDb::Db9Response::Success, "Adding entity 'granite'");
-    
+
     // Extract the EID from response
     std::string graniteEid = extractJsonField(response.result, "eid");
     AXIOM(!graniteEid.empty(), "Should return an EID for created entity");
     std::cout << "    Created entity with EID: " << graniteEid << "\n";
-    
-    // Test 2: Add more entities
+
+    // Test 2: Get entity by EID
+    TEST_SECTION("Retrieving entities by EID");    
+    std::string getCmd = "(get-entity :dbid " + dbid + " :eid \"" + graniteEid + "\")";
+    response = g_test.dispatcher->executeCommand(getCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Getting entity by EID");
+
+    std::string retrievedValue = extractJsonField(response.result, "value");
+    std::cout << "    Retrieved entity value: " << retrievedValue << "\n";
+    AXIOM(retrievedValue == "granite", "Retrieved value should match original");
+    std::cout << "    Successfully retrieved: " << retrievedValue << "\n";
+
+    // Test 3: Add more entities
     TEST_SECTION("Adding multiple entities");
     std::vector<std::string> entities = {"quartz", "feldspar", "mica", "rock_crystal"};
     std::vector<std::string> eids;
@@ -232,17 +462,7 @@ void test_entity_operations_success_cases() {
         AXIOM(!eid.empty(), "Should return EID for " + entity);
         eids.push_back(eid);
     }
-    
-    // Test 3: Get entity by EID
-    TEST_SECTION("Retrieving entities by EID");
-    std::string getCmd = "(get-entity :dbid " + dbid + " :eid \"" + graniteEid + "\")";
-    response = g_test.dispatcher->executeCommand(getCmd);
-    validateResponse(response, LabDb::Db9Response::Success, "Getting entity by EID");
-    
-    std::string retrievedValue = extractJsonField(response.result, "value");
-    AXIOM(retrievedValue == "granite", "Retrieved value should match original");
-    std::cout << "    Successfully retrieved: " << retrievedValue << "\n";
-    
+        
     // Test 4: Find entities with wildcard patterns
     TEST_SECTION("Finding entities with patterns");
     
@@ -258,11 +478,22 @@ void test_entity_operations_success_cases() {
     validateResponse(response, LabDb::Db9Response::Success, "Finding entities with prefix");
     std::cout << "    Find prefix result: " << response.result << "\n";
     
-    TEST_SUCCESS("Entity Operations - Success Cases");
+    // Close the test database
+    std::string closeCmd = "(close-database :dbid " + dbid + ")";
+    auto closeResponse = g_test.dispatcher->executeCommand(closeCmd);
+    if (closeResponse.status == LabDb::Db9Response::Success) {
+        std::cout << "    Closed test database: " << dbid << "\n";
+    }
+    
+    TEST_SUCCESS("Entity Operations - Success Cases (" + test_name + ")");
 }
 
-void test_entity_operations_failure_cases() {
-    TEST_START("Entity Operations - Failure Cases");
+void test_entity_operations_failure_cases(const std::string& test_name) {
+    TEST_START("Entity Operations - Failure Cases (" + test_name + ")");
+    
+    // Create fresh database for this test
+    std::string dbid = create_fresh_database("entity_failure_" + test_name);
+    std::cout << "    Using fresh database ID: " << dbid << "\n";
     
     // Test 1: Operations with invalid database ID
     TEST_SECTION("Testing invalid database ID");
@@ -273,18 +504,13 @@ void test_entity_operations_failure_cases() {
     
     // Test 2: Get entity with non-existent EID using valid DBID
     TEST_SECTION("Testing non-existent EID");
-    // First get a valid DBID
-    std::string openCmd = "(open-database :path \"" + g_test.test_db_path + "\")";
-    auto openResponse = g_test.dispatcher->executeCommand(openCmd);
-    std::string validDbid = extractJsonField(openResponse.result, "dbid");
-    
-    std::string getCmd = "(get-entity :dbid " + validDbid + " :eid \"nonexistent_eid_12345\")";
+    std::string getCmd = "(get-entity :dbid " + dbid + " :eid \"nonexistent_eid_12345\")";
     response = g_test.dispatcher->executeCommand(getCmd);
     validateResponse(response, LabDb::Db9Response::Error, "Non-existent EID should fail");
     
     // Test 3: Add entity without required parameters
     TEST_SECTION("Testing missing parameters");
-    std::string missingValueCmd = "(add-entity :dbid " + validDbid + ")";
+    std::string missingValueCmd = "(add-entity :dbid " + dbid + ")";
     response = g_test.dispatcher->executeCommand(missingValueCmd);
     validateResponse(response, LabDb::Db9Response::Error, "Missing value parameter should fail");
     
@@ -294,11 +520,18 @@ void test_entity_operations_failure_cases() {
     
     // Test 4: Find with invalid pattern
     TEST_SECTION("Testing invalid find patterns");
-    std::string invalidPatternCmd = "(find-entity :dbid " + validDbid + " :pattern \"\")";
+    std::string invalidPatternCmd = "(find-entity :dbid " + dbid + " :pattern \"\")";
     response = g_test.dispatcher->executeCommand(invalidPatternCmd);
     validateResponse(response, LabDb::Db9Response::Error, "Empty pattern should fail");
     
-    TEST_SUCCESS("Entity Operations - Failure Cases");
+    // Close the test database
+    std::string closeCmd = "(close-database :dbid " + dbid + ")";
+    auto closeResponse = g_test.dispatcher->executeCommand(closeCmd);
+    if (closeResponse.status == LabDb::Db9Response::Success) {
+        std::cout << "    Closed test database: " << dbid << "\n";
+    }
+    
+    TEST_SUCCESS("Entity Operations - Failure Cases (" + test_name + ")");
 }
 
 void test_malformed_commands() {
@@ -348,15 +581,12 @@ void test_multiple_commands() {
     TEST_SUCCESS("Multiple Command Execution");
 }
 
-void test_triple_operations() {
-    TEST_START("Triple Operations - Phase 3");
+void test_triple_operations(const std::string& test_name) {
+    TEST_START("Triple Operations - Phase 3 (" + test_name + ")");
     
-    // Get a valid DBID first
-    std::string openCmd = "(open-database :path \"" + g_test.test_db_path + "\")";
-    auto openResponse = g_test.dispatcher->executeCommand(openCmd);
-    std::string dbid = extractJsonField(openResponse.result, "dbid");
-    AXIOM(!dbid.empty(), "Should get valid database ID for triple tests");
-    std::cout << "    Using database ID: " << dbid << "\n";
+    // Create fresh database for this test
+    std::string dbid = create_fresh_database("triple_ops_" + test_name);
+    std::cout << "    Using fresh database ID: " << dbid << "\n";
     
     // Test 1: Add basic triple
     TEST_SECTION("Adding basic triple");
@@ -423,7 +653,44 @@ void test_triple_operations() {
     validateResponse(response, LabDb::Db9Response::Success, "Finding specific triple 'granite contains quartz'");
     std::cout << "    Find specific triple: " << response.result << "\n";
     
-    // Test 4: Error cases
+    // Test 4: Get specific triple
+    TEST_SECTION("Getting specific triples");
+    
+    // Get existing triple
+    std::string getTripleCmd = "(get-triple :dbid " + dbid + " :subject \"granite\" :predicate \"contains\" :object \"quartz\")";
+    response = g_test.dispatcher->executeCommand(getTripleCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Getting existing triple 'granite contains quartz'");
+    std::cout << "    Get existing triple: " << response.result << "\n";
+    
+    // Try to get non-existent triple
+    std::string getNonExistentCmd = "(get-triple :dbid " + dbid + " :subject \"granite\" :predicate \"contains\" :object \"diamond\")";
+    response = g_test.dispatcher->executeCommand(getNonExistentCmd);
+    validateResponse(response, LabDb::Db9Response::Error, "Getting non-existent triple should fail");
+    
+    // Test 5: Remove triple
+    TEST_SECTION("Removing triples");
+    
+    // First verify the triple exists
+    std::string verifyExistsCmd = "(find-triple :dbid " + dbid + " :subject \"granite\" :predicate \"contains\" :object \"mica\")";
+    response = g_test.dispatcher->executeCommand(verifyExistsCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Verify mica triple exists before removal");
+    
+    // Remove the triple
+    std::string removeTripleCmd = "(remove-triple :dbid " + dbid + " :subject \"granite\" :predicate \"contains\" :object \"mica\")";
+    response = g_test.dispatcher->executeCommand(removeTripleCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Removing triple 'granite contains mica'");
+    std::cout << "    Remove triple result: " << response.result << "\n";
+    
+    // Verify the triple no longer exists
+    response = g_test.dispatcher->executeCommand(verifyExistsCmd);
+    AXIOM(response.result == "[]", "Triple should no longer exist after removal");
+    
+    // Try to remove non-existent triple
+    std::string removeNonExistentCmd = "(remove-triple :dbid " + dbid + " :subject \"granite\" :predicate \"contains\" :object \"diamond\")";
+    response = g_test.dispatcher->executeCommand(removeNonExistentCmd);
+    validateResponse(response, LabDb::Db9Response::Error, "Removing non-existent triple should fail");
+    
+    // Test 6: Error cases
     TEST_SECTION("Testing triple operation error cases");
     
     // Missing parameters
@@ -436,7 +703,14 @@ void test_triple_operations() {
     response = g_test.dispatcher->executeCommand(invalidDbCmd);
     validateResponse(response, LabDb::Db9Response::Error, "Invalid database ID should fail");
     
-    TEST_SUCCESS("Triple Operations - Phase 3");
+    // Close the test database
+    std::string closeCmd = "(close-database :dbid " + dbid + ")";
+    auto closeResponse = g_test.dispatcher->executeCommand(closeCmd);
+    if (closeResponse.status == LabDb::Db9Response::Success) {
+        std::cout << "    Closed test database: " << dbid << "\n";
+    }
+    
+    TEST_SUCCESS("Triple Operations - Phase 3 (" + test_name + ")");
 }
 
 void test_performance_metrics() {
@@ -476,12 +750,26 @@ int main() {
         
         // Core functionality tests
         test_dispatcher_basic_functionality();
-        test_database_lifecycle();
-        test_entity_operations_success_cases();
-        test_entity_operations_failure_cases();
+
+        test_database_isolation();
+
+        auto dbids = test_database_lifecycle();
+
+        // Test entity operations with fresh databases for clean isolation
+        g_test.verbosity = 1; // Normal verbosity for entity tests
+        test_entity_operations_success_cases("fresh_1");
+        test_entity_operations_success_cases("fresh_2");
+        test_entity_operations_failure_cases("fresh_1");
+        test_entity_operations_failure_cases("fresh_2");
+        
         test_malformed_commands();
         test_multiple_commands();
-        test_triple_operations();
+        
+        // Test triple operations with fresh databases for clean isolation
+        g_test.verbosity = 1; // Normal verbosity for triple tests
+        test_triple_operations("fresh_1");
+        test_triple_operations("fresh_2");
+        
         test_performance_metrics();
         
         // Summary
@@ -489,14 +777,15 @@ int main() {
         std::cout << "=====================================\n";
         std::cout << "✅ Test environment setup\n";
         std::cout << "✅ Dispatcher basic functionality\n";
-        std::cout << "✅ Database lifecycle operations\n";
-        std::cout << "✅ Entity operations (success cases)\n";
-        std::cout << "✅ Entity operations (failure cases)\n";
+        std::cout << "✅ Database isolation verification\n";
+        std::cout << "✅ Database lifecycle operations (including create-database)\n";
+        std::cout << "✅ Entity operations (success cases) - Fresh isolated databases\n";
+        std::cout << "✅ Entity operations (failure cases) - Fresh isolated databases\n";
         std::cout << "✅ Malformed command handling\n";
         std::cout << "✅ Multiple command execution\n";
-        std::cout << "✅ Triple operations (Phase 3)\n";
+        std::cout << "✅ Triple operations (Phase 3) - Fresh isolated databases\n";
         std::cout << "✅ Performance metrics validation\n";
-        std::cout << "\n🎉 Phase 3 Triple Operations Complete!\n";
+        std::cout << "\n🎉 Phase 4.1 + Clean Database Isolation Testing Complete!\n";
         
         return 0;
         
