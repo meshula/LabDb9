@@ -46,6 +46,15 @@ except ImportError:
     from tools.query_tools import QueryTools
     from tools.add_triple_tool import AddTripleTool
 
+# Import db9 MCP tools
+try:
+    from labdb.db9_mcp import handle_mcp_tool_call as db9_handle_mcp_tool_call
+    DB9_MCP_AVAILABLE = True
+    print("✅ db9 MCP tools available", file=sys.stderr)
+except ImportError as e:
+    DB9_MCP_AVAILABLE = False
+    print(f"❌ db9 MCP tools not available: {e}", file=sys.stderr)
+
 
 class DB9Server:
     """
@@ -516,6 +525,100 @@ class DB9Server:
                 }
                 import json
                 return json.dumps(error_result, indent=2)
+        
+        # db9 MCP Tools Integration
+        if DB9_MCP_AVAILABLE:
+            @self.app.tool
+            async def db9_readme() -> str:
+                """
+                Returns complete specification and usage guide for the db9 triadic database system.
+                
+                This tool provides the full S-expression interface documentation, available verbs,
+                example commands, and usage patterns for the db9 triadic consciousness database.
+                
+                Returns:
+                    Complete db9 specification as formatted text
+                    
+                Example Usage:
+                    First call db9_readme to understand the interface, then use db9 tool with S-expressions.
+                """
+                try:
+                    result = db9_handle_mcp_tool_call("db9-readme", {})
+                    
+                    # Return the result content directly for better readability
+                    if result.get("status") == "success":
+                        return result.get("result", "")
+                    else:
+                        error_msg = result.get("error_message", "Unknown error")
+                        return f"Error: {error_msg}"
+                        
+                except Exception as e:
+                    self.logger.error(f"db9_readme tool error: {e}")
+                    return f"Error: Failed to get db9 specification: {str(e)}"
+            
+            @self.app.tool
+            async def db9(commands: List[str]) -> str:
+                """
+                High-performance triadic consciousness database operations via S-expressions.
+                
+                Execute S-expression commands against the db9 triadic database system.
+                Invoke db9_readme first to understand the interface and available verbs.
+                
+                Args:
+                    commands: List of S-expression commands to execute
+                    
+                Returns:
+                    JSON response from db9 system with results and metadata
+                    
+                Examples:
+                    - db9(["(query ?s ?p ?o)"])  # Query all triples
+                    - db9(["(add granite contains quartz)"])  # Add a triple
+                    - db9(["(motion-from granite)"])  # Motion perspective query
+                    - db9(["(stats)"])  # Get database statistics
+                    
+                Note: 
+                    Use db9_readme to learn the complete S-expression interface before using this tool.
+                """
+                try:
+                    if not commands:
+                        return json.dumps({
+                            "status": "error",
+                            "error_message": "No commands provided. Use db9_readme to learn the interface."
+                        }, indent=2)
+                    
+                    result = db9_handle_mcp_tool_call("db9", {"commands": commands})
+                    
+                    # Return formatted JSON for structured results
+                    import json
+                    return json.dumps(result, indent=2)
+                        
+                except Exception as e:
+                    self.logger.error(f"db9 tool error: {e}")
+                    error_result = {
+                        "status": "error",
+                        "error_message": f"db9 execution failed: {str(e)}"
+                    }
+                    import json
+                    return json.dumps(error_result, indent=2)
+        else:
+            # Provide placeholder tools when db9 MCP is not available
+            @self.app.tool
+            async def db9_readme() -> str:
+                """
+                db9 specification (placeholder - db9 MCP not available)
+                """
+                return "Error: db9 MCP tools not available. Please build LabDb with db9 support."
+            
+            @self.app.tool
+            async def db9(commands: List[str]) -> str:
+                """
+                db9 operations (placeholder - db9 MCP not available)
+                """
+                import json
+                return json.dumps({
+                    "status": "error",
+                    "error_message": "db9 MCP tools not available. Please build LabDb with db9 support."
+                }, indent=2)
     
     async def _execute_triadic_query(self, query_hints) -> Dict[str, Any]:
         """Execute triadic query based on parsed hints"""
