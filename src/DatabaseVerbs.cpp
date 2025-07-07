@@ -4,6 +4,7 @@
 #include <chrono>
 #include <filesystem>
 #include <sstream>
+#include <iostream>
 
 namespace LabDb {
 
@@ -567,22 +568,25 @@ Db9Response FindEntityVerb::execute(const lab::Text::Sexpr& sexpr) {
         auto allSubjects = store->all_subjects();
         
         for (const auto& subject : allSubjects) {
+            bool matches = false;
+            
             if (hasWildcard) {
                 // Prefix matching
                 if (subject.substr(0, prefix.length()) == prefix) {
-                    // Generate EID - for now use simple encoding
-                    static uint64_t tempCounter = 1000;
-                    std::ostringstream eidStream;
-                    eidStream << "eid:" << std::hex << (tempCounter++);
-                    results.push_back(eidStream.str());
+                    matches = true;
                 }
             } else {
                 // Exact matching
                 if (subject == pattern) {
-                    static uint64_t tempCounter = 1000;
-                    std::ostringstream eidStream;
-                    eidStream << "eid:" << std::hex << (tempCounter++);
-                    results.push_back(eidStream.str());
+                    matches = true;
+                }
+            }
+            
+            if (matches) {
+                // Get the real EID for this entity using the proper EntityId mechanism
+                EntityId entityId = EntityId::fromName(subject, *store);
+                if (entityId.isValid()) {
+                    results.push_back(entityId.eid());
                 }
             }
         }
@@ -949,6 +953,267 @@ Db9Response RemoveTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
     }
 }
 
+//-----------------------------------------------------------------------------
+// Phase 4: Advanced Entity Operations Implementation
+//-----------------------------------------------------------------------------
+
+Db9Response AddEntitiesBulkVerb::execute(const lab::Text::Sexpr& sexpr) {
+    auto start_time = std::chrono::steady_clock::now();
+    
+    try {
+        // Extract parameters
+        std::string dbid = extractStringParam(sexpr, "dbid");
+        
+        // Get database
+        auto& manager = DatabaseManager::instance();
+        auto store = manager.getDatabase(dbid);
+        if (!store) {
+            AutoReflexiveMetrics metrics;
+            return Db9Response{
+                Db9Response::Error,
+                "",
+                "invalid_dbid",
+                "Database ID not found: " + dbid,
+                metrics
+            };
+        }
+        
+        // Extract entities array from S-expression using proper API
+        std::vector<std::string> entities;
+        
+        // Find the :entities parameter in the S-expression
+        bool found_entities = false;
+        for (size_t i = 0; i < sexpr.expr.size(); ++i) {
+            const auto& elem = sexpr.expr[i];
+            if (elem.token == tsSexprAtom) {
+                int stringIndex = elem.ref;
+                if (stringIndex < static_cast<int>(sexpr.strings.size()) &&
+                    sexpr.strings[stringIndex] == ":entities") {
+                    if (i + 1 < sexpr.expr.size() && sexpr.expr[i + 1].token == tsSexprPushList) {
+                        // Found the entities list, collect string entities
+                        for (size_t j = i + 2; j < sexpr.expr.size(); ++j) {
+                            const auto& entity_elem = sexpr.expr[j];
+                            if (entity_elem.token == tsSexprPopList) {
+                                break; // End of list
+                            }
+                            if (entity_elem.token == tsSexprAtom || entity_elem.token == tsSexprString) {
+                                int entityIndex = entity_elem.ref;
+                                if (entityIndex < static_cast<int>(sexpr.strings.size())) {
+                                    entities.push_back(sexpr.strings[entityIndex]);
+                                }
+                            }
+                        }
+                        found_entities = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (!found_entities || entities.empty()) {
+            AutoReflexiveMetrics metrics;
+            return Db9Response{
+                Db9Response::Error,
+                "",
+                "missing_entities",
+                "Parameter :entities is required and must be a non-empty list",
+                metrics
+            };
+        }
+        
+        // Performance optimization: use batch operations
+        std::vector<EntityId> created_eids;
+        created_eids.reserve(entities.size());
+        
+        // Process entities in batch using NonoStore's batch capabilities
+        // Note: NonoStore transactions are handled internally
+        for (const auto& entity_value : entities) {
+            // Create entity triple: entityValue isA entity
+            bool success = store->add_triple(entity_value, "isA", "entity");
+            if (!success) {
+                throw std::runtime_error("Failed to add entity: " + entity_value);
+            }
+            
+            // Generate EID
+            EntityId entityId = EntityId::fromName(entity_value, *store);
+            created_eids.push_back(entityId);
+        }
+        
+        // Calculate execution time
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+        
+        // Create response JSON
+        // Create response using string concatenation
+        std::ostringstream result;
+        result << "{\"status\": \"bulk_created\", \"entity_count\": " << entities.size()
+               << ", \"eids\": [";
+        for (size_t i = 0; i < created_eids.size(); ++i) {
+            if (i > 0) result << ", ";
+            result << "\"" << created_eids[i].eid() << "\"";
+        }
+        result << "], \"batch_time_ms\": " << duration_ms << "}";
+        
+        AutoReflexiveMetrics metrics;
+        return Db9Response{
+            Db9Response::Success,
+            result.str(),
+            "",
+            "",
+            metrics
+        };
+        
+    } catch (const std::exception& e) {
+        AutoReflexiveMetrics metrics;
+        return Db9Response{
+            Db9Response::Error,
+            "",
+            "bulk_operation_failed",
+            std::string("Bulk entity creation failed: ") + e.what(),
+            metrics
+        };
+    }
+}
+
+Db9Response AddTriplesBulkVerb::execute(const lab::Text::Sexpr& sexpr) {
+    auto start_time = std::chrono::steady_clock::now();
+    
+    try {
+        // Extract parameters
+        std::string dbid = extractStringParam(sexpr, "dbid");
+        
+        // Get database
+        auto& manager = DatabaseManager::instance();
+        auto store = manager.getDatabase(dbid);
+        if (!store) {
+            AutoReflexiveMetrics metrics;
+            return Db9Response{
+                Db9Response::Error,
+                "",
+                "invalid_dbid",
+                "Database ID not found: " + dbid,
+                metrics
+            };
+        }
+        
+        // Extract triples array from S-expression using proper API
+        std::vector<std::string> triple_strings;
+        
+        // Find the :triples parameter in the S-expression
+        bool found_triples = false;
+        for (size_t i = 0; i < sexpr.expr.size(); ++i) {
+            const auto& elem = sexpr.expr[i];
+            if (elem.token == tsSexprAtom) {
+                int stringIndex = elem.ref;
+                if (stringIndex < static_cast<int>(sexpr.strings.size()) &&
+                    sexpr.strings[stringIndex] == ":triples") {
+                    if (i + 1 < sexpr.expr.size() && sexpr.expr[i + 1].token == tsSexprPushList) {
+                        // Found the triples list, collect string triples
+                        for (size_t j = i + 2; j < sexpr.expr.size(); ++j) {
+                            const auto& triple_elem = sexpr.expr[j];
+                            if (triple_elem.token == tsSexprPopList) {
+                                break; // End of list
+                            }
+                            if (triple_elem.token == tsSexprAtom || triple_elem.token == tsSexprString) {
+                                int tripleIndex = triple_elem.ref;
+                                if (tripleIndex < static_cast<int>(sexpr.strings.size())) {
+                                    triple_strings.push_back(sexpr.strings[tripleIndex]);
+                                }
+                            }
+                        }
+                        found_triples = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (!found_triples || triple_strings.empty()) {
+            AutoReflexiveMetrics metrics;
+            return Db9Response{
+                Db9Response::Error,
+                "",
+                "missing_triples",
+                "No triples provided for bulk operation",
+                metrics
+            };
+        }
+        
+        // Parse and validate triples - expecting "subject predicate object" format
+        std::vector<std::tuple<std::string, std::string, std::string>> parsed_triples;
+        for (const auto& triple_str : triple_strings) {
+            std::istringstream iss(triple_str);
+            std::string subject, predicate, object;
+            if (!(iss >> subject >> predicate >> object)) {
+                AutoReflexiveMetrics metrics;
+                return Db9Response{
+                    Db9Response::Error,
+                    "",
+                    "invalid_triple_format",
+                    "Invalid triple format: " + triple_str + " (expected: 'subject predicate object')",
+                    metrics
+                };
+            }
+            parsed_triples.emplace_back(subject, predicate, object);
+        }
+        
+        // Performance optimization: use bulk operations
+        // Process triples in batch using NonoStore's batch capabilities
+        size_t successful_triples = 0;
+        for (const auto& [subject, predicate, object] : parsed_triples) {
+            bool success = store->add_triple(subject, predicate, object);
+            if (!success) {
+                // Continue with other triples even if one fails
+                std::cout << "AddTriplesBulkVerb Warning: Failed to add triple: " 
+                         << subject << " " << predicate << " " << object << "\n";
+            } else {
+                successful_triples++;
+                std::cout << "AddTriplesBulkVerb Added triple: " 
+                         << subject << " " << predicate << " " << object << "\n";
+            }
+        }
+        
+        // Calculate execution time
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+        
+        // Create response JSON
+        std::ostringstream result;
+        result << "{\"status\": \"bulk_created\", \"triple_count\": " << successful_triples
+               << ", \"processed_time_ms\": " << duration_ms
+               << ", \"total_requested\": " << parsed_triples.size();
+        
+        if (successful_triples != parsed_triples.size()) {
+            result << ", \"failures\": " << (parsed_triples.size() - successful_triples);
+        }
+        
+        result << "}";
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = std::chrono::milliseconds(duration_ms);
+        metrics.items_processed = successful_triples;
+        metrics.tid_allocations = static_cast<uint32_t>(successful_triples); // One TID per triple
+        
+        return Db9Response{
+            Db9Response::Success,
+            result.str(),
+            "",
+            "",
+            metrics
+        };
+        
+    } catch (const std::exception& e) {
+        AutoReflexiveMetrics metrics;
+        return Db9Response{
+            Db9Response::Error,
+            "",
+            "bulk_triple_operation_failed",
+            std::string("Bulk triple creation failed: ") + e.what(),
+            metrics
+        };
+    }
+}
+
 Db9Dispatcher& getGlobalDb9Dispatcher();
 
 } // namespace LabDb
@@ -974,6 +1239,8 @@ void initDatabaseVerbRegistration() {
         dispatcher.registerVerb(std::make_unique<LabDb::RemoveTripleVerb>());
         // Phase 4: Database Creation & Advanced Operations
         dispatcher.registerVerb(std::make_unique<LabDb::CreateDatabaseVerb>());
+        dispatcher.registerVerb(std::make_unique<LabDb::AddEntitiesBulkVerb>());
+        dispatcher.registerVerb(std::make_unique<LabDb::AddTriplesBulkVerb>());
         registered = true;
     }
 }

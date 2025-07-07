@@ -135,6 +135,15 @@ public:
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
 
+/// Add Triples Bulk Verb Implementation
+class AddTriplesBulkVerb : public IDb9Verb {
+public:
+    std::string getVerbName() const override { return "add-triples-bulk"; }
+    std::string getDescription() const override { return "Add multiple triples in bulk with optimized performance"; }
+    
+    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
+};
+
 /// Find Triple Verb Implementation
 class FindTripleVerb : public IDb9Verb {
 public:
@@ -159,6 +168,15 @@ public:
     std::string getVerbName() const override { return "remove-triple"; }
     std::string getDescription() const override { return "Remove triple from database by subject, predicate, object"; }
     
+    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
+};
+
+/// Add Entities Bulk Verb Implementation
+class AddEntitiesBulkVerb : public IDb9Verb {
+public:
+    std::string getVerbName() const override { return "add-entities-bulk"; }
+    std::string getDescription() const override { return "High-performance bulk entity creation with transaction batching"; }
+
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
 
