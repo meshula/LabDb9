@@ -47,6 +47,21 @@ add_executable(test_triple_store
 target_link_libraries(test_triple_store labdb)
 add_test(NAME TripleStoreTest COMMAND test_triple_store)
 
+# S-Expression Unicode Robustness test
+add_executable(test_sexpr_unicode_robustness
+    cpp/test_sexpr_unicode_robustness.cpp
+)
+target_link_libraries(test_sexpr_unicode_robustness labdb)
+target_include_directories(test_sexpr_unicode_robustness PRIVATE ../include)
+add_test(NAME SexprUnicodeRobustnessTest COMMAND test_sexpr_unicode_robustness)
+
+# Db9Dispatcher test
+add_executable(test_db9_dispatcher
+    cpp/test_db9_dispatcher.cpp
+)
+target_link_libraries(test_db9_dispatcher labdb)
+add_test(NAME Db9DispatcherTest COMMAND test_db9_dispatcher)
+
 # Performance Benchmark (not a test, but a benchmark tool)
 add_executable(benchmark_performance
     cpp/benchmark_performance.cpp
