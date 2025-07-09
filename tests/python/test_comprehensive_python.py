@@ -32,13 +32,13 @@ def test_triadic_python_integration():
             store = labdb.NonoStore(db_path)
             
             # Create some knowledge relationships
-            store.connect("granite", "isA", "rock")
-            store.connect("granite", "hasColor", "gray")
-            store.connect("granite", "hasHardness", "6")
-            store.connect("marble", "isA", "rock")
-            store.connect("marble", "hasColor", "white")
-            store.connect("diamond", "isA", "mineral")
-            store.connect("diamond", "hasHardness", "10")
+            store.add_triple("granite", "isA", "rock")
+            store.add_triple("granite", "hasColor", "gray")
+            store.add_triple("granite", "hasHardness", "6")
+            store.add_triple("marble", "isA", "rock")
+            store.add_triple("marble", "hasColor", "white")
+            store.add_triple("diamond", "isA", "mineral")
+            store.add_triple("diamond", "hasHardness", "10")
             
             print("✅ Knowledge base created with triadic relationships")
             
@@ -118,8 +118,8 @@ def test_pythonic_interface():
             store = labdb.NonoStore(db_path)
             
             # Test that results are iterable
-            store.connect("python", "isA", "language")
-            store.connect("python", "hasType", "interpreted")
+            store.add_triple("python", "isA", "language")
+            store.add_triple("python", "hasType", "interpreted")
             
             results = store.query("python", "*", "*")
             print(f"✅ Query results are iterable: {len(results)} results")

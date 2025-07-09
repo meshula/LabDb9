@@ -118,6 +118,34 @@ std::string DatabaseManager::createDatabase(const std::string& path) {
 // Helper functions for S-expression parameter extraction
 //-----------------------------------------------------------------------------
 namespace {
+
+
+    // Utility function to generate helpful database diagnosis messages
+    std::string generateDbidDiagnosisMessage(const std::string& operation_name) {
+        auto& manager = DatabaseManager::instance();
+        auto active_dbids = manager.getActiveDbids();
+        
+        std::ostringstream msg;
+        msg << "Supply " << operation_name << " with a valid dbid, and try again. ";
+        
+        if (active_dbids.empty()) {
+            msg << "There are no open databases, so open one first to get a dbid.";
+        } else if (active_dbids.size() == 1) {
+            msg << "This is the open database: dbid \"" << active_dbids[0] 
+                << "\", is it the one with the data you are searching for?";
+        } else {
+            msg << "There are several open databases: ";
+            for (size_t i = 0; i < active_dbids.size(); ++i) {
+                if (i > 0) msg << ", ";
+                if (i == active_dbids.size() - 1 && active_dbids.size() > 2) msg << "and ";
+                msg << "dbid \"" << active_dbids[i] << "\"";
+            }
+            msg << ", is the data you are searching for in one of them?";
+        }
+        
+        return msg.str();
+    }
+
     std::string extractStringParam(const lab::Text::Sexpr& sexpr, const std::string& param_name) {
         // Look for :param_name value pattern in the parsed S-expression
         for (size_t i = 0; i < sexpr.expr.size() - 1; ++i) {
@@ -148,10 +176,15 @@ namespace {
                 }
             }
         }
-        
-        throw std::runtime_error("Required parameter :" + param_name + " not found");
+
+        if (param_name == "dbid") {
+            throw std::runtime_error(generateDbidDiagnosisMessage("operation") + " (Parameter :dbid is required)");
+        } else {
+            throw std::runtime_error("Required parameter :" + param_name + " not found");
+        }
     }
-}
+
+} // anonymous namespace
 
 //-----------------------------------------------------------------------------
 // OpenDatabaseVerb Implementation
@@ -380,6 +413,60 @@ Db9Response CloseDatabaseVerb::execute(const lab::Text::Sexpr& sexpr) {
 }
 
 //-----------------------------------------------------------------------------
+// ListOpenDatabasesVerb Implementation
+//-----------------------------------------------------------------------------
+
+Db9Response ListOpenDatabasesVerb::execute(const lab::Text::Sexpr& sexpr) {
+    auto start_time = std::chrono::steady_clock::now();
+    
+    try {
+        // Get active database IDs from manager
+        auto& manager = DatabaseManager::instance();
+        auto active_dbids = manager.getActiveDbids();
+        
+        // Calculate metrics
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        metrics.items_processed = active_dbids.size();
+        
+        // Build result JSON array
+        std::ostringstream result;
+        result << "[";
+        for (size_t i = 0; i < active_dbids.size(); ++i) {
+            if (i > 0) result << ", ";
+            result << "\"" << active_dbids[i] << "\"";
+        }
+        result << "]";
+        
+        return Db9Response{
+            Db9Response::Success,
+            result.str(),
+            "",
+            "",
+            metrics
+        };
+        
+    } catch (const std::exception& e) {
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        
+        return Db9Response{
+            Db9Response::Error,
+            "",
+            "list_open_databases_failed",
+            e.what(),
+            metrics
+        };
+    }
+}
+
+//-----------------------------------------------------------------------------
 // Phase 2: Entity Management Verbs Implementation
 //-----------------------------------------------------------------------------
 
@@ -400,7 +487,7 @@ Db9Response AddEntityVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("add_entity"),
                 metrics
             };
         }
@@ -473,7 +560,7 @@ Db9Response GetEntityVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("get_entity"),
                 metrics
             };
         }
@@ -551,7 +638,7 @@ Db9Response FindEntityVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("find_entity"),
                 metrics
             };
         }
@@ -560,19 +647,39 @@ Db9Response FindEntityVerb::execute(const lab::Text::Sexpr& sexpr) {
         // We'll query for all subjects where the pattern matches
         std::vector<std::string> results;
         
-        // Simple wildcard matching: support terminal asterisk
-        bool hasWildcard = !pattern.empty() && pattern.back() == '*';
-        std::string prefix = hasWildcard ? pattern.substr(0, pattern.length() - 1) : pattern;
+        // Enhanced wildcard matching: support leading (*suffix), trailing (prefix*), and infix (*substring*) patterns
+        std::string searchPattern = pattern;
+        bool hasLeadingWildcard = !pattern.empty() && pattern.front() == '*';
+        bool hasTrailingWildcard = !pattern.empty() && pattern.back() == '*';
         
+        // Extract the actual search string by removing wildcards
+        if (hasLeadingWildcard) {
+            searchPattern = searchPattern.substr(1); // Remove leading *
+        }
+        if (hasTrailingWildcard) {
+            searchPattern = searchPattern.substr(0, searchPattern.length() - 1); // Remove trailing *
+        }
+
         // Get all subjects (entities) from the database
         auto allSubjects = store->all_subjects();
         
         for (const auto& subject : allSubjects) {
             bool matches = false;
             
-            if (hasWildcard) {
-                // Prefix matching
-                if (subject.substr(0, prefix.length()) == prefix) {
+            if (hasLeadingWildcard && hasTrailingWildcard) {
+                // Infix matching: *substring*
+                if (subject.find(searchPattern) != std::string::npos) {
+                    matches = true;
+                }
+            } else if (hasLeadingWildcard) {
+                // Suffix matching: *suffix
+                if (subject.length() >= searchPattern.length() &&
+                    subject.substr(subject.length() - searchPattern.length()) == searchPattern) {
+                    matches = true;
+                }
+            } else if (hasTrailingWildcard) {
+                // Prefix matching: prefix* (backwards compatible)
+                if (subject.substr(0, searchPattern.length()) == searchPattern) {
                     matches = true;
                 }
             } else {
@@ -655,7 +762,7 @@ Db9Response AddTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("add_triple"),
                 metrics
             };
         }
@@ -744,7 +851,7 @@ Db9Response FindTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("find_triple"),
                 metrics
             };
         }
@@ -816,7 +923,7 @@ Db9Response GetTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("get_triple"),
                 metrics
             };
         }
@@ -893,7 +1000,7 @@ Db9Response RemoveTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("remove_triple"),
                 metrics
             };
         }
@@ -973,7 +1080,7 @@ Db9Response AddEntitiesBulkVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("add_entities_bulk"),
                 metrics
             };
         }
@@ -1091,7 +1198,7 @@ Db9Response AddTriplesBulkVerb::execute(const lab::Text::Sexpr& sexpr) {
                 Db9Response::Error,
                 "",
                 "invalid_dbid",
-                "Database ID not found: " + dbid,
+                generateDbidDiagnosisMessage("add_triples_bulk"),
                 metrics
             };
         }
@@ -1228,6 +1335,7 @@ void initDatabaseVerbRegistration() {
         dispatcher.registerVerb(std::make_unique<LabDb::OpenDatabaseVerb>());
         dispatcher.registerVerb(std::make_unique<LabDb::DatabaseHealthCheckVerb>());
         dispatcher.registerVerb(std::make_unique<LabDb::CloseDatabaseVerb>());
+        dispatcher.registerVerb(std::make_unique<LabDb::ListOpenDatabasesVerb>());
         // Phase 2: Entity Management Verbs
         dispatcher.registerVerb(std::make_unique<LabDb::AddEntityVerb>());
         dispatcher.registerVerb(std::make_unique<LabDb::GetEntityVerb>());

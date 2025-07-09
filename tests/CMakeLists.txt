@@ -62,6 +62,13 @@ add_executable(test_db9_dispatcher
 target_link_libraries(test_db9_dispatcher labdb)
 add_test(NAME Db9DispatcherTest COMMAND test_db9_dispatcher)
 
+# Find-Triple Wildcard test (Critical missing functionality)
+add_executable(test_find_triple_wildcards
+    cpp/test_find_triple_wildcards.cpp
+)
+target_link_libraries(test_find_triple_wildcards labdb)
+add_test(NAME FindTripleWildcardsTest COMMAND test_find_triple_wildcards)
+
 # Performance Benchmark (not a test, but a benchmark tool)
 add_executable(benchmark_performance
     cpp/benchmark_performance.cpp

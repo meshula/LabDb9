@@ -91,6 +91,15 @@ private:
     std::string extractDbid(const lab::Text::Sexpr& sexpr);
 };
 
+/// List Open Databases Verb Implementation
+class ListOpenDatabasesVerb : public IDb9Verb {
+public:
+    std::string getVerbName() const override { return "list-open-databases"; }
+    std::string getDescription() const override { return "List all currently open database IDs"; }
+    
+    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
+};
+
 //-----------------------------------------------------------------------------
 // Phase 2: Entity Management Verbs
 //-----------------------------------------------------------------------------

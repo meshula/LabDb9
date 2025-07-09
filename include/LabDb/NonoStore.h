@@ -6,12 +6,13 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <chrono>
+#include <optional>
 
 // Forward declarations for TID architecture
 namespace LabDb {
     class TermDictionary;
     class TIDSequenceGenerator;
-    class TripleStore;
     class TriadicQuery; // Forward declaration for factory method
 }
 
@@ -210,9 +211,86 @@ public:
     Result get_last_error() const { return _last_error; }
     
     /// Access to TermDictionary for EntityId integration
+    const TermDictionary& getTermDictionary() const { return *_term_dict; }
     TermDictionary& getTermDictionary() { return *_term_dict; }
     
     LmdbStore& getLmdbStore() { return *_store; }
+    
+    //-------------------------------------------------------------------------
+    // TripleStore functionality (consolidated from separate TripleStore class)
+    //-------------------------------------------------------------------------
+    
+    using TID = uint64_t;
+    using TermID = uint64_t; 
+    using Timestamp = std::chrono::system_clock::time_point;
+    
+    /// Triple data structure with full provenance
+    struct TripleData {
+        TermID subject_id;     ///< Subject TermID from TermDictionary
+        TermID predicate_id;   ///< Predicate TermID from TermDictionary
+        TermID object_id;      ///< Object TermID from TermDictionary
+        Timestamp timestamp;   ///< When this triple was created/last modified
+        std::string source;    ///< Source of this triple (URL, file, user, etc.)
+        float confidence;      ///< Confidence score (0.0 - 1.0)
+        uint32_t flags;        ///< Bitfield for various flags
+        
+        TripleData() = default;
+        TripleData(TermID sid, TermID pid, TermID oid, 
+                   const std::string& src = "", float conf = 1.0f, uint32_t fl = 0)
+            : subject_id(sid), predicate_id(pid), object_id(oid)
+            , timestamp(std::chrono::system_clock::now())
+            , source(src), confidence(conf), flags(fl) {}
+    };
+    
+    /// Triple flags for various properties
+    enum TripleFlags : uint32_t {
+        NONE = 0x00000000,           ///< No special flags
+        INFERRED = 0x00000001,       ///< Triple was inferred, not explicitly stated
+        TEMPORARY = 0x00000002,      ///< Temporary triple, may be cleaned up
+        SYSTEM = 0x00000004,         ///< System-generated triple
+        USER_CREATED = 0x00000008,   ///< User explicitly created this triple
+        IMPORTED = 0x00000010,       ///< Triple was imported from external source
+        VERIFIED = 0x00000020,       ///< Triple has been verified/validated
+        DEPRECATED = 0x00000040,     ///< Triple is deprecated but kept for history
+        HIGH_CONFIDENCE = 0x00000080 ///< High confidence triple (confidence >= 0.9)
+    };
+    
+    /// Store a new triple, returns the assigned TID
+    TID store_triple_internal(MDB_txn* txn, 
+                              const std::string& subject, 
+                              const std::string& predicate, 
+                              const std::string& object,
+                              const std::string& source = "",
+                              float confidence = 1.0f,
+                              uint32_t flags = TripleFlags::NONE);
+    
+    /// Store a triple with pre-interned TermIDs (more efficient)
+    TID store_triple_internal(MDB_txn* txn, 
+                              TermID subject_id,
+                              TermID predicate_id, 
+                              TermID object_id,
+                              const std::string& source = "",
+                              float confidence = 1.0f,
+                              uint32_t flags = TripleFlags::NONE);
+    
+    /// Retrieve triple data by TID
+    std::optional<TripleData> get_triple_internal(MDB_txn* txn, TID tid) const;
+    
+    /// Retrieve triple as strings (resolves TermIDs to strings)
+    struct StringTriple {
+        std::string subject;
+        std::string predicate;
+        std::string object;
+        Timestamp timestamp;
+        std::string source;
+        float confidence;
+        uint32_t flags;
+        TID tid;  ///< Include TID for reference
+    };
+    std::optional<StringTriple> get_triple_as_strings_internal(MDB_txn* txn, TID tid) const;
+    
+    /// Remove triple by TID
+    bool remove_triple_internal(MDB_txn* txn, TID tid);
     
 private:
     std::unique_ptr<LmdbStore> _store;
@@ -221,7 +299,12 @@ private:
     // TID-based architecture components
     std::unique_ptr<TermDictionary> _term_dict;
     std::unique_ptr<TIDSequenceGenerator> _tid_gen;
-    std::unique_ptr<TripleStore> _triple_store;
+    
+    // TripleStore DBIs (consolidated from separate TripleStore class)
+    MDB_dbi _triple_dbi;              ///< Main triple storage DBI
+    MDB_dbi _subject_index_dbi;       ///< Subject TermID → list of TIDs
+    MDB_dbi _predicate_index_dbi;     ///< Predicate TermID → list of TIDs  
+    MDB_dbi _object_index_dbi;        ///< Object TermID → list of TIDs
     
     /// Internal helpers
     bool set_error(ErrorCode code, const std::string& message);
@@ -246,6 +329,21 @@ private:
                          const std::string& subject,
                          const std::string& predicate,
                          const std::string& object);
+    
+    /// TripleStore internal helpers (consolidated from separate TripleStore class)
+    void init_triple_store_dbis();
+    std::string serialize_triple_data(const TripleData& data) const;
+    TripleData deserialize_triple_data(const std::string& serialized) const;
+    bool update_indices(MDB_txn* txn, TID tid, const TripleData& data, bool add);
+    bool add_to_index(MDB_txn* txn, MDB_dbi index_dbi, TermID term_id, TID tid);
+    bool remove_from_index(MDB_txn* txn, MDB_dbi index_dbi, TermID term_id, TID tid);
+    std::vector<TID> get_tids_from_index(MDB_txn* txn, MDB_dbi index_dbi, TermID term_id) const;
+    bool validate_triple_data(const TripleData& data) const;
+    bool validate_tid(TID tid) const;
+    static std::string encode_tid(TID tid);
+    static TID decode_tid(const std::string& encoded);
+    static std::string encode_term_id(TermID term_id);
+    static TermID decode_term_id(const std::string& encoded);
     
     /// TID-based architecture helpers
     std::string encode_tid_for_storage(uint64_t tid);

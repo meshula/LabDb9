@@ -476,6 +476,58 @@ void test_entity_operations_success_cases(const std::string& test_name) {
         std::cout << "    Find prefix result: " << response.result << "\n";
     }
     
+    // Test enhanced wildcard patterns - suffix matching (*suffix)
+    std::string findSuffixCmd = "(find-entity :dbid " + dbid + " :pattern \"*spar\")";
+    response = g_test.dispatcher->executeCommand(findSuffixCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Finding entities with suffix pattern");
+    if (g_test.verbosity >= 2) {
+        std::cout << "    Find suffix result: " << response.result << "\n";
+    }
+    
+    // Test enhanced wildcard patterns - infix matching (*substring*)
+    std::string findInfixCmd = "(find-entity :dbid " + dbid + " :pattern \"*uar*\")";
+    response = g_test.dispatcher->executeCommand(findInfixCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Finding entities with infix pattern");
+    if (g_test.verbosity >= 2) {
+        std::cout << "    Find infix result: " << response.result << "\n";
+    }
+    
+    // Test specific CleanRoom USD semantic search patterns
+    // First add some entities that would match the triadic patterns
+    std::string addMotionCmd = "(add-entity :dbid " + dbid + " :value \"UsdMotion_ValueResolution\")";
+    auto addMotionResponse = g_test.dispatcher->executeCommand(addMotionCmd);
+    validateResponse(addMotionResponse, LabDb::Db9Response::Success, "Adding Motion entity for testing");
+    
+    std::string addMemoryCmd = "(add-entity :dbid " + dbid + " :value \"UsdMemory_DataTypes\")";
+    auto addMemoryResponse = g_test.dispatcher->executeCommand(addMemoryCmd);
+    validateResponse(addMemoryResponse, LabDb::Db9Response::Success, "Adding Memory entity for testing");
+    
+    std::string addFieldCmd = "(add-entity :dbid " + dbid + " :value \"UsdField_SceneGraph\")";
+    auto addFieldResponse = g_test.dispatcher->executeCommand(addFieldCmd);
+    validateResponse(addFieldResponse, LabDb::Db9Response::Success, "Adding Field entity for testing");
+    
+    // Test semantic searches for triadic consciousness entities
+    std::string findMotionCmd = "(find-entity :dbid " + dbid + " :pattern \"*Motion*\")";
+    response = g_test.dispatcher->executeCommand(findMotionCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Finding Motion entities with infix pattern");
+    if (g_test.verbosity >= 1) {
+        std::cout << "    Motion entities found: " << response.result << "\n";
+    }
+    
+    std::string findMemoryCmd = "(find-entity :dbid " + dbid + " :pattern \"*Memory*\")";
+    response = g_test.dispatcher->executeCommand(findMemoryCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Finding Memory entities with infix pattern");
+    if (g_test.verbosity >= 1) {
+        std::cout << "    Memory entities found: " << response.result << "\n";
+    }
+    
+    std::string findFieldCmd = "(find-entity :dbid " + dbid + " :pattern \"*Field*\")";
+    response = g_test.dispatcher->executeCommand(findFieldCmd);
+    validateResponse(response, LabDb::Db9Response::Success, "Finding Field entities with infix pattern");
+    if (g_test.verbosity >= 1) {
+        std::cout << "    Field entities found: " << response.result << "\n";
+    }
+    
     // Close the test database
     std::string closeCmd = "(close-database :dbid " + dbid + ")";
     auto closeResponse = g_test.dispatcher->executeCommand(closeCmd);

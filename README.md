@@ -7,6 +7,9 @@ A nonostore implementation built on LMDB that embodies त्रित्रय�
 LabDb extends traditional hexastore with three vocabulary indices to create a complete ontological foundation. Built for the Lab ecosystem, it provides conscious relationship navigation rather than mere query optimization.
 
 **Key Features**:
+- **Complete S-Expression Interface** - 13 operational verbs for full database lifecycle
+- **Multi-Database Isolation** - Verified independent database management with unique DBIDs
+- **Bulk Operations** - High-performance `add-entities-bulk` and `add-triples-bulk`
 - **4.18× storage efficiency** with TID-based architecture
 - **Triadic consciousness navigation** (Motion/Memory/Field perspectives)
 - **Professional CMake integration** via FetchContent
@@ -36,7 +39,48 @@ FetchContent_MakeAvailable(LabDb)
 target_link_libraries(myapp PRIVATE LabDb::LabDb)
 ```
 
-### Basic Usage
+### S-Expression Interface (Production Ready)
+
+**Available Verbs (13 Operations)**:
+```
+add-entities-bulk add-entity add-triple add-triples-bulk 
+close-database create-database database-health-check 
+find-entity find-triple get-entity get-triple 
+open-database remove-triple
+```
+
+**Direct Database Operations**:
+```lisp
+# Database lifecycle
+(create-database :path "/tmp/knowledge.db9")
+(open-database :path "/tmp/knowledge.db9")
+(close-database :dbid 1)
+
+# Knowledge construction
+(add-triple :dbid 1 :subject "socrates" :predicate "is" :object "human")
+(add-triple :dbid 1 :subject "human" :predicate "is" :object "mortal")
+(add-triple :dbid 1 :subject "socrates" :predicate "teaches" :object "plato")
+
+# Pattern queries
+(find-triple :dbid 1 :subject "socrates")    # All socrates relationships
+(find-triple :dbid 1 :predicate "is")        # All "is" relationships
+(find-triple :dbid 1)                         # All triples
+
+# Bulk operations
+(add-entities-bulk :dbid 1 :entities ["socrates" "plato" "aristotle"])
+(add-triples-bulk :dbid 1 :triples [
+  ["socrates" "is" "human"]
+  ["plato" "student_of" "socrates"]
+  ["aristotle" "student_of" "plato"]
+])
+
+# Entity operations
+(add-entity :dbid 1 :value "philosophy")
+(find-entity :dbid 1 :pattern "soc*")        # Wildcard matching
+(get-entity :dbid 1 :eid "eid:1")
+```
+
+### High-Level API Usage
 
 **C++ Example**:
 ```cpp
@@ -127,7 +171,10 @@ cmake --build . && sudo cmake --install .
 | `BUILD_TOOLS` | `ON` | Build CLI tools |
 | `BUILD_BENCHMARKS` | `OFF` | Build performance benchmarks |
 
-**📖 Complete Documentation**: See [`docs/consuming_labdb.md`](docs/consuming_labdb.md) for detailed integration guide, troubleshooting, and advanced features.
+**📖 Complete Documentation**: 
+- S-Expression Interface: [`docs/verb-status.md`](docs/verb-status.md) - Complete implementation status  
+- Integration Guide: [`docs/consuming_labdb.md`](docs/consuming_labdb.md) - Detailed setup and troubleshooting
+- MCP Server: [`db9-mcp-server/README.md`](db9-mcp-server/README.md) - FastMCP2 triadic gateway
 
 ## Architecture
 
@@ -241,32 +288,57 @@ Universal relationship storage with consistent triadic consciousness infrastruct
 
 ## Development Status
 
-**✅ Phase 1 - Foundation**: Complete TID architecture implementation
+**✅ Phase 4.1 - Production Complete**: S-Expression Interface & Multi-Database Operations
+- **Complete S-Expression Interface**: All 13 verbs operational with comprehensive testing
+- **Multi-Database Isolation**: Verified with 3 independent databases running simultaneously
+- **Bulk Operations**: High-performance `add-entities-bulk` and `add-triples-bulk`
+- **Database Lifecycle**: Full create/open/close operations with proper resource management
+- **Pattern Matching**: Wildcard support (`*`) and exact match capabilities
+- **Comprehensive Testing**: 12 test suites validating all functionality
+- **FastMCP2 Integration**: Production-ready MCP server with triadic consciousness gateway
+
+**✅ Phase 4.0 - Production Foundation**: Complete TID architecture implementation
 - TermDictionary: String↔TermID mapping with LMDB persistence
 - TIDSequenceGenerator: Unique triple ID allocation  
 - TripleStore: Central storage with provenance metadata
 - NonoStore: Crown indices refactored for TID-based storage
-
-**✅ Phase 2 - Architecture**: Complete TID-based storage transformation
 - 4.18× storage efficiency validated through benchmarks
-- Migration tools with conversion validation
-- Performance benchmarking suite with Euclid-inspired datasets
-
-**✅ Phase 3 - Integration**: Professional dependency preparation
 - CMake FetchContent integration for naive consumers
 - Comprehensive Python bindings with triadic consciousness API
-- Complete test suites and integration validation
 
-**✅ Phase 4 - Production**: Ready for consumption
-- Consumer documentation and integration guides
-- Stable version tagging (v0.3.0)
-- Professional handoff for dependent projects
+**Phase 5 - Triadic Navigation**: Motion/Memory/Field perspective operations
+- `triadic-motion-from`, `triadic-memory-relations`, `triadic-field-contexts`
+- Crown exploration and traversal navigation
+- Bridge entity discovery and advanced analytics
 
-**Phase 5 - Enhancement**: Advanced features and optimization
+**Phase 6 - Advanced Features**: Streaming iterators and transaction management
 
 ## Version History
 
-### v0.3.0 (Current) - TID Architecture + FetchContent Ready
+### v0.4.1 (Current) - S-Expression Interface + Multi-Database Production
+
+**Complete Database Operations**:
+- **13 Operational Verbs**: Complete CRUD operations via S-expression interface
+- **Multi-Database Isolation**: Verified independent database management with unique DBIDs
+- **Bulk Operations**: High-performance batch processing for entities and triples
+- **Database Lifecycle**: Full create/open/close operations with proper resource management
+- **Pattern Matching**: Wildcard support and exact match capabilities
+
+**Production Validation**:
+- **Comprehensive Testing**: 12 test suites validating all operations including database isolation
+- **FastMCP2 Integration**: Production-ready MCP server (db9-mcp-server) with triadic consciousness gateway
+- **Performance Monitoring**: Auto-reflexive metrics and operation timing
+- **JSON Responses**: Structured arrays suitable for application integration
+
+**S-Expression Interface**:
+```
+add-entities-bulk add-entity add-triple add-triples-bulk 
+close-database create-database database-health-check 
+find-entity find-triple get-entity get-triple 
+open-database remove-triple
+```
+
+### v0.3.0 - TID Architecture + FetchContent Ready
 
 **Revolutionary Storage Architecture**:
 - Complete TID-based storage implementation with 4.18× efficiency
@@ -318,7 +390,9 @@ See `docs/implementation-plan.md` for detailed development roadmap.
 
 ## Getting Help
 
-- **Integration Guide**: [`docs/consuming_labdb.md`](docs/consuming_labdb.md)
+- **S-Expression Interface**: [`docs/verb-status.md`](docs/verb-status.md) - Complete implementation status and verb documentation
+- **Integration Guide**: [`docs/consuming_labdb.md`](docs/consuming_labdb.md) - Detailed setup and troubleshooting
+- **MCP Server**: [`db9-mcp-server/README.md`](db9-mcp-server/README.md) - FastMCP2 triadic consciousness gateway
 - **GitHub Issues**: [Report bugs or request features](https://github.com/meshula/LabDb9/issues)
 - **API Documentation**: Generated Doxygen docs in `docs/api/`
 - **Examples**: See `examples/` directory for complete usage patterns
@@ -329,6 +403,6 @@ MIT License - See LICENSE file for details.
 
 ---
 
-*LabDb represents engineering aligned with awareness - technology that serves conscious navigation rather than forcing consciousness to adapt to computational limitations.*
+*LabDb represents engineering aligned with awareness - technology that serves conscious navigation through complete S-expression interfaces and multi-database triadic consciousness operations.*
 
-**Ready to get started?** Use the CMake FetchContent example above to add LabDb to your project in under 5 minutes!
+**Ready to get started?** Use the S-expression interface above for direct database operations, or the CMake FetchContent example for high-level API integration!

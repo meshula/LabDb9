@@ -45,22 +45,110 @@ set(LMDB_LIBRARIES lmdb_lib)
 
 message(STATUS "LMDB configured via FetchContent")
 
-# Option for Python bindings
-option(BUILD_PYTHON_BINDINGS "Build Python bindings" ON)
+# ==============================================================================
+# BUILD OPTIONS
+# ==============================================================================
 
-# Option for MCP server
-option(LABDB_BUILD_MCP "Build LabDb MCP server with installation structure" ON)
+# Primary option for MCP server with C-based Python bindings
+option(LABDB_MCP "Build LabDb MCP server with clean C-based Python bindings" OFF)
 
-# Core library
+# Development options
+option(BUILD_TESTS "Build test suite" ON)
+
+# Python configuration (used when LABDB_MCP=ON)
+# LABDB_PYDIR: Python installation directory (e.g., /opt/conda/envs/myenv)
+# LABDB_PYEXE: Python executable path (e.g., /opt/conda/envs/myenv/bin/python3)
+set(LABDB_PYDIR "" CACHE STRING "Python installation directory for LABDB_MCP")
+set(LABDB_PYEXE "" CACHE STRING "Python executable for LABDB_MCP")
+
+if(LABDB_MCP)
+    # Validate LABDB_PYDIR is defined and writable
+    if(NOT LABDB_PYDIR)
+        message(FATAL_ERROR "LABDB_MCP=ON requires LABDB_PYDIR to be defined. "
+                           "Example: -DLABDB_PYDIR=/opt/conda/envs/myenv")
+    endif()
+    
+    if(NOT IS_DIRECTORY "${LABDB_PYDIR}")
+        message(FATAL_ERROR "LABDB_PYDIR directory does not exist: ${LABDB_PYDIR}")
+    endif()
+    
+    # Test write access by attempting to create/remove a temporary file
+    set(TEST_WRITE_FILE "${LABDB_PYDIR}/.cmake_write_test_${CMAKE_CURRENT_TIMESTAMP}")
+    file(WRITE "${TEST_WRITE_FILE}" "test")
+    if(NOT EXISTS "${TEST_WRITE_FILE}")
+        message(FATAL_ERROR "LABDB_PYDIR is not writable: ${LABDB_PYDIR}")
+    endif()
+    file(REMOVE "${TEST_WRITE_FILE}")
+    
+    message(STATUS "LABDB_MCP: Using Python directory: ${LABDB_PYDIR} [validated]")
+    
+    # Validate LABDB_PYEXE is defined and executable exists
+    if(NOT LABDB_PYEXE)
+        message(FATAL_ERROR "LABDB_MCP=ON requires LABDB_PYEXE to be defined. "
+                           "Example: -DLABDB_PYEXE=/opt/conda/envs/myenv/bin/python3")
+    endif()
+    
+    if(NOT EXISTS "${LABDB_PYEXE}")
+        message(FATAL_ERROR "LABDB_PYEXE executable does not exist: ${LABDB_PYEXE}")
+    endif()
+    
+    if(NOT IS_EXECUTABLE "${LABDB_PYEXE}")
+        message(FATAL_ERROR "LABDB_PYEXE is not executable: ${LABDB_PYEXE}")
+    endif()
+    
+    # Verify it's actually a Python executable by testing --version
+    execute_process(
+        COMMAND "${LABDB_PYEXE}" --version
+        RESULT_VARIABLE PYTHON_VERSION_RESULT
+        OUTPUT_VARIABLE PYTHON_VERSION_OUTPUT
+        ERROR_VARIABLE PYTHON_VERSION_ERROR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_STRIP_TRAILING_WHITESPACE
+    )
+    
+    if(NOT PYTHON_VERSION_RESULT EQUAL 0)
+        message(FATAL_ERROR "LABDB_PYEXE failed to execute '--version': ${LABDB_PYEXE}\n"
+                           "Output: ${PYTHON_VERSION_OUTPUT}\n"
+                           "Error: ${PYTHON_VERSION_ERROR}")
+    endif()
+    
+    if(NOT PYTHON_VERSION_OUTPUT MATCHES "Python [0-9]+\\.[0-9]+")
+        message(FATAL_ERROR "LABDB_PYEXE does not appear to be a Python executable: ${LABDB_PYEXE}\n"
+                           "Version output: ${PYTHON_VERSION_OUTPUT}")
+    endif()
+    
+    message(STATUS "LABDB_MCP: Using Python executable: ${LABDB_PYEXE} [${PYTHON_VERSION_OUTPUT}]")
+endif()
+
+# ==============================================================================
+# CORE LIBRARY
+# ==============================================================================
+
 add_library(labdb
-    src/LmdbStore.cpp
-    src/NonostoreKeys.cpp
-    src/NonoStore.cpp
-    src/TriadicQuery.cpp
+    include/LabDb/DatabaseVerbs.h
+    include/LabDb/Db9Dispatcher.h
+    include/LabDb/EntityId.h
+    include/LabDb/InceptionBridge.h
+    include/LabDb/LabText.hpp
+    include/LabDb/LmdbStore.h
+    include/LabDb/NonoStore.h
+    include/LabDb/NonostoreKeys.h
+    include/LabDb/PerformanceBenchmark.h
+    include/LabDb/TermDictionary.h
+    include/LabDb/TIDSequenceGenerator.h
+    include/LabDb/TriadicQuery.h
+    include/LabDb/TripleStore.h
+    src/DatabaseVerbs.cpp
+    src/Db9Dispatcher.cpp
+    src/EntityId.cpp
     src/InceptionBridge.cpp
+    src/LmdbStore.cpp
+    src/NonoStore.cpp
+    src/NonostoreKeys.cpp
     src/PerformanceBenchmark.cpp
     src/TermDictionary.cpp
     src/TIDSequenceGenerator.cpp
+    src/TriadicQuery.cpp
     src/TripleStore.cpp
 )
 
@@ -76,71 +164,35 @@ target_link_libraries(labdb
     PUBLIC ${LMDB_LIBRARIES}  # Make it PUBLIC so it gets exported
 )
 
+# ==============================================================================
+# SUBDIRECTORIES
+# ==============================================================================
+
 # Tests
-option(BUILD_TESTS "Build tests" ON)
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-# Python bindings
-if(BUILD_PYTHON_BINDINGS)
-    # Try to find pybind11 first, if not found, fetch it
-    find_package(pybind11 QUIET)
-    if(NOT pybind11_FOUND)
-        message(STATUS "pybind11 not found locally, fetching via FetchContent...")
-        FetchContent_Declare(
-            pybind11
-            GIT_REPOSITORY https://github.com/pybind/pybind11.git
-            GIT_TAG v2.11.1
-        )
-        FetchContent_MakeAvailable(pybind11)
-        message(STATUS "pybind11 configured via FetchContent")
-    else()
-        message(STATUS "Using system pybind11")
-    endif()
-    
-    # Now we know pybind11 is available
-    pybind11_add_module(pylabdb python/bindings.cpp)
-    target_link_libraries(pylabdb PRIVATE labdb)
-    
-    # Set properties for proper Python module
-    set_target_properties(pylabdb PROPERTIES
-        CXX_VISIBILITY_PRESET "hidden"
-        VISIBILITY_INLINES_HIDDEN YES
-        OUTPUT_NAME "pylabdb"
-        SUFFIX ".so"
-        PREFIX ""
-    )
-    
-    # Install Python module to python/labdb/ directory
-    install(TARGETS pylabdb DESTINATION python/labdb)
-    
-    # For development: copy module to python directory after build
-    add_custom_command(TARGET pylabdb POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pylabdb> ${CMAKE_SOURCE_DIR}/python/labdb/
-        COMMENT "Copying pylabdb module to python/labdb/ for development"
-    )
-    
-    message(STATUS "Python bindings enabled")
-else()
-    message(STATUS "Python bindings disabled")
-endif()
-
-# Examples
+# Examples and tools
 add_subdirectory(examples)
-
-# Tools
 add_subdirectory(tools)
 
-# MCP server (if enabled)
-if(LABDB_BUILD_MCP)
-    message(STATUS "Configuring LabDb MCP server...")
-    add_subdirectory(db9-mcp-server)
-    message(STATUS "LabDb MCP server configured")
+# ==============================================================================
+# PYTHON BINDINGS
+# ==============================================================================
+
+# Clean C-based Python extension for MCP server
+if(LABDB_MCP)
+    message(STATUS "Configuring LabDb Python C Extension for MCP server...")
+    add_subdirectory(python)
+    message(STATUS "LabDb Python C Extension configured")
 endif()
 
-# Installation
+# ==============================================================================
+# INSTALLATION
+# ==============================================================================
+
 install(TARGETS labdb lmdb_lib
     EXPORT LabDbTargets
     LIBRARY DESTINATION lib

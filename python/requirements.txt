@@ -1,0 +1,5 @@
+# LabDb MCP Server Dependencies
+# Minimal dependencies for C-based Python extension MCP server
+
+# FastMCP2 - Modern MCP server framework
+fastmcp>=2.0.0

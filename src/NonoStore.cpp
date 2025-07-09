@@ -1,5 +1,4 @@
 #include "LabDb/NonoStore.h"
-#include "LabDb/TripleStore.h"
 #include "LabDb/TermDictionary.h"
 #include "LabDb/TIDSequenceGenerator.h"
 #include "LabDb/TriadicQuery.h"
@@ -19,7 +18,7 @@ NonoStore::NonoStore(const std::string& database_path, size_t map_size)
         MDB_env* env = _store->environment();
         _term_dict = std::make_unique<TermDictionary>(env);
         _tid_gen = std::make_unique<TIDSequenceGenerator>(env);
-        _triple_store = std::make_unique<TripleStore>(env, *_term_dict, *_tid_gen);
+        init_triple_store_dbis();
         
     } catch (const LmdbException& e) {
         set_error(ErrorCode::DatabaseError, "Failed to open database: " + std::string(e.what()));
@@ -29,9 +28,6 @@ NonoStore::NonoStore(const std::string& database_path, size_t map_size)
         throw;
     } catch (const TIDSequenceException& e) {
         set_error(ErrorCode::DatabaseError, "Failed to initialize TIDSequenceGenerator: " + std::string(e.what()));
-        throw;
-    } catch (const TripleStoreException& e) {
-        set_error(ErrorCode::DatabaseError, "Failed to initialize TripleStore: " + std::string(e.what()));
         throw;
     }
 }
@@ -46,7 +42,7 @@ bool NonoStore::add_triple(const std::string& subject,
 
         // 1. Store triple in central TripleStore to get TID
         MDB_txn* mdb_txn = txn.handle();
-        TripleStore::TID tid = _triple_store->store_triple(mdb_txn, subject, predicate, object);
+        TID tid = store_triple_internal(mdb_txn, subject, predicate, object);
         
         // 2. Get TermIDs for crown indices
         TermDictionary::TermID subject_id = _term_dict->intern(mdb_txn, subject);
@@ -143,7 +139,7 @@ bool NonoStore::remove_triple(const std::string& subject,
             uint64_t tid = decode_tid_from_storage(tid_value);
             
             // Remove from central TripleStore
-            _triple_store->remove_triple(mdb_txn, tid);
+            remove_triple_internal(mdb_txn, tid);
             
             // Remove from all crown indices
             auto crown_keys = generate_tid_based_crown_keys(subject_id, predicate_id, object_id);
@@ -763,7 +759,7 @@ std::vector<NonoStore::Triple> NonoStore::parse_query_results_tid(
             uint64_t tid = decode_tid_from_storage(value);
             
             // Resolve TID to triple strings using TripleStore
-            auto resolved = _triple_store->get_triple_as_strings(mdb_txn, tid);
+            auto resolved = get_triple_as_strings_internal(mdb_txn, tid);
             if (resolved.has_value()) {
                 triples.emplace_back(
                     resolved->subject,
@@ -907,6 +903,363 @@ std::string NonoStore::generate_vocabulary_key_for_term_id(NonostoreKeys::IndexT
     }
     
     return prefix + TermDictionary::encode_term_id_for_storage(term_id);
+}
+
+//-------------------------------------------------------------------------
+// TripleStore functionality implementations (consolidated from separate TripleStore class)
+//-------------------------------------------------------------------------
+
+void NonoStore::init_triple_store_dbis() {
+    MDB_env* env = _store->environment();
+    
+    // Open/create the TripleStore DBIs
+    int rc;
+    MDB_txn* txn;
+    
+    rc = mdb_txn_begin(env, nullptr, 0, &txn);
+    if (rc != 0) {
+        throw std::runtime_error("Failed to begin transaction for DBI init: " + std::string(mdb_strerror(rc)));
+    }
+    
+    // Main triple storage DBI
+    rc = mdb_dbi_open(txn, "triple", MDB_CREATE, &_triple_dbi);
+    if (rc != 0) {
+        mdb_txn_abort(txn);
+        throw std::runtime_error("Failed to open triple DBI: " + std::string(mdb_strerror(rc)));
+    }
+    
+    // Subject index DBI  
+    rc = mdb_dbi_open(txn, "subject_index", MDB_CREATE, &_subject_index_dbi);
+    if (rc != 0) {
+        mdb_txn_abort(txn);
+        throw std::runtime_error("Failed to open subject_index DBI: " + std::string(mdb_strerror(rc)));
+    }
+    
+    // Predicate index DBI
+    rc = mdb_dbi_open(txn, "predicate_index", MDB_CREATE, &_predicate_index_dbi);
+    if (rc != 0) {
+        mdb_txn_abort(txn);
+        throw std::runtime_error("Failed to open predicate_index DBI: " + std::string(mdb_strerror(rc)));
+    }
+    
+    // Object index DBI
+    rc = mdb_dbi_open(txn, "object_index", MDB_CREATE, &_object_index_dbi);
+    if (rc != 0) {
+        mdb_txn_abort(txn);
+        throw std::runtime_error("Failed to open object_index DBI: " + std::string(mdb_strerror(rc)));
+    }
+    
+    rc = mdb_txn_commit(txn);
+    if (rc != 0) {
+        throw std::runtime_error("Failed to commit DBI init transaction: " + std::string(mdb_strerror(rc)));
+    }
+}
+
+NonoStore::TID NonoStore::store_triple_internal(MDB_txn* txn, 
+                                                 const std::string& subject, 
+                                                 const std::string& predicate, 
+                                                 const std::string& object,
+                                                 const std::string& source,
+                                                 float confidence,
+                                                 uint32_t flags) {
+    // 1. Intern terms to get TermIDs
+    TermID subject_id = _term_dict->intern(txn, subject);
+    TermID predicate_id = _term_dict->intern(txn, predicate);
+    TermID object_id = _term_dict->intern(txn, object);
+    
+    // 2. Call the TermID version
+    return store_triple_internal(txn, subject_id, predicate_id, object_id, source, confidence, flags);
+}
+
+NonoStore::TID NonoStore::store_triple_internal(MDB_txn* txn, 
+                                                 TermID subject_id,
+                                                 TermID predicate_id, 
+                                                 TermID object_id,
+                                                 const std::string& source,
+                                                 float confidence,
+                                                 uint32_t flags) {
+    // 1. Allocate new TID
+    TID tid = _tid_gen->next_sequence(txn);
+    
+    // 2. Create TripleData
+    TripleData triple_data(subject_id, predicate_id, object_id, source, confidence, flags);
+    
+    // 3. Serialize and store in main triple DBI
+    std::string serialized = serialize_triple_data(triple_data);
+    std::string tid_key = encode_tid(tid);
+    
+    MDB_val key_val = {tid_key.size(), (void*)tid_key.c_str()};
+    MDB_val data_val = {serialized.size(), (void*)serialized.c_str()};
+    
+    int rc = mdb_put(txn, _triple_dbi, &key_val, &data_val, 0);
+    if (rc != 0) {
+        throw std::runtime_error("Failed to store triple data: " + std::string(mdb_strerror(rc)));
+    }
+    
+    // 4. Update indices
+    update_indices(txn, tid, triple_data, true);
+    
+    return tid;
+}
+
+std::optional<NonoStore::StringTriple> NonoStore::get_triple_as_strings_internal(MDB_txn* txn, TID tid) const {
+    // 1. Get TripleData by TID
+    auto triple_data = get_triple_internal(txn, tid);
+    if (!triple_data.has_value()) {
+        return std::nullopt;
+    }
+    
+    // 2. Resolve TermIDs to strings
+    auto subject_opt = _term_dict->resolve(txn, triple_data->subject_id);
+    auto predicate_opt = _term_dict->resolve(txn, triple_data->predicate_id);
+    auto object_opt = _term_dict->resolve(txn, triple_data->object_id);
+    
+    if (!subject_opt || !predicate_opt || !object_opt) {
+        return std::nullopt; // TermIDs not found - data corruption?
+    }
+    
+    // 3. Create StringTriple
+    StringTriple result;
+    result.subject = *subject_opt;
+    result.predicate = *predicate_opt;
+    result.object = *object_opt;
+    result.timestamp = triple_data->timestamp;
+    result.source = triple_data->source;
+    result.confidence = triple_data->confidence;
+    result.flags = triple_data->flags;
+    result.tid = tid;
+    
+    return result;
+}
+
+std::optional<NonoStore::TripleData> NonoStore::get_triple_internal(MDB_txn* txn, TID tid) const {
+    // 1. Encode TID as key
+    std::string tid_key = encode_tid(tid);
+    MDB_val key_val = {tid_key.size(), (void*)tid_key.c_str()};
+    MDB_val data_val;
+    
+    // 2. Get from main triple DBI
+    int rc = mdb_get(txn, _triple_dbi, &key_val, &data_val);
+    if (rc == MDB_NOTFOUND) {
+        return std::nullopt;
+    }
+    if (rc != 0) {
+        throw std::runtime_error("Failed to get triple data: " + std::string(mdb_strerror(rc)));
+    }
+    
+    // 3. Deserialize
+    std::string serialized((char*)data_val.mv_data, data_val.mv_size);
+    return deserialize_triple_data(serialized);
+}
+
+bool NonoStore::remove_triple_internal(MDB_txn* txn, TID tid) {
+    // 1. Get triple data first (for index cleanup)
+    auto triple_data = get_triple_internal(txn, tid);
+    if (!triple_data.has_value()) {
+        return false; // Triple doesn't exist
+    }
+    
+    // 2. Remove from main triple DBI
+    std::string tid_key = encode_tid(tid);
+    MDB_val key_val = {tid_key.size(), (void*)tid_key.c_str()};
+    
+    int rc = mdb_del(txn, _triple_dbi, &key_val, nullptr);
+    if (rc != 0 && rc != MDB_NOTFOUND) {
+        throw std::runtime_error("Failed to remove triple data: " + std::string(mdb_strerror(rc)));
+    }
+    
+    // 3. Update indices (remove)
+    update_indices(txn, tid, *triple_data, false);
+    
+    return true;
+}
+
+//-------------------------------------------------------------------------
+// TripleStore helper method implementations  
+//-------------------------------------------------------------------------
+
+std::string NonoStore::serialize_triple_data(const TripleData& data) const {
+    // Simple binary serialization for TripleData
+    // Format: subject_id(8) + predicate_id(8) + object_id(8) + timestamp(8) + confidence(4) + flags(4) + source_len(4) + source
+    
+    std::string result;
+    result.reserve(44 + data.source.size()); // Pre-allocate
+    
+    // Fixed-size fields (40 bytes total)
+    auto append_uint64 = [&](uint64_t val) {
+        for (int i = 7; i >= 0; --i) {
+            result.push_back((val >> (i * 8)) & 0xFF);
+        }
+    };
+    
+    auto append_uint32 = [&](uint32_t val) {
+        for (int i = 3; i >= 0; --i) {
+            result.push_back((val >> (i * 8)) & 0xFF);
+        }
+    };
+    
+    auto append_float = [&](float val) {
+        uint32_t int_val;
+        std::memcpy(&int_val, &val, 4);
+        append_uint32(int_val);
+    };
+    
+    // Serialize timestamp as nanoseconds since epoch
+    auto time_point_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        data.timestamp.time_since_epoch()).count();
+    
+    append_uint64(data.subject_id);
+    append_uint64(data.predicate_id);
+    append_uint64(data.object_id);
+    append_uint64(static_cast<uint64_t>(time_point_ns));
+    append_float(data.confidence);
+    append_uint32(data.flags);
+    
+    // Variable-size source string
+    append_uint32(static_cast<uint32_t>(data.source.size()));
+    result.append(data.source);
+    
+    return result;
+}
+
+NonoStore::TripleData NonoStore::deserialize_triple_data(const std::string& serialized) const {
+    if (serialized.size() < 44) {
+        throw std::runtime_error("Invalid serialized TripleData: too short");
+    }
+    
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(serialized.c_str());
+    size_t offset = 0;
+    
+    auto read_uint64 = [&]() -> uint64_t {
+        uint64_t val = 0;
+        for (int i = 0; i < 8; ++i) {
+            val = (val << 8) | data[offset++];
+        }
+        return val;
+    };
+    
+    auto read_uint32 = [&]() -> uint32_t {
+        uint32_t val = 0;
+        for (int i = 0; i < 4; ++i) {
+            val = (val << 8) | data[offset++];
+        }
+        return val;
+    };
+    
+    auto read_float = [&]() -> float {
+        uint32_t int_val = read_uint32();
+        float float_val;
+        std::memcpy(&float_val, &int_val, 4);
+        return float_val;
+    };
+    
+    TripleData result;
+    result.subject_id = read_uint64();
+    result.predicate_id = read_uint64();
+    result.object_id = read_uint64();
+    
+    uint64_t time_ns = read_uint64();
+    result.timestamp = std::chrono::time_point_cast<Timestamp::duration>(
+        std::chrono::system_clock::time_point() + std::chrono::nanoseconds(time_ns));
+    
+    result.confidence = read_float();
+    result.flags = read_uint32();
+    
+    uint32_t source_len = read_uint32();
+    if (offset + source_len > serialized.size()) {
+        throw std::runtime_error("Invalid serialized TripleData: source length exceeds data");
+    }
+    
+    result.source = std::string(reinterpret_cast<const char*>(data + offset), source_len);
+    
+    return result;
+}
+
+bool NonoStore::update_indices(MDB_txn* txn, TID tid, const TripleData& data, bool add) {
+    if (add) {
+        return add_to_index(txn, _subject_index_dbi, data.subject_id, tid) &&
+               add_to_index(txn, _predicate_index_dbi, data.predicate_id, tid) &&
+               add_to_index(txn, _object_index_dbi, data.object_id, tid);
+    } else {
+        return remove_from_index(txn, _subject_index_dbi, data.subject_id, tid) &&
+               remove_from_index(txn, _predicate_index_dbi, data.predicate_id, tid) &&
+               remove_from_index(txn, _object_index_dbi, data.object_id, tid);
+    }
+}
+
+bool NonoStore::add_to_index(MDB_txn* txn, MDB_dbi index_dbi, TermID term_id, TID tid) {
+    // For now, simple implementation - each TermID maps to a list of TIDs
+    // TODO: Optimize with more efficient data structures for large lists
+    
+    std::string term_key = encode_term_id(term_id);
+    std::string tid_str = encode_tid(tid);
+    
+    MDB_val key_val = {term_key.size(), (void*)term_key.c_str()};
+    MDB_val data_val;
+    
+    // Get existing TID list
+    std::string tid_list;
+    int rc = mdb_get(txn, index_dbi, &key_val, &data_val);
+    if (rc == 0) {
+        tid_list = std::string((char*)data_val.mv_data, data_val.mv_size);
+    } else if (rc != MDB_NOTFOUND) {
+        return false;
+    }
+    
+    // Add TID to list (simple append for now)
+    tid_list.append(tid_str);
+    
+    // Store updated list
+    data_val = {tid_list.size(), (void*)tid_list.c_str()};
+    rc = mdb_put(txn, index_dbi, &key_val, &data_val, 0);
+    
+    return rc == 0;
+}
+
+bool NonoStore::remove_from_index(MDB_txn* txn, MDB_dbi index_dbi, TermID term_id, TID tid) {
+    // Simple implementation - remove TID from the list
+    // TODO: Optimize this for better performance
+    
+    std::string term_key = encode_term_id(term_id);
+    std::string tid_str = encode_tid(tid);
+    
+    MDB_val key_val = {term_key.size(), (void*)term_key.c_str()};
+    MDB_val data_val;
+    
+    // Get existing TID list
+    int rc = mdb_get(txn, index_dbi, &key_val, &data_val);
+    if (rc != 0) {
+        return false; // Not found
+    }
+    
+    std::string tid_list((char*)data_val.mv_data, data_val.mv_size);
+    
+    // Remove TID from list (simple string replacement for now)
+    size_t pos = tid_list.find(tid_str);
+    if (pos != std::string::npos) {
+        tid_list.erase(pos, tid_str.size());
+        
+        if (tid_list.empty()) {
+            // Remove key entirely if list is empty
+            rc = mdb_del(txn, index_dbi, &key_val, nullptr);
+        } else {
+            // Store updated list
+            data_val = {tid_list.size(), (void*)tid_list.c_str()};
+            rc = mdb_put(txn, index_dbi, &key_val, &data_val, 0);
+        }
+    }
+    
+    return true;
+}
+
+std::string NonoStore::encode_tid(TID tid) {
+    // Use same encoding as TIDSequenceGenerator for consistency
+    return TIDSequenceGenerator::encode_tid_for_storage(tid);
+}
+
+std::string NonoStore::encode_term_id(TermID term_id) {
+    // Use same encoding as TermDictionary for consistency
+    return TermDictionary::encode_term_id_for_storage(term_id);
 }
 
 } // namespace LabDb
