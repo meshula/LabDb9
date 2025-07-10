@@ -842,6 +842,11 @@ Db9Response FindTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
             // Use default "*"
         }
         
+        // Convert "nil" parameters to "*" for wildcard matching
+        if (subject_pattern == "nil") subject_pattern = "*";
+        if (predicate_pattern == "nil") predicate_pattern = "*";
+        if (object_pattern == "nil") object_pattern = "*";
+        
         // Get database
         auto& manager = DatabaseManager::instance();
         auto store = manager.getDatabase(dbid);

@@ -138,7 +138,9 @@ add_library(labdb
     include/LabDb/TIDSequenceGenerator.h
     include/LabDb/TriadicQuery.h
     include/LabDb/TripleStore.h
+    include/LabDb/EnhancedDatabaseVerbs.h
     src/DatabaseVerbs.cpp
+    src/EnhancedDatabaseVerbs.cpp
     src/Db9Dispatcher.cpp
     src/EntityId.cpp
     src/InceptionBridge.cpp

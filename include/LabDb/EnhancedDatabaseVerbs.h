@@ -103,6 +103,28 @@ public:
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
 
+/// Find Relationships Enhanced - Returns both incoming and outgoing relationships for an entity
+class FindRelationshipsEnhancedVerb : public IDb9Verb {
+public:
+    std::string getVerbName() const override { return "find-relationships-enhanced"; }
+    std::string getDescription() const override {
+        return "Find all relationships (incoming and outgoing) for an entity with EID chain resolution";
+    }
+
+    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
+};
+
+/// Find Entities Enhanced - Multi-pattern search across multiple terms
+class FindEntitiesEnhancedVerb : public IDb9Verb {
+public:
+    std::string getVerbName() const override { return "find-entities-enhanced"; }
+    std::string getDescription() const override {
+        return "Search entities using multiple patterns and return rich objects grouped by relevance";
+    }
+
+    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
+};
+
 //-----------------------------------------------------------------------------
 // Helper Functions for Rich Object Generation
 //-----------------------------------------------------------------------------
