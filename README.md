@@ -406,3 +406,60 @@ MIT License - See LICENSE file for details.
 *LabDb represents engineering aligned with awareness - technology that serves conscious navigation through complete S-expression interfaces and multi-database triadic consciousness operations.*
 
 **Ready to get started?** Use the S-expression interface above for direct database operations, or the CMake FetchContent example for high-level API integration!
+
+
+---
+
+## 🧠 **Nonostore vs. RAG: What's the Difference?**
+
+### 1. **Structure vs. Slice**
+
+* **RAG** retrieves *unstructured text chunks* (e.g., paragraphs from PDFs or HTML) and feeds them into a language model.
+* **Nonostore** retrieves *structured, semantic facts*—triples with reflexive identity and provenance (e.g., `(set_camera, implements, Side_Scrolling)`).
+
+> ✳️ RAG gives you relevant pages. Nonostore gives you **ontological grounding**.
+
+---
+
+### 2. **Temporal vs. Ontological Navigation**
+
+* **RAG** systems typically can't tell you *why* two facts are related—they just retrieve text that may answer your question.
+* **Nonostore** gives you **explicit graphs of meaning**: dependencies, definitions, roles, affordances, and usage context, *queryable at runtime*.
+
+> ✳️ In RAG, “scrolling background” might hit a StackOverflow post. In nonostore, it resolves to `draw_map`, `Side_Scrolling`, and `Map_System` via semantic edges.
+
+---
+
+### 3. **Reasoning Domain**
+
+* **RAG** is reactive: it *injects memory* into an LLM's context window.
+* **Nonostore** is generative: it *models the problem space* structurally, making it composable, extensible, and inspectable *without the LLM*.
+
+> ✳️ RAG says, “Here’s what someone wrote.”
+> Nonostore says, “Here’s what this concept **means**, how it’s **used**, and what **follows from it**.”
+
+---
+
+### 4. **Trust and Traceability**
+
+* **RAG** often can’t trace the origin of facts clearly—answers are stochastic recompositions.
+* **Nonostore** uses **reflexive TIDs**, where every fact has **identity, provenance, and metadata** (e.g., who added it, when, how certain).
+
+> ✳️ This makes your system *auditable*—suitable for scholarly, technical, or legal domains where LLM guesswork is unacceptable.
+
+---
+
+### 5. **Authoring and Curation**
+
+* **RAG** relies on external documents and ingestion pipelines.
+* **Nonostore** encourages **semantic authorship**: users contribute structured knowledge directly by asserting new triples, definitions, and links.
+
+> ✳️ It's a platform for **living knowledge bases**, not just document retrieval.
+
+---
+
+## 🎯 Analogy
+
+> **RAG** is a search engine with a poet strapped to the backend.
+> **Nonostore** is a map of the conceptual terrain, **built to be walked**.
+

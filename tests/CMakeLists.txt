@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
+# Copy test environment to build directory
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cpp/testenv 
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # Test executables
 
 # LMDB wrapper test
@@ -68,6 +72,20 @@ add_executable(test_find_triple_wildcards
 )
 target_link_libraries(test_find_triple_wildcards labdb)
 add_test(NAME FindTripleWildcardsTest COMMAND test_find_triple_wildcards)
+
+# Enhanced API test (Rich object returns and dual-layer design)
+add_executable(test_enhanced_api
+    cpp/test_enhanced_api.cpp
+)
+target_link_libraries(test_enhanced_api labdb)
+add_test(NAME EnhancedApiTest COMMAND test_enhanced_api)
+
+# EID Chain Debug test (Debug EID resolution chains)
+add_executable(eid_debug_test
+    cpp/eid_debug_test.cpp
+)
+target_link_libraries(eid_debug_test labdb)
+# Note: This is a debug test, not added to CTest suite
 
 # Performance Benchmark (not a test, but a benchmark tool)
 add_executable(benchmark_performance

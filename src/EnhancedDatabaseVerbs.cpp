@@ -247,22 +247,22 @@ std::vector<std::string> extractPatternList(const lab::Text::Sexpr& sexpr, const
         const auto& elem = sexpr.expr[i];
         
         // Check if we hit the target parameter atom (e.g., ":patterns")
-        if (elem.token == lab::Text::tsSexprAtom && elem.ref < sexpr.strings.size()) {
-            if (sexpr.strings[elem.ref] == param_name) {
+        if (elem.token == tsSexprAtom && elem.ref < sexpr.strings.size()) {
+            if (sexpr.strings[elem.ref] == ":" + param_name) {
                 in_target_param = true;
                 continue;
             }
         }
         
         if (in_target_param) {
-            if (elem.token == lab::Text::tsSexprPushList) {
+            if (elem.token == tsSexprPushList) {
                 list_depth++;
-            } else if (elem.token == lab::Text::tsSexprPopList) {
+            } else if (elem.token == tsSexprPopList) {
                 list_depth--;
                 if (list_depth == 0) {
                     in_target_param = false; // End of parameter list
                 }
-            } else if (elem.token == lab::Text::tsSexprString && list_depth > 0) {
+            } else if (elem.token == tsSexprString && list_depth > 0) {
                 // This is a string inside the list
                 if (elem.ref < sexpr.strings.size()) {
                     patterns.push_back(sexpr.strings[elem.ref]);
@@ -283,23 +283,135 @@ struct EntitySearchResult {
     std::string type = "entity";
 };
 
+std::vector<EntitySearchResult> performEntitySearch(const std::string& pattern, NonoStore* store) {
+    std::vector<EntitySearchResult> results;
+    
+    // Pattern matching logic (same as original FindEntityVerb)
+    std::string searchPattern = pattern;
+    bool hasLeadingWildcard = !pattern.empty() && pattern.front() == '*';
+    bool hasTrailingWildcard = !pattern.empty() && pattern.back() == '*';
+    
+    if (hasLeadingWildcard) searchPattern = searchPattern.substr(1);
+    if (hasTrailingWildcard) searchPattern = searchPattern.substr(0, searchPattern.length() - 1);
+    
+    // Get all subjects (entities) from the database
+    auto allSubjects = store->all_subjects();
+    
+    for (const auto& subject : allSubjects) {
+        const std::string& entity_name = subject;
+        bool matches = false;
+        
+        if (pattern == "*") {
+            matches = true;
+        } else if (hasLeadingWildcard && hasTrailingWildcard) {
+            matches = (entity_name.find(searchPattern) != std::string::npos);
+        } else if (hasLeadingWildcard) {
+            matches = (entity_name.length() >= searchPattern.length() && 
+                      entity_name.substr(entity_name.length() - searchPattern.length()) == searchPattern);
+        } else if (hasTrailingWildcard) {
+            matches = (entity_name.length() >= searchPattern.length() && 
+                      entity_name.substr(0, searchPattern.length()) == searchPattern);
+        } else {
+            matches = (entity_name == searchPattern);
+        }
+        
+        if (matches) {
+            EntitySearchResult result;
+            
+            // Generate EID using existing logic
+            EntityId entityId = EntityId::fromName(entity_name, *store);
+            result.eid = entityId.isValid() ? entityId.eid() : "eid:unknown";
+            
+            // Apply EID chain resolution to get the friendly value
+            // Note: We need to convert raw pointer to shared_ptr for resolveEidChain
+            std::shared_ptr<NonoStore> store_shared(store, [](NonoStore*) {});
+            auto resolved = resolveEidChain(result.eid, entity_name, store_shared);
+            result.value = resolved.final_value;  // Use resolved value instead of raw entity_name
+            
+            results.push_back(result);
+        }
+    }
+    
+    return results;
+}
 
 //-----------------------------------------------------------------------------
-// Enhanced Find Entity Implementation (returns rich objects)
+// Helper: Format multiple search results as JSON
 //-----------------------------------------------------------------------------
+std::string formatMultipleSearchResults(const std::vector<EntitySearchResult>& all_results, 
+                                       const std::vector<std::string>& patterns_searched) {
+    std::ostringstream json;
+    
+    if (patterns_searched.size() == 1) {
+        // Single pattern - return simple array (backward compatible)
+        json << "[";
+        for (size_t i = 0; i < all_results.size(); ++i) {
+            if (i > 0) json << ",";
+            json << "{\"eid\":\"" << all_results[i].eid << "\","
+                 << "\"value\":\"" << all_results[i].value << "\","
+                 << "\"type\":\"" << all_results[i].type << "\"}";
+        }
+        json << "]";
+    } else {
+        // Multiple patterns - return enhanced structure with analytics
+        json << "{";
+        json << "\"patterns_searched\":[";
+        for (size_t i = 0; i < patterns_searched.size(); ++i) {
+            if (i > 0) json << ",";
+            json << "\"" << patterns_searched[i] << "\"";
+        }
+        json << "],";
+        
+        json << "\"entities\":[";
+        for (size_t i = 0; i < all_results.size(); ++i) {
+            if (i > 0) json << ",";
+            json << "{\"eid\":\"" << all_results[i].eid << "\","
+                 << "\"value\":\"" << all_results[i].value << "\","
+                 << "\"type\":\"" << all_results[i].type << "\"}";
+        }
+        json << "],";
+        
+        json << "\"search_analytics\":{";
+        json << "\"total_patterns\":" << patterns_searched.size() << ",";
+        json << "\"total_entities_found\":" << all_results.size();
+        json << "}}";
+    }
+    
+    return json.str();
+}
 
+//-----------------------------------------------------------------------------
+// Main: Upgraded FindEntityEnhancedVerb Implementation
+//-----------------------------------------------------------------------------
 Db9Response FindEntityEnhancedVerb::execute(const lab::Text::Sexpr& sexpr) {
     auto start_time = std::chrono::steady_clock::now();
     
     try {
-        std::string pattern = extractStringParam(sexpr, "pattern");
+        // Check for both single pattern and multiple patterns
+        std::string single_pattern = extractStringParam(sexpr, "pattern");
+        std::vector<std::string> pattern_list = extractPatternList(sexpr, "patterns");
         std::string dbid = extractStringParam(sexpr, "dbid");
         
-        if (pattern.empty()) {
+        // Determine which patterns to search
+        std::vector<std::string> patterns_to_search;
+        
+        if (!single_pattern.empty()) {
+            patterns_to_search.push_back(single_pattern);
+        } else if (!pattern_list.empty()) {
+            patterns_to_search = pattern_list;
+        } else {
             AutoReflexiveMetrics metrics;
             return Db9Response{
-                Db9Response::Error, "", "invalid_pattern", 
-                "Pattern cannot be empty", metrics
+                Db9Response::Error, "", "missing_patterns",
+                "Either :pattern or :patterns parameter is required", metrics
+            };
+        }
+        
+        if (dbid.empty()) {
+            AutoReflexiveMetrics metrics;
+            return Db9Response{
+                Db9Response::Error, "", "invalid_dbid",
+                generateDbidDiagnosisMessage("find_entity_enhanced"), metrics
             };
         }
         
@@ -309,43 +421,25 @@ Db9Response FindEntityEnhancedVerb::execute(const lab::Text::Sexpr& sexpr) {
             AutoReflexiveMetrics metrics;
             return Db9Response{
                 Db9Response::Error, "", "invalid_dbid",
-                generateDbidDiagnosisMessage("find_entity_enhanced"), metrics
+                "Database not found: " + dbid, metrics
             };
         }
         
-        // Pattern matching logic (same as existing FindEntityVerb)
-        std::vector<std::string> results;
-        std::string searchPattern = pattern;
-        bool hasLeadingWildcard = !pattern.empty() && pattern.front() == '*';
-        bool hasTrailingWildcard = !pattern.empty() && pattern.back() == '*';
+        // Debug logging to stderr (not stdout!)
+        std::cerr << "🔍 FindEntityEnhanced: Searching " << patterns_to_search.size() 
+                  << " patterns" << std::endl;
         
-        if (hasLeadingWildcard) searchPattern = searchPattern.substr(1);
-        if (hasTrailingWildcard) searchPattern = searchPattern.substr(0, searchPattern.length() - 1);
+        // Perform search for each pattern and collect results
+        std::vector<EntitySearchResult> all_results;
         
-        // Get all subjects (entities) from the database - same as regular FindEntityVerb
-        auto allSubjects = store->all_subjects();
-        
-        for (const auto& subject : allSubjects) {
-            const std::string& entity_name = subject;
-            bool matches = false;
+        for (const auto& pattern : patterns_to_search) {
+            auto pattern_results = performEntitySearch(pattern, store.get());
             
-            if (pattern == "*") {
-                matches = true;
-            } else if (hasLeadingWildcard && hasTrailingWildcard) {
-                matches = (entity_name.find(searchPattern) != std::string::npos);
-            } else if (hasLeadingWildcard) {
-                matches = (entity_name.length() >= searchPattern.length() && 
-                          entity_name.substr(entity_name.length() - searchPattern.length()) == searchPattern);
-            } else if (hasTrailingWildcard) {
-                matches = (entity_name.length() >= searchPattern.length() && 
-                          entity_name.substr(0, searchPattern.length()) == searchPattern);
-            } else {
-                matches = (entity_name == searchPattern);
-            }
+            // Add pattern results to combined results
+            all_results.insert(all_results.end(), pattern_results.begin(), pattern_results.end());
             
-            if (matches) {
-                results.push_back(entity_name);
-            }
+            std::cerr << "  Pattern '" << pattern << "': " << pattern_results.size() 
+                      << " entities found" << std::endl;
         }
         
         auto end_time = std::chrono::steady_clock::now();
@@ -353,24 +447,15 @@ Db9Response FindEntityEnhancedVerb::execute(const lab::Text::Sexpr& sexpr) {
         
         AutoReflexiveMetrics metrics;
         metrics.operation_time_ms = duration;
-        metrics.items_processed = results.size();
+        metrics.items_processed = all_results.size();
         
-        // Format results as JSON array of rich objects
-        std::ostringstream resultStream;
-        resultStream << "[";
-        for (size_t i = 0; i < results.size(); ++i) {
-            if (i > 0) resultStream << ",";
-            
-            EntityId entityId = EntityId::fromName(results[i], *store);
-            std::string eid = entityId.isValid() ? entityId.eid() : "eid:unknown";
-            
-            std::string richObject = generateRichEntityJson(eid, results[i]);
-            resultStream << richObject;
-        }
-        resultStream << "]";
+        std::string result_json = formatMultipleSearchResults(all_results, patterns_to_search);
+        
+        std::cerr << "🎯 FindEntityEnhanced: Found " << all_results.size() 
+                  << " total entities across " << patterns_to_search.size() << " patterns" << std::endl;
         
         return Db9Response{
-            Db9Response::Success, resultStream.str(), "", "", metrics
+            Db9Response::Success, result_json, "", "", metrics
         };
         
     } catch (const std::exception& e) {
@@ -385,6 +470,37 @@ Db9Response FindEntityEnhancedVerb::execute(const lab::Text::Sexpr& sexpr) {
         };
     }
 }
+
+//-----------------------------------------------------------------------------
+// Usage Examples:
+//-----------------------------------------------------------------------------
+
+/*
+
+// Single pattern (backward compatible):
+(find-entity-enhanced :pattern "*camera*" :dbid "db1")
+
+// Returns:
+[
+  {"eid":"eid:104","value":"set_camera","type":"entity"}
+]
+
+// Multiple patterns (new functionality):
+(find-entity-enhanced :patterns ("*camera*" "*background*" "*scroll*") :dbid "db1")
+
+// Returns:
+{
+  "patterns_searched": ["*camera*", "*background*", "*scroll*"],
+  "entities": [
+    {"eid":"eid:104","value":"set_camera","type":"entity"}
+  ],
+  "search_analytics": {
+    "total_patterns": 3,
+    "total_entities_found": 1
+  }
+}
+
+*/
 
 //-----------------------------------------------------------------------------
 // FindEidVerb Implementation
@@ -1241,14 +1357,79 @@ Db9Response FindRelationshipsEnhancedVerb::execute(const lab::Text::Sexpr& sexpr
         std::ofstream debug_file("/tmp/enhanced_verbs_debug.log", std::ios::app);
         debug_file << "🔍 FindRelationshipsEnhanced: Searching for entity=" << entity << std::endl;
         
-        // Find outgoing relationships (entity as subject)
-        std::ostringstream outgoing_json;
-        std::string find_outgoing_cmd = "(find-triple-enhanced :subject \"" + entity + "\" :predicate \"*\" :object \"*\" :dbid \"" + dbid + "\")";
-        auto outgoing_response = getGlobalDb9Dispatcher().executeCommand(find_outgoing_cmd);
+        // Find outgoing relationships (entity as subject) - DIRECT IMPLEMENTATION
+        auto outgoing_triples = store->query(entity, "*", "*");
         
-        // Find incoming relationships (entity as object)  
-        std::string find_incoming_cmd = "(find-triple-enhanced :subject \"*\" :predicate \"*\" :object \"" + entity + "\" :dbid \"" + dbid + "\")";
-        auto incoming_response = getGlobalDb9Dispatcher().executeCommand(find_incoming_cmd);
+        // Find incoming relationships (entity as object) - DIRECT IMPLEMENTATION
+        auto incoming_triples = store->query("*", "*", entity);
+        
+        // Build outgoing relationships JSON
+        std::ostringstream outgoing_json;
+        outgoing_json << "[";
+        for (size_t i = 0; i < outgoing_triples.size(); ++i) {
+            if (i > 0) outgoing_json << ",";
+            
+            // Generate EIDs for each component
+            EntityId subjectId = EntityId::fromName(outgoing_triples[i].subject, *store);
+            EntityId predicateId = EntityId::fromName(outgoing_triples[i].predicate, *store);
+            EntityId objectId = EntityId::fromName(outgoing_triples[i].object, *store);
+            
+            std::string subject_eid = subjectId.isValid() ? subjectId.eid() : "eid:unknown";
+            std::string predicate_eid = predicateId.isValid() ? predicateId.eid() : "eid:unknown";
+            std::string object_eid = objectId.isValid() ? objectId.eid() : "eid:unknown";
+            
+            // Generate a TID for this triple
+            std::string triple_key = outgoing_triples[i].subject + ":" + outgoing_triples[i].predicate + ":" + outgoing_triples[i].object;
+            std::hash<std::string> hasher;
+            size_t tid_value = hasher(triple_key);
+            std::string tid = "tid:" + std::to_string(tid_value);
+            
+            // Generate rich triple JSON directly
+            std::string richTriple = generateRichTripleJson(
+                tid,
+                subject_eid, outgoing_triples[i].subject,
+                predicate_eid, outgoing_triples[i].predicate,
+                object_eid, outgoing_triples[i].object,
+                store
+            );
+            
+            outgoing_json << richTriple;
+        }
+        outgoing_json << "]";
+        
+        // Build incoming relationships JSON
+        std::ostringstream incoming_json;
+        incoming_json << "[";
+        for (size_t i = 0; i < incoming_triples.size(); ++i) {
+            if (i > 0) incoming_json << ",";
+            
+            // Generate EIDs for each component
+            EntityId subjectId = EntityId::fromName(incoming_triples[i].subject, *store);
+            EntityId predicateId = EntityId::fromName(incoming_triples[i].predicate, *store);
+            EntityId objectId = EntityId::fromName(incoming_triples[i].object, *store);
+            
+            std::string subject_eid = subjectId.isValid() ? subjectId.eid() : "eid:unknown";
+            std::string predicate_eid = predicateId.isValid() ? predicateId.eid() : "eid:unknown";
+            std::string object_eid = objectId.isValid() ? objectId.eid() : "eid:unknown";
+            
+            // Generate a TID for this triple
+            std::string triple_key = incoming_triples[i].subject + ":" + incoming_triples[i].predicate + ":" + incoming_triples[i].object;
+            std::hash<std::string> hasher;
+            size_t tid_value = hasher(triple_key);
+            std::string tid = "tid:" + std::to_string(tid_value);
+            
+            // Generate rich triple JSON directly
+            std::string richTriple = generateRichTripleJson(
+                tid,
+                subject_eid, incoming_triples[i].subject,
+                predicate_eid, incoming_triples[i].predicate,
+                object_eid, incoming_triples[i].object,
+                store
+            );
+            
+            incoming_json << richTriple;
+        }
+        incoming_json << "]";
         
         debug_file << "🔗 FindRelationshipsEnhanced: Found relationships for " << entity << std::endl;
         debug_file.close();
@@ -1257,8 +1438,8 @@ Db9Response FindRelationshipsEnhancedVerb::execute(const lab::Text::Sexpr& sexpr
         std::ostringstream combined_json;
         combined_json << "{";
         combined_json << "\"entity\":\"" << entity << "\",";
-        combined_json << "\"outgoing\":" << outgoing_response.result << ",";
-        combined_json << "\"incoming\":" << incoming_response.result;
+        combined_json << "\"outgoing\":" << outgoing_json.str() << ",";
+        combined_json << "\"incoming\":" << incoming_json.str();
         combined_json << "}";
         
         auto end_time = std::chrono::steady_clock::now();
@@ -1266,7 +1447,7 @@ Db9Response FindRelationshipsEnhancedVerb::execute(const lab::Text::Sexpr& sexpr
         
         AutoReflexiveMetrics metrics;
         metrics.operation_time_ms = duration;
-        metrics.items_processed = 2; // Two relationship searches
+        metrics.items_processed = outgoing_triples.size() + incoming_triples.size(); // Total relationships found
         
         return Db9Response{
             Db9Response::Success, combined_json.str(), "", "", metrics
@@ -1281,117 +1462,6 @@ Db9Response FindRelationshipsEnhancedVerb::execute(const lab::Text::Sexpr& sexpr
         
         return Db9Response{
             Db9Response::Error, "", "find_relationships_enhanced_failed", e.what(), metrics
-        };
-    }
-}
-
-//-----------------------------------------------------------------------------
-// FindEntitiesEnhancedVerb Implementation  
-//-----------------------------------------------------------------------------
-
-Db9Response FindEntitiesEnhancedVerb::execute(const lab::Text::Sexpr& sexpr) {
-    auto start_time = std::chrono::steady_clock::now();
-    
-    try {
-        std::string patterns = extractStringParam(sexpr, "patterns");
-        std::string dbid = extractStringParam(sexpr, "dbid");
-        
-        if (patterns.empty()) {
-            AutoReflexiveMetrics metrics;
-            return Db9Response{
-                Db9Response::Error, "", "missing_patterns",
-                "Parameter :patterns is required (comma-separated list)", metrics
-            };
-        }
-        
-        if (dbid.empty()) {
-            AutoReflexiveMetrics metrics;
-            return Db9Response{
-                Db9Response::Error, "", "invalid_dbid",
-                generateDbidDiagnosisMessage("find_entities_enhanced"), metrics
-            };
-        }
-        
-        auto& manager = DatabaseManager::instance();
-        auto store = manager.getDatabase(dbid);
-        if (!store) {
-            AutoReflexiveMetrics metrics;
-            return Db9Response{
-                Db9Response::Error, "", "invalid_dbid",
-                "Database not found: " + dbid, metrics
-            };
-        }
-        
-        std::ofstream debug_file("/tmp/enhanced_verbs_debug.log", std::ios::app);
-        debug_file << "🔍 FindEntitiesEnhanced: Searching patterns=" << patterns << std::endl;
-        
-        // Parse comma-separated patterns
-        std::vector<std::string> pattern_list;
-        std::istringstream pattern_stream(patterns);
-        std::string pattern;
-        while (std::getline(pattern_stream, pattern, ',')) {
-            // Trim whitespace
-            pattern.erase(0, pattern.find_first_not_of(" \t"));
-            pattern.erase(pattern.find_last_not_of(" \t") + 1);
-            if (!pattern.empty()) {
-                pattern_list.push_back(pattern);
-            }
-        }
-        
-        std::ostringstream combined_json;
-        combined_json << "{\"patterns_searched\":[";
-        
-        // Search each pattern and collect results
-        std::vector<std::string> all_results;
-        for (size_t i = 0; i < pattern_list.size(); ++i) {
-            if (i > 0) combined_json << ",";
-            combined_json << "\"" << pattern_list[i] << "\"";
-            
-            std::string find_cmd = "(find-entity-enhanced :dbid \"" + dbid + "\" :pattern \"" + pattern_list[i] + "\")";
-            auto pattern_response = getGlobalDb9Dispatcher().executeCommand(find_cmd);
-            
-            if (pattern_response.status == Db9Response::Success && pattern_response.result != "[]") {
-                all_results.push_back(pattern_response.result);
-            }
-        }
-        
-        combined_json << "],\"results\":[";
-        
-        // Combine all results
-        for (size_t i = 0; i < all_results.size(); ++i) {
-            if (i > 0) combined_json << ",";
-            // Remove outer brackets from individual results and merge
-            std::string result = all_results[i];
-            if (result.front() == '[') result = result.substr(1);
-            if (result.back() == ']') result = result.substr(0, result.length() - 1);
-            combined_json << result;
-        }
-        
-        combined_json << "]}";
-        
-        debug_file << "🎯 FindEntitiesEnhanced: Found entities across " << pattern_list.size() << " patterns" << std::endl;
-        debug_file.close();
-        
-        auto end_time = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-        
-        AutoReflexiveMetrics metrics;
-        metrics.operation_time_ms = duration;
-        metrics.items_processed = pattern_list.size();
-        
-        return Db9Response{
-            Db9Response::Success, combined_json.str(), "", "", metrics
-        };
-        
-    } catch (const std::exception& e) {
-        auto end_time = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-        
-        AutoReflexiveMetrics metrics;
-        metrics.operation_time_ms = duration;
-        
-        return Db9Response{
-            Db9Response::Error, "", "find_entities_enhanced_failed", e.what(), metrics
         };
     }
 }
@@ -1415,7 +1485,6 @@ extern "C" void initEnhancedDatabaseVerbRegistration() {
         
         // Register new enhanced exploration verbs
         dispatcher.registerVerb(std::make_unique<LabDb::FindRelationshipsEnhancedVerb>());
-        dispatcher.registerVerb(std::make_unique<LabDb::FindEntitiesEnhancedVerb>());
         
         // Register lean API verbs (EID/TID only)
         dispatcher.registerVerb(std::make_unique<LabDb::FindEidVerb>());

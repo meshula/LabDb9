@@ -458,6 +458,150 @@ void TestEscapedQuoteDiagnostics() {
 }
 
 //-----------------------------------------------------------------------------
+// Enhanced Entity Pattern List Parsing Test
+// Add this to test_sexpr_unicode_robustness.cpp or create a new test file
+//-----------------------------------------------------------------------------
+
+void TestEnhancedEntityPatternParsing() {
+    TEST_START("Enhanced Entity Pattern List Parsing");
+    
+    //-------------------------------------------------------------------------
+    // Test 1: Single pattern (existing syntax) 
+    //-------------------------------------------------------------------------
+    TEST_SECTION("Single pattern syntax");
+    {
+        std::string single_cmd = "(find-entity-enhanced :pattern \"*camera*\" :dbid \"db1\")";
+        ParseResult result = ParseSexpr(single_cmd);
+        
+        AXIOM(result.success, "Single pattern S-expression should parse successfully");
+        AXIOM(result.atoms.size() >= 3, "Should have verb + parameters");
+        AXIOM(result.atoms[0] == "find-entity-enhanced", "First atom should be verb name");
+        AXIOM(result.strings.size() >= 2, "Should have pattern and dbid strings");
+        
+        // Find :pattern parameter
+        bool found_pattern_param = false;
+        for (size_t i = 0; i < result.atoms.size(); ++i) {
+            if (result.atoms[i] == ":pattern") {
+                found_pattern_param = true;
+                break;
+            }
+        }
+        AXIOM(found_pattern_param, "Should contain :pattern parameter");
+    }
+    
+    //-------------------------------------------------------------------------  
+    // Test 2: Multiple patterns (new list syntax)
+    //-------------------------------------------------------------------------
+    TEST_SECTION("Multiple pattern list syntax");
+    {
+        std::string multi_cmd = "(find-entity-enhanced :patterns (\"*camera*\" \"*background*\" \"*scroll*\") :dbid \"db1\")";
+        ParseResult result = ParseSexpr(multi_cmd);
+        
+        AXIOM(result.success, "Multi-pattern S-expression should parse successfully");
+        AXIOM(result.atoms[0] == "find-entity-enhanced", "First atom should be verb name");
+        
+        // Should have nested list structure
+        bool has_nested_list = false;
+        int depth = 0;
+        for (int struct_elem : result.structure) {
+            if (struct_elem == 1) depth++;
+            if (struct_elem == -1) depth--;
+            if (depth > 1) has_nested_list = true;
+        }
+        AXIOM(has_nested_list, "Should contain nested list for patterns");
+        
+        // Should have 3 pattern strings plus dbid
+        AXIOM(result.strings.size() >= 4, "Should have 3 patterns + dbid string");
+        
+        // Find :patterns parameter
+        bool found_patterns_param = false;
+        for (size_t i = 0; i < result.atoms.size(); ++i) {
+            if (result.atoms[i] == ":patterns") {
+                found_patterns_param = true;
+                break;
+            }
+        }
+        AXIOM(found_patterns_param, "Should contain :patterns parameter");
+    }
+    
+    //-------------------------------------------------------------------------
+    // Test 3: Extract pattern list from parsed S-expression
+    //-------------------------------------------------------------------------  
+    TEST_SECTION("Pattern list extraction");
+    {
+        std::string multi_cmd = "(find-entity-enhanced :patterns (\"*camera*\" \"*background*\" \"*scroll*\") :dbid \"db1\")";
+        StrView view(multi_cmd);
+        Sexpr sexpr(view);
+        
+        AXIOM(sexpr.balance == 0, "S-expression should be balanced");
+        
+        // Simulate extractPatternList functionality
+        std::vector<std::string> extracted_patterns;
+        
+        // Find :patterns parameter in atoms
+        bool in_patterns_list = false;
+        int list_depth = 0;
+        
+        for (size_t i = 0; i < sexpr.expr.size(); ++i) {
+            const auto& elem = sexpr.expr[i];
+            
+            // Check if we hit :patterns atom
+            if (elem.token == tsSexprAtom && elem.ref < sexpr.strings.size()) {
+                if (sexpr.strings[elem.ref] == ":patterns") {
+                    in_patterns_list = true;
+                    continue;
+                }
+            }
+            
+            if (in_patterns_list) {
+                if (elem.token == tsSexprPushList) {
+                    list_depth++;
+                } else if (elem.token == tsSexprPopList) {
+                    list_depth--;
+                    if (list_depth == 0) {
+                        in_patterns_list = false; // End of patterns list
+                    }
+                } else if (elem.token == tsSexprString && list_depth > 0) {
+                    // This is a pattern string inside the list
+                    if (elem.ref < sexpr.strings.size()) {
+                        extracted_patterns.push_back(sexpr.strings[elem.ref]);
+                    }
+                }
+            }
+        }
+        
+        AXIOM(extracted_patterns.size() == 3, "Should extract exactly 3 patterns");
+        AXIOM(extracted_patterns[0] == "*camera*", "First pattern should be *camera*");
+        AXIOM(extracted_patterns[1] == "*background*", "Second pattern should be *background*");
+        AXIOM(extracted_patterns[2] == "*scroll*", "Third pattern should be *scroll*");
+    }
+    
+    //-------------------------------------------------------------------------
+    // Test 4: Edge cases and error conditions
+    //-------------------------------------------------------------------------
+    TEST_SECTION("Edge cases");
+    {
+        // Empty patterns list
+        std::string empty_list = "(find-entity-enhanced :patterns () :dbid \"db1\")";
+        ParseResult empty_result = ParseSexpr(empty_list);
+        AXIOM(empty_result.success, "Empty pattern list should parse");
+        
+        // Single pattern in list (should work same as :pattern)
+        std::string single_in_list = "(find-entity-enhanced :patterns (\"*camera*\") :dbid \"db1\")"; 
+        ParseResult single_result = ParseSexpr(single_in_list);
+        AXIOM(single_result.success, "Single pattern in list should parse");
+        
+        // Missing dbid (should parse but fail validation later)
+        std::string no_dbid = "(find-entity-enhanced :patterns (\"*camera*\"))";
+        ParseResult no_dbid_result = ParseSexpr(no_dbid);
+        AXIOM(no_dbid_result.success, "Missing dbid should still parse (validation happens later)");
+    }
+    
+    TEST_SUCCESS("Enhanced Entity Pattern List Parsing");
+}
+
+
+//-----------------------------------------------------------------------------
 // Main Test Runner
 //-----------------------------------------------------------------------------
 
@@ -472,6 +616,8 @@ int main() {
         TestEmojiAndSymbolHandling();
         TestVisualParenthesesLookalikes();
         TestRealWorldTriadicData();
+        TestEnhancedEntityPatternParsing();
+
         
         // Original quick test preserved
         std::cout << "\n🧪 Quick Additional Unicode Test...\n";

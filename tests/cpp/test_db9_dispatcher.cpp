@@ -43,6 +43,8 @@ struct TestState {
 
 static TestState g_test;
 
+extern "C" void initEnhancedDatabaseVerbRegistration();
+
 //-----------------------------------------------------------------------------
 // Helper Functions
 //-----------------------------------------------------------------------------
@@ -51,6 +53,7 @@ void setupTestEnvironment() {
     
     // Initialize verb registration
     initDatabaseVerbRegistration();
+    initEnhancedDatabaseVerbRegistration();
 
     // Clean up any existing test database
     std::filesystem::remove_all(g_test.test_db_path);
@@ -973,6 +976,273 @@ void test_triple_operations(const std::string& test_name) {
     TEST_SUCCESS("Triple Operations - Phase 3 (" + test_name + ")");
 }
 
+//-----------------------------------------------------------------------------
+// Comprehensive Tests for Enhanced Pattern Functionality
+//-----------------------------------------------------------------------------
+
+void test_single_pattern_enhanced() {
+    TEST_START("Single Pattern Enhanced (:pattern)");
+    
+    // Create fresh database for this test
+    std::string dbid = create_fresh_database("test_single_pattern");
+    if (g_test.verbosity >= 1) {
+        std::cout << "    Using fresh database ID: " << dbid << "\n";
+    }
+    
+    // Add some test entities
+    std::vector<std::string> test_entities = {
+        "camera_main", "camera_follow", "background_sky",
+        "background_mountains", "scroll_handler", "map_renderer"
+    };
+    
+    for (const auto& entity : test_entities) {
+        std::string addCmd = "(add-entity :value \"" + entity + "\" :dbid \"" + dbid + "\")";
+        auto response = g_test.dispatcher->executeCommand(addCmd);
+        AXIOM(response.status == LabDb::Db9Response::Success,
+              "Should successfully add entity: " + entity);
+    }
+    
+    // Test single pattern search
+    std::string findCmd = "(find-entity-enhanced :pattern \"*camera*\" :dbid \"" + dbid + "\")";
+    auto response = g_test.dispatcher->executeCommand(findCmd);
+    
+    if (g_test.verbosity >= 2) {
+        std::cout << "    Single pattern response: " << response.result << "\n";
+        if (response.status != LabDb::Db9Response::Success) {
+            std::cout << "    Error: " << response.error_message << "\n";
+        }
+    }
+    
+    AXIOM(response.status == LabDb::Db9Response::Success,
+          "Single pattern search should succeed");
+    
+    // Parse JSON response to verify structure
+    AXIOM(response.result.front() == '[', "Single pattern should return JSON array");
+    AXIOM(response.result.find("camera_main") != std::string::npos,
+          "Should find camera_main entity");
+    AXIOM(response.result.find("camera_follow") != std::string::npos,
+          "Should find camera_follow entity");
+    AXIOM(response.result.find("\"eid\":") != std::string::npos,
+          "Should include EID in response");
+    AXIOM(response.result.find("\"value\":") != std::string::npos,
+          "Should include value in response");
+    AXIOM(response.result.find("\"type\":") != std::string::npos,
+          "Should include type in response");
+    
+    TEST_SUCCESS("Single Pattern Enhanced (:pattern)");
+}
+
+void test_multiple_patterns_enhanced() {
+    TEST_START("Multiple Patterns Enhanced (:patterns)");
+    
+    // Create fresh database for this test
+    std::string dbid = create_fresh_database("test_multiple_patterns");
+    if (g_test.verbosity >= 1) {
+        std::cout << "    Using fresh database ID: " << dbid << "\n";
+    }
+    
+    // Add diverse test entities
+    std::vector<std::string> test_entities = {
+        "camera_main", "camera_follow", "camera_shake",
+        "background_sky", "background_mountains", "background_clouds",
+        "scroll_horizontal", "scroll_vertical", "scroll_handler",
+        "sprite_player", "map_tiles", "layer_foreground"
+    };
+    
+    for (const auto& entity : test_entities) {
+        std::string addCmd = "(add-entity :value \"" + entity + "\" :dbid \"" + dbid + "\")";
+        auto response = g_test.dispatcher->executeCommand(addCmd);
+        AXIOM(response.status == LabDb::Db9Response::Success,
+              "Should successfully add entity: " + entity);
+    }
+    
+    // Test multiple patterns search
+    std::string findCmd = "(find-entity-enhanced :patterns (\"*camera*\" \"*background*\" \"*scroll*\") :dbid \"" + dbid + "\")";
+    auto response = g_test.dispatcher->executeCommand(findCmd);
+    
+    if (g_test.verbosity >= 2) {
+        std::cout << "    Multiple patterns response: " << response.result << "\n";
+        if (response.status != LabDb::Db9Response::Success) {
+            std::cout << "    Error: " << response.error_message << "\n";
+        }
+    }
+    
+    AXIOM(response.status == LabDb::Db9Response::Success,
+          "Multiple patterns search should succeed");
+    
+    // Parse JSON response to verify enhanced structure
+    AXIOM(response.result.front() == '{', "Multiple patterns should return JSON object");
+    AXIOM(response.result.find("\"patterns_searched\":") != std::string::npos,
+          "Should include patterns_searched field");
+    AXIOM(response.result.find("\"entities\":") != std::string::npos,
+          "Should include entities array");
+    AXIOM(response.result.find("\"search_analytics\":") != std::string::npos,
+          "Should include search analytics");
+    AXIOM(response.result.find("\"total_patterns\":3") != std::string::npos,
+          "Should report 3 patterns searched");
+    
+    // Verify specific entities are found
+    AXIOM(response.result.find("camera_main") != std::string::npos,
+          "Should find camera entities");
+    AXIOM(response.result.find("background_sky") != std::string::npos,
+          "Should find background entities");
+    AXIOM(response.result.find("scroll_horizontal") != std::string::npos,
+          "Should find scroll entities");
+    
+    TEST_SUCCESS("Multiple Patterns Enhanced (:patterns)");
+}
+
+void test_pattern_edge_cases() {
+    TEST_START("Pattern Edge Cases");
+    
+    std::string dbid = create_fresh_database("test_edge_cases");
+    if (g_test.verbosity >= 1) {
+        std::cout << "    Using fresh database ID: " << dbid << "\n";
+    }
+    
+    // Add test entity
+    std::string addCmd = "(add-entity :value \"test_entity\" :dbid \"" + dbid + "\")";
+    auto response = g_test.dispatcher->executeCommand(addCmd);
+    AXIOM(response.status == LabDb::Db9Response::Success, "Should add test entity");
+    
+    // Test 1: Empty patterns list
+    TEST_SECTION("Empty patterns list");
+    std::string emptyCmd = "(find-entity-enhanced :patterns () :dbid \"" + dbid + "\")";
+    auto emptyResponse = g_test.dispatcher->executeCommand(emptyCmd);
+    
+    if (g_test.verbosity >= 2) {
+        std::cout << "    Empty patterns response: " << emptyResponse.result << "\n";
+        if (emptyResponse.status != LabDb::Db9Response::Success) {
+            std::cout << "    Error: " << emptyResponse.error_message << "\n";
+        }
+    }
+    
+    // Should error because empty patterns list is invalid
+    AXIOM(emptyResponse.status == LabDb::Db9Response::Error,
+          "Empty patterns list should fail");
+    AXIOM(emptyResponse.error_code == "missing_patterns",
+          "Should report missing patterns error");
+
+    // Test 2: Single pattern in list (should work like :pattern)
+    TEST_SECTION("Single pattern in list");
+    std::string singleInListCmd = "(find-entity-enhanced :patterns (\"*test*\") :dbid \"" + dbid + "\")";
+    auto singleResponse = g_test.dispatcher->executeCommand(singleInListCmd);
+    
+    AXIOM(singleResponse.status == LabDb::Db9Response::Success,
+          "Single pattern in list should succeed");
+    AXIOM(singleResponse.result.find("test_entity") != std::string::npos,
+          "Should find test entity");
+    
+    // Test 3: Missing both parameters
+    TEST_SECTION("Missing parameters");
+    std::string noParamsCmd = "(find-entity-enhanced :dbid \"" + dbid + "\")";
+    auto noParamsResponse = g_test.dispatcher->executeCommand(noParamsCmd);
+    
+    AXIOM(noParamsResponse.status == LabDb::Db9Response::Error,
+          "Missing parameters should fail");
+    AXIOM(noParamsResponse.error_code == "missing_patterns",
+          "Should report missing patterns error");
+    
+    // Test 4: Both parameters provided (should prefer :pattern)
+    TEST_SECTION("Both parameters provided");
+    std::string bothCmd = "(find-entity-enhanced :pattern \"*test*\" :patterns (\"*other*\") :dbid \"" + dbid + "\")";
+    auto bothResponse = g_test.dispatcher->executeCommand(bothCmd);
+    
+    AXIOM(bothResponse.status == LabDb::Db9Response::Success,
+          "Both parameters should succeed");
+    AXIOM(bothResponse.result.front() == '[',
+          "Should use single pattern format when :pattern provided");
+    
+    // Test 5: Wildcard patterns
+    TEST_SECTION("Wildcard patterns");
+    std::string wildcardCmd = "(find-entity-enhanced :patterns (\"*\" \"test*\" \"*entity\") :dbid \"" + dbid + "\")";
+    auto wildcardResponse = g_test.dispatcher->executeCommand(wildcardCmd);
+    
+    AXIOM(wildcardResponse.status == LabDb::Db9Response::Success,
+          "Wildcard patterns should succeed");
+    
+    TEST_SUCCESS("Pattern Edge Cases");
+}
+
+void test_performance_comparison() {
+    TEST_START("Performance Comparison");
+    
+    std::string dbid = create_fresh_database("test_performance");
+    if (g_test.verbosity >= 1) {
+        std::cout << "    Using fresh database ID: " << dbid << "\n";
+    }
+    
+    // Add many test entities
+    std::vector<std::string> categories = {"camera", "background", "scroll", "sprite", "map"};
+    for (const auto& category : categories) {
+        for (int i = 0; i < 5; ++i) {
+            std::string entity = category + "_item_" + std::to_string(i);
+            std::string addCmd = "(add-entity :value \"" + entity + "\" :dbid \"" + dbid + "\")";
+            auto response = g_test.dispatcher->executeCommand(addCmd);
+            AXIOM(response.status == LabDb::Db9Response::Success,
+                  "Should add entity: " + entity);
+        }
+    }
+    
+    // Test multiple individual calls vs single multi-pattern call
+    auto start_time = std::chrono::steady_clock::now();
+    
+    // Method 1: Multiple individual calls
+    std::vector<std::string> individual_patterns = {"*camera*", "*background*", "*scroll*"};
+    for (const auto& pattern : individual_patterns) {
+        std::string findCmd = "(find-entity-enhanced :pattern \"" + pattern + "\" :dbid \"" + dbid + "\")";
+        auto response = g_test.dispatcher->executeCommand(findCmd);
+        AXIOM(response.status == LabDb::Db9Response::Success,
+              "Individual pattern should succeed: " + pattern);
+    }
+    
+    auto individual_time = std::chrono::steady_clock::now();
+    
+    // Method 2: Single multi-pattern call
+    std::string multiCmd = "(find-entity-enhanced :patterns (\"*camera*\" \"*background*\" \"*scroll*\") :dbid \"" + dbid + "\")";
+    auto multiResponse = g_test.dispatcher->executeCommand(multiCmd);
+    AXIOM(multiResponse.status == LabDb::Db9Response::Success,
+          "Multi-pattern should succeed");
+    
+    auto multi_time = std::chrono::steady_clock::now();
+    
+    // Calculate durations
+    auto individual_duration = std::chrono::duration_cast<std::chrono::microseconds>(individual_time - start_time);
+    auto multi_duration = std::chrono::duration_cast<std::chrono::microseconds>(multi_time - individual_time);
+    
+    if (g_test.verbosity >= 1) {
+        std::cout << "    Individual calls: " << individual_duration.count() << " microseconds\n";
+        std::cout << "    Multi-pattern call: " << multi_duration.count() << " microseconds\n";
+        if (multi_duration < individual_duration) {
+            std::cout << "    ✅ Multi-pattern is faster!\n";
+        }
+    }
+    
+    // Verify multi-pattern returns expected analytics
+    AXIOM(multiResponse.result.find("\"total_patterns\":3") != std::string::npos,
+          "Should report 3 patterns");
+    AXIOM(multiResponse.result.find("\"total_entities_found\":15") != std::string::npos,
+          "Should find 15 entities (5 per pattern)");
+    
+    TEST_SUCCESS("Performance Comparison");
+}
+
+//-----------------------------------------------------------------------------
+// Main test runner function - add these to your test suite
+//-----------------------------------------------------------------------------
+void run_enhanced_pattern_tests() {
+    std::cout << "\n🧪 Running Enhanced Pattern Tests...\n";
+    
+    test_single_pattern_enhanced();
+    test_multiple_patterns_enhanced();
+    test_pattern_edge_cases();
+    test_performance_comparison();
+    
+    std::cout << "✅ All Enhanced Pattern Tests Passed!\n";
+}
+
+// Add this call to your main test runner:
+// run_enhanced_pattern_tests();
 void test_performance_metrics() {
     TEST_START("Performance Metrics Validation");
     
@@ -1037,6 +1307,8 @@ int main() {
         test_triple_operations("fresh_2");
         
         test_performance_metrics();
+        
+        run_enhanced_pattern_tests();
         
         // Summary
         std::cout << "\n🎉 ALL TESTS PASSED!\n";
