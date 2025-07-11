@@ -143,4 +143,4 @@ std::string resolveEntityValue(const std::string& entity_term, std::shared_ptr<N
 
 } // namespace LabDb
 
-extern "C" void initEnhancedDatabaseVerbRegistration();
+void initEnhancedDatabaseVerbRegistration(LabDb::Db9Dispatcher&);

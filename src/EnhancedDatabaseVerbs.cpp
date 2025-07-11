@@ -1,7 +1,9 @@
 #include "LabDb/EnhancedDatabaseVerbs.h"
 #include "LabDb/DatabaseVerbs.h"
+#include "LabDb/Verbs.h"
 #include "LabDb/EntityId.h"
 #include "LabDb/LabText.hpp"
+#include "Verbs/VocabularyStatsVerb.h"
 #include <chrono>
 #include <sstream>
 #include <iostream>
@@ -10,224 +12,18 @@
 
 namespace LabDb {
 
-//-----------------------------------------------------------------------------
-// Helper function implementations (from DatabaseVerbs.cpp)
-//-----------------------------------------------------------------------------
-
-std::string generateDbidDiagnosisMessage(const std::string& operation_name) {
-    auto& manager = DatabaseManager::instance();
-    auto active_dbids = manager.getActiveDbids();
-    
-    std::ostringstream msg;
-    msg << "Supply " << operation_name << " with a valid dbid, and try again. ";
-    
-    if (active_dbids.empty()) {
-        msg << "There are no open databases, so open one first to get a dbid.";
-    } else if (active_dbids.size() == 1) {
-        msg << "This is the open database: dbid \"" << active_dbids[0] 
-            << "\", is it the one with the data you are searching for?";
-    } else {
-        msg << "There are several open databases: ";
-        for (size_t i = 0; i < active_dbids.size(); ++i) {
-            if (i > 0) msg << ", ";
-            if (i == active_dbids.size() - 1 && active_dbids.size() > 2) msg << "and ";
-            msg << "dbid \"" << active_dbids[i] << "\"";
-        }
-        msg << ", is the data you are searching for in one of them?";
-    }
-    
-    return msg.str();
-}
-
-std::string extractStringParam(const lab::Text::Sexpr& sexpr, const std::string& param_name) {
-    // Look for :param_name value pattern in the parsed S-expression
-    for (size_t i = 0; i < sexpr.expr.size() - 1; ++i) {
-        const auto& elem = sexpr.expr[i];
-        
-        // Look for atoms that match our parameter name
-        if (elem.token == tsSexprAtom) {
-            int stringIndex = elem.ref;
-            if (stringIndex < static_cast<int>(sexpr.strings.size())) {
-                const std::string& token = sexpr.strings[stringIndex];
-                if (token == ":" + param_name) {
-                    // Found parameter, get next value
-                    if (i + 1 < sexpr.expr.size()) {
-                        const auto& value_elem = sexpr.expr[i + 1];
-                        if (value_elem.token == tsSexprAtom || value_elem.token == tsSexprString) {
-                            int valueIndex = value_elem.ref;
-                            if (valueIndex < static_cast<int>(sexpr.strings.size())) {
-                                return sexpr.strings[valueIndex];
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    }
-    
-    return ""; // Parameter not found
-}
+// Enhanced Database Verbs now use utilities from base IDb9Verb class
 
 // Implementation file for enhanced db9 API
 // This provides rich object returns and dual-layer semantic/storage operations
 
-//-----------------------------------------------------------------------------
-// EID Chain Resolution for Enhanced Verbs
-//-----------------------------------------------------------------------------
+// Enhanced database verbs implementation uses base class utilities for EID resolution
 
-// EID chain resolution helper for enhanced verbs
-struct EidResolutionResult {
-    std::string final_eid;
-    std::string final_value;
-    std::vector<std::string> chain;
-    bool had_cycles;
-    bool had_indirection;
-};
-
-EidResolutionResult resolveEidChain(const std::string& start_eid, const std::string& start_value, 
-                                   std::shared_ptr<NonoStore> store) {
-    EidResolutionResult result;
-    result.final_eid = start_eid;
-    result.final_value = start_value;
-    result.had_cycles = false;
-    result.had_indirection = false;
-    
-    std::unordered_set<std::string> visited;
-    std::string current_eid = start_eid;
-    std::string current_value = start_value;
-    
-    // Add initial EID to chain
-    result.chain.push_back(current_eid);
-    visited.insert(current_eid);
-    
-    // DIAGNOSTIC: Write to file for debugging
-    std::ofstream debug_file("/tmp/eid_resolution_debug.log", std::ios::app);
-    debug_file << "🔍 EID Resolution: Starting with eid=" << start_eid << " value='" << start_value << "'" << std::endl;
-    
-    // Follow EID chain until we reach a non-EID value or detect cycle
-    while (current_value.starts_with("eid:")) {
-        debug_file << "🔗 EID Chain: Found EID value '" << current_value << "', attempting to resolve..." << std::endl;
-        
-        // Check for cycle
-        if (visited.find(current_value) != visited.end()) {
-            debug_file << "🚫 EID Chain: Cycle detected! " << current_value << " already visited" << std::endl;
-            result.had_cycles = true;
-            break;
-        }
-        
-        // Try to resolve the EID value to the next entity
-        EntityId nextEntity = EntityId::fromEid(current_value, *store);
-        debug_file << "🏷️  EID Chain: EntityId lookup for '" << current_value << "' -> valid=" << nextEntity.isValid() << " exists=" << nextEntity.exists() << std::endl;
-        
-        if (!nextEntity.isValid() || !nextEntity.exists()) {
-            // Dead end - value looks like EID but doesn't resolve
-            debug_file << "💀 EID Chain: Dead end - '" << current_value << "' doesn't resolve to valid entity" << std::endl;
-            break;
-        }
-        
-        std::string next_value = nextEntity.name();
-        debug_file << "✅ EID Chain: '" << current_value << "' resolves to '" << next_value << "'" << std::endl;
-        
-        // Follow the chain
-        visited.insert(current_value);
-        result.chain.push_back(current_value);
-        current_eid = current_value;
-        current_value = next_value;
-        result.had_indirection = true;
-        
-        debug_file << "➡️  EID Chain: Moving to eid=" << current_eid << " value='" << current_value << "'" << std::endl;
-    }
-    
-    result.final_eid = current_eid;
-    result.final_value = current_value;
-    
-    debug_file << "🎯 EID Resolution: Final result eid=" << result.final_eid << " value='" << result.final_value << "' had_indirection=" << result.had_indirection << std::endl;
-    debug_file << "---" << std::endl;
-    debug_file.close();
-    
-    return result;
-}
+// Rich JSON generation now provided by base IDb9Verb class
 
 //-----------------------------------------------------------------------------
-// Helper Functions for Rich Object Generation
+// Enhanced Database Verbs Implementation
 //-----------------------------------------------------------------------------
-
-std::string generateRichEntityJson(const std::string& eid, const std::string& value) {
-    std::ostringstream json;
-    json << "{"
-         << "\"eid\":\"" << eid << "\","
-         << "\"value\":\"" << value << "\","
-         << "\"type\":\"entity\""
-         << "}";
-    return json.str();
-}
-
-std::string generateRichTripleJson(const std::string& tid,
-                                 const std::string& subject_eid, const std::string& subject_value,
-                                 const std::string& predicate_eid, const std::string& predicate_value,
-                                 const std::string& object_eid, const std::string& object_value,
-                                 std::shared_ptr<NonoStore> store) {
-    
-    // Resolve EID chains for all components
-    auto subject_resolved = resolveEidChain(subject_eid, subject_value, store);
-    auto predicate_resolved = resolveEidChain(predicate_eid, predicate_value, store);
-    auto object_resolved = resolveEidChain(object_eid, object_value, store);
-    
-    std::ostringstream json;
-    json << "{"
-         << "\"tid\":\"" << tid << "\","
-         << "\"subject\":{\"eid\":\"" << subject_resolved.final_eid << "\",\"value\":\"" << subject_resolved.final_value << "\"},"
-         << "\"predicate\":{\"eid\":\"" << predicate_resolved.final_eid << "\",\"value\":\"" << predicate_resolved.final_value << "\"},"
-         << "\"object\":{\"eid\":\"" << object_resolved.final_eid << "\",\"value\":\"" << object_resolved.final_value << "\"},"
-         << "\"type\":\"triple\"";
-    
-    // Add awareness report if we had indirection
-    if (subject_resolved.had_indirection || predicate_resolved.had_indirection || object_resolved.had_indirection) {
-        json << ",\"indirection_report\":{";
-        
-        bool needsComma = false;
-        
-        if (subject_resolved.had_indirection) {
-            json << "\"subject_chain\":[";
-            for (size_t i = 0; i < subject_resolved.chain.size(); ++i) {
-                if (i > 0) json << ",";
-                json << "\"" << subject_resolved.chain[i] << "\"";
-            }
-            json << "]";
-            if (subject_resolved.had_cycles) json << ",\"subject_cycles\":true";
-            needsComma = true;
-        }
-        
-        if (predicate_resolved.had_indirection) {
-            if (needsComma) json << ",";
-            json << "\"predicate_chain\":[";
-            for (size_t i = 0; i < predicate_resolved.chain.size(); ++i) {
-                if (i > 0) json << ",";
-                json << "\"" << predicate_resolved.chain[i] << "\"";
-            }
-            json << "]";
-            if (predicate_resolved.had_cycles) json << ",\"predicate_cycles\":true";
-            needsComma = true;
-        }
-        
-        if (object_resolved.had_indirection) {
-            if (needsComma) json << ",";
-            json << "\"object_chain\":[";
-            for (size_t i = 0; i < object_resolved.chain.size(); ++i) {
-                if (i > 0) json << ",";
-                json << "\"" << object_resolved.chain[i] << "\"";
-            }
-            json << "]";
-            if (object_resolved.had_cycles) json << ",\"object_cycles\":true";
-        }
-        
-        json << "}";
-    }
-    
-    json << "}";
-    return json.str();
-}
 
 //-----------------------------------------------------------------------------
 // Enhanced Find Entity Implementation - Supports Single + Multiple Patterns
@@ -325,7 +121,7 @@ std::vector<EntitySearchResult> performEntitySearch(const std::string& pattern, 
             // Apply EID chain resolution to get the friendly value
             // Note: We need to convert raw pointer to shared_ptr for resolveEidChain
             std::shared_ptr<NonoStore> store_shared(store, [](NonoStore*) {});
-            auto resolved = resolveEidChain(result.eid, entity_name, store_shared);
+            auto resolved = IDb9Verb::resolveEidChain(result.eid, entity_name, store_shared);
             result.value = resolved.final_value;  // Use resolved value instead of raw entity_name
             
             results.push_back(result);
@@ -388,9 +184,9 @@ Db9Response FindEntityEnhancedVerb::execute(const lab::Text::Sexpr& sexpr) {
     
     try {
         // Check for both single pattern and multiple patterns
-        std::string single_pattern = extractStringParam(sexpr, "pattern");
+        std::string single_pattern = IDb9Verb::extractStringParam(sexpr, "pattern");
         std::vector<std::string> pattern_list = extractPatternList(sexpr, "patterns");
-        std::string dbid = extractStringParam(sexpr, "dbid");
+        std::string dbid = IDb9Verb::extractStringParam(sexpr, "dbid");
         
         // Determine which patterns to search
         std::vector<std::string> patterns_to_search;
@@ -411,7 +207,7 @@ Db9Response FindEntityEnhancedVerb::execute(const lab::Text::Sexpr& sexpr) {
             AutoReflexiveMetrics metrics;
             return Db9Response{
                 Db9Response::Error, "", "invalid_dbid",
-                generateDbidDiagnosisMessage("find_entity_enhanced"), metrics
+                IDb9Verb::generateDbidDiagnosisMessage("find_entity_enhanced"), metrics
             };
         }
         
@@ -1472,11 +1268,9 @@ Db9Response FindRelationshipsEnhancedVerb::execute(const lab::Text::Sexpr& sexpr
 
 } // namespace LabDb
 
-extern "C" void initEnhancedDatabaseVerbRegistration() {
+void initEnhancedDatabaseVerbRegistration(LabDb::Db9Dispatcher& dispatcher) {
     static bool registered = false;
     if (!registered) {
-        auto& dispatcher = LabDb::getGlobalDb9Dispatcher();
-        
         // Register enhanced API verbs (rich objects)
         dispatcher.registerVerb(std::make_unique<LabDb::FindEntityEnhancedVerb>());
         dispatcher.registerVerb(std::make_unique<LabDb::FindTripleEnhancedVerb>());
@@ -1485,6 +1279,9 @@ extern "C" void initEnhancedDatabaseVerbRegistration() {
         
         // Register new enhanced exploration verbs
         dispatcher.registerVerb(std::make_unique<LabDb::FindRelationshipsEnhancedVerb>());
+        
+        // Register vocabulary and statistics verbs
+        dispatcher.registerVerb(std::make_unique<LabDb::VocabularyStatsVerb>());
         
         // Register lean API verbs (EID/TID only)
         dispatcher.registerVerb(std::make_unique<LabDb::FindEidVerb>());

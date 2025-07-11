@@ -191,4 +191,4 @@ public:
 
 } // namespace LabDb
 
-extern "C" void initDatabaseVerbRegistration();
+void initDatabaseVerbRegistration(LabDb::Db9Dispatcher& dispatcher);

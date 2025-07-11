@@ -43,8 +43,6 @@ struct TestState {
 
 static TestState g_test;
 
-extern "C" void initEnhancedDatabaseVerbRegistration();
-
 //-----------------------------------------------------------------------------
 // Helper Functions
 //-----------------------------------------------------------------------------
@@ -52,8 +50,7 @@ void setupTestEnvironment() {
     TEST_START("Test Environment Setup");
     
     // Initialize verb registration
-    initDatabaseVerbRegistration();
-    initEnhancedDatabaseVerbRegistration();
+    // (Verbs auto-register via getGlobalDb9Dispatcher)
 
     // Clean up any existing test database
     std::filesystem::remove_all(g_test.test_db_path);

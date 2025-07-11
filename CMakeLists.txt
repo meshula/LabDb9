@@ -125,8 +125,11 @@ endif()
 # ==============================================================================
 
 add_library(labdb
+    include/LabDb/AutoReflexiveMetrics.h
+    include/LabDb/DatabaseManager.h
     include/LabDb/DatabaseVerbs.h
     include/LabDb/Db9Dispatcher.h
+    include/LabDb/Db9Response.h
     include/LabDb/EntityId.h
     include/LabDb/InceptionBridge.h
     include/LabDb/LabText.hpp
@@ -139,6 +142,8 @@ add_library(labdb
     include/LabDb/TriadicQuery.h
     include/LabDb/TripleStore.h
     include/LabDb/EnhancedDatabaseVerbs.h
+    include/Labdb/Verbs.h
+    src/DatabaseManager.cpp
     src/DatabaseVerbs.cpp
     src/EnhancedDatabaseVerbs.cpp
     src/Db9Dispatcher.cpp
@@ -152,6 +157,10 @@ add_library(labdb
     src/TIDSequenceGenerator.cpp
     src/TriadicQuery.cpp
     src/TripleStore.cpp
+    src/LabTextODR.cpp
+    src/Verbs.cpp
+    src/Verbs/VocabularyStatsVerb.h
+    src/Verbs/VocabularyStatsVerb.cpp
 )
 
 target_include_directories(labdb

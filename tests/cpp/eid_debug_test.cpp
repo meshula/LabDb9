@@ -13,8 +13,7 @@ int main() {
 
     try {
         // Initialize verb registrations
-        initDatabaseVerbRegistration();
-        initEnhancedDatabaseVerbRegistration();
+        // (Verbs auto-register via getGlobalDb9Dispatcher)
         
         auto& dispatcher = LabDb::getGlobalDb9Dispatcher();
         

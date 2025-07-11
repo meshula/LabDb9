@@ -361,7 +361,7 @@ int main() {
     
     try {
         // Initialize verb registration
-        initDatabaseVerbRegistration();
+        // (Verbs auto-register via getGlobalDb9Dispatcher)
         
         // Run wildcard tests
         test_find_triple_wildcard_patterns();

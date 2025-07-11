@@ -45,8 +45,7 @@ void test_enhanced_api_basic_functionality() {
     TEST_START("Enhanced API Basic Functionality");
     
     // Initialize both verb registrations
-    initDatabaseVerbRegistration();
-    initEnhancedDatabaseVerbRegistration();
+    // (Verbs auto-register via getGlobalDb9Dispatcher)
     
     auto& dispatcher = LabDb::getGlobalDb9Dispatcher();
     
@@ -174,8 +173,7 @@ void test_semantic_triple_functionality() {
     TEST_START("Semantic Triple Functionality");
     
     // Initialize verbs
-    initDatabaseVerbRegistration();
-    initEnhancedDatabaseVerbRegistration();
+    // (Verbs auto-register via getGlobalDb9Dispatcher)
     
     auto& dispatcher = LabDb::getGlobalDb9Dispatcher();
     

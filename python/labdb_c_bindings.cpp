@@ -236,16 +236,12 @@ static struct PyModuleDef labdb_module = {
 // Module initialization function
 //-----------------------------------------------------------------------------
 
-extern "C" void initDatabaseVerbRegistration();
-
 PyMODINIT_FUNC PyInit_labdb(void) {
     std::ofstream logfile("/tmp/labdb_native_debug.log", std::ios::app);
     logfile << "LabDb native module initializing..." << std::endl;
 
-    initDatabaseVerbRegistration();
-
     auto &dispatcher = LabDb::getGlobalDb9Dispatcher();
-    logfile << "Dispatcher acquired\n";
+    logfile << "Dispatcher acquired (verbs auto-registered)\n";
 
     auto verbs = dispatcher.getAvailableVerbs();
     logfile << "Available verbs:\n";

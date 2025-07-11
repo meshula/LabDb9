@@ -7,57 +7,13 @@
 #include <unordered_map>
 #include <chrono>
 
+#include "LabDb/AutoReflexiveMetrics.h"
+#include "LabDb/Verbs.h"
+
 // Forward declarations
 namespace lab { namespace Text { struct Sexpr; } }
 
 namespace LabDb {
-
-//-----------------------------------------------------------------------------
-// Forward declarations
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-// Auto-reflexive metrics for operation monitoring
-//-----------------------------------------------------------------------------
-struct AutoReflexiveMetrics {
-    std::chrono::milliseconds operation_time_ms{0};
-    uint64_t items_processed{0};
-    double cache_hit_ratio{0.0};
-    uint32_t tid_allocations{0};
-    uint64_t memory_usage_kb{0};
-};
-
-//-----------------------------------------------------------------------------
-// Standardized response format for all db9 operations
-//-----------------------------------------------------------------------------
-struct Db9Response {
-    enum Status { Success, Error, Warning } status{Success};
-    std::string result;                    // Primary return data
-    std::string error_code;               // Optional error identifier
-    std::string error_message;            // Human-readable error description
-    AutoReflexiveMetrics auto_reflexive;  // Performance metrics
-    
-    // Convert to JSON for MCP return
-    std::string toJson() const;
-};
-
-//-----------------------------------------------------------------------------
-// Base interface for all db9 verb implementations
-//-----------------------------------------------------------------------------
-class IDb9Verb {
-public:
-    virtual ~IDb9Verb() = default;
-    
-    // Execute the verb with parsed S-expression parameters
-    // sexpr contains the full parsed command: (verb :param1 value1 :param2 value2)
-    virtual Db9Response execute(const ::lab::Text::Sexpr& sexpr) = 0;
-    
-    // Get verb name for registration
-    virtual std::string getVerbName() const = 0;
-    
-    // Get help/description for documentation
-    virtual std::string getDescription() const = 0;
-};
 
 //-----------------------------------------------------------------------------
 // Verb registry and dispatcher

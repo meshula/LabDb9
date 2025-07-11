@@ -1,6 +1,7 @@
-#define LABTEXT_ODR  // ODR instantiation for LabText single header library
 #include "LabDb/LabText.hpp"
 #include "LabDb/Db9Dispatcher.h"
+#include "LabDb/DatabaseVerbs.h"
+#include "LabDb/EnhancedDatabaseVerbs.h"
 
 #include <sstream>
 #include <iomanip>
@@ -578,8 +579,20 @@ This specification provides a complete, high-performance interface that leverage
 //-----------------------------------------------------------------------------
 // Global dispatcher singleton
 //-----------------------------------------------------------------------------
+
 Db9Dispatcher& getGlobalDb9Dispatcher() {
     static Db9Dispatcher dispatcher;
+    static bool initialized = false;
+    
+    // Initialize verbs on first access
+    if (!initialized) {
+        // Automatically initialize all verb registrations
+        initDatabaseVerbRegistration(dispatcher);
+        initEnhancedDatabaseVerbRegistration(dispatcher);
+        
+        initialized = true;
+    }
+    
     return dispatcher;
 }
 
