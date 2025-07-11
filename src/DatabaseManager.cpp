@@ -1,3 +1,4 @@
+#include "LabDb/DatabaseManager.h"
 #include "LabDb/DatabaseVerbs.h"
 #include "LabDb/EntityId.h"
 #include "LabDb/LabText.hpp"

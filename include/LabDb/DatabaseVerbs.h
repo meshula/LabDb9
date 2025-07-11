@@ -3,55 +3,22 @@
 #include "LabDb/Db9Dispatcher.h"
 #include "LabDb/EntityId.h"
 #include "LabDb/NonoStore.h"
+#include "LabDb/LabText.hpp"
 #include <memory>
-#include <unordered_map>
 #include <mutex>
+#include <string>
+#include <unordered_map>
 
 namespace LabDb {
 
 /// Database connection management for db9 verbs
 /// Maintains active database connections with unique DBIDs
-class DatabaseManager {
-public:
-    static DatabaseManager& instance() {
-        static DatabaseManager mgr;
-        return mgr;
-    }
-    
-    /// Open database and return unique DBID
-    std::string openDatabase(const std::string& path);
-    
-    /// Create new database and return unique DBID
-    std::string createDatabase(const std::string& path);
-    
-    /// Close database by DBID  
-    bool closeDatabase(const std::string& dbid);
-    
-    /// Get database by DBID (returns nullptr if not found)
-    std::shared_ptr<NonoStore> getDatabase(const std::string& dbid);
-    
-    /// Check if DBID is valid
-    bool isValidDbid(const std::string& dbid) const;
-    
-    /// Get all active DBIDs
-    std::vector<std::string> getActiveDbids() const;
-    
-private:
-    DatabaseManager() = default;
-    
-    mutable std::mutex _mutex;
-    std::unordered_map<std::string, std::shared_ptr<NonoStore>> _databases;
-    uint32_t _next_id{1};
-    
-    std::string generateDbid();
-};
 
 /// Open Database Verb Implementation
 class OpenDatabaseVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "open-database"; }
-    std::string getDescription() const override { return "Open database file and return unique database ID"; }
-    
+    std::string getDescription() const override;
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
     
 private:
@@ -62,8 +29,7 @@ private:
 class CreateDatabaseVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "create-database"; }
-    std::string getDescription() const override { return "Create new database file and return unique database ID"; }
-    
+    std::string getDescription() const override;
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
 
@@ -71,8 +37,7 @@ public:
 class DatabaseHealthCheckVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "database-health-check"; }
-    std::string getDescription() const override { return "Check database health and return comprehensive statistics"; }
-    
+    std::string getDescription() const override;
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
     
 private:
@@ -83,8 +48,7 @@ private:
 class CloseDatabaseVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "close-database"; }
-    std::string getDescription() const override { return "Close database by database ID"; }
-    
+    std::string getDescription() const override;
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
     
 private:
@@ -95,7 +59,7 @@ private:
 class ListOpenDatabasesVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "list-open-databases"; }
-    std::string getDescription() const override { return "List all currently open database IDs"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -108,7 +72,7 @@ public:
 class AddEntityVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "add-entity"; }
-    std::string getDescription() const override { return "Create new entity with string content and return entity ID"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -117,7 +81,7 @@ public:
 class GetEntityVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "get-entity"; }
-    std::string getDescription() const override { return "Retrieve entity content by entity ID"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -126,7 +90,7 @@ public:
 class FindEntityVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-entity"; }
-    std::string getDescription() const override { return "Search entities with wildcard patterns"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -139,7 +103,7 @@ public:
 class AddTripleVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "add-triple"; }
-    std::string getDescription() const override { return "Add subject-predicate-object triple to database"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -148,7 +112,7 @@ public:
 class AddTriplesBulkVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "add-triples-bulk"; }
-    std::string getDescription() const override { return "Add multiple triples in bulk with optimized performance"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -157,7 +121,7 @@ public:
 class FindTripleVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-triple"; }
-    std::string getDescription() const override { return "Find triples matching subject, predicate, object patterns"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -166,7 +130,7 @@ public:
 class GetTripleVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "get-triple"; }
-    std::string getDescription() const override { return "Retrieve specific triple by exact subject, predicate, object match"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -175,7 +139,7 @@ public:
 class RemoveTripleVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "remove-triple"; }
-    std::string getDescription() const override { return "Remove triple from database by subject, predicate, object"; }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -184,7 +148,7 @@ public:
 class AddEntitiesBulkVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "add-entities-bulk"; }
-    std::string getDescription() const override { return "High-performance bulk entity creation with transaction batching"; }
+    std::string getDescription() const override;
 
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };

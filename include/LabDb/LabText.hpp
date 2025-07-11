@@ -1632,7 +1632,7 @@ tsStrView_t tsStrViewParseSexpr(tsStrView_t* s, tsParsedSexpr_t* currCell, int b
 
         if (*curr.curr == '"') {
             tsStrView_t str;
-            curr = tsStrViewGetString(&curr, true, &str); // parase a string, dealing with escaped characters
+            curr = tsStrViewGetString(&curr, true, &str); // parse a string, dealing with escaped characters
             tsParsedSexpr_t* cell = tsParsedSexpr_New();
             cell->token = tsSexprString;
             cell->str = str;

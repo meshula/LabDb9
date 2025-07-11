@@ -1,5 +1,6 @@
 #include "VocabularyStatsVerb.h"
 #include "LabDb/Db9Dispatcher.h"
+#include "LabDb/DatabaseManager.h"
 #include "LabDb/DatabaseVerbs.h"
 #include "LabDb/Verbs.h"
 #include "LabDb/EntityId.h"
@@ -24,6 +25,8 @@ std::string VocabularyStatsVerb::getVerbName() const {
 std::string VocabularyStatsVerb::getDescription() const {
     return R"(
 Analyze vocabulary statistics for a database including predicate usage, entity counts, and distribution with EID resolution.
+Usage:
+```lisp
 (get-vocabulary-stats :dbid database-id)
 ;; Returns: {
 ;;   "total_triples": 644,
@@ -37,6 +40,7 @@ Analyze vocabulary statistics for a database including predicate usage, entity c
 ;;     {"predicate": "eid:116", "value": "hasAttribute", "count": 44}
 ;;   ]
 ;; }
+```
     )";
 }
 

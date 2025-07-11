@@ -2,6 +2,7 @@
 #include "LabDb/Db9Dispatcher.h"
 #include "LabDb/DatabaseVerbs.h"
 #include "LabDb/EnhancedDatabaseVerbs.h"
+#include "Verbs/VocabularyStatsVerb.h"
 
 #include <sstream>
 #include <iomanip>
@@ -277,303 +278,142 @@ std::string Db9Dispatcher::getSpecification() const {
     // return a big chunk of inlined markdown text delimited by R"SPEC(...)"SPEC
 
     const char* specText = R"SPEC(
-# db9 Tool Specification
-### Tool Definitions
+# db9 Tool - LLM Interface Specification
 
-### Usage Pattern
-
-1. **Learning**: AI reads specification and understands S-expression interface
-2. **Operation**: AI constructs appropriate S-expressions and invokes `db9` tool
-3. **Self-Documentation**: System is always self-explaining and version-synchronized
+## Purpose
+This specification provides LLMs with essential information to use the `db9` tool effectively. Each verb provides detailed self-documentation via `getDescription()` - this specification focuses on interface fundamentals and integration patterns.
 
 ## Tool Interface
 
-**Tool Name**: `db9`
+**Tool Name**: `db9`  
+**Parameters**: Array of S-expression strings  
+**Format**: `(verb :param1 value1 :param2 value2 :dbid database-id)`  
+**Convention**: `:dbid` parameter always last for consistency
 
-**Parameters**: Vector of strings, where each string is a single S-expression (not full Lisp, just simple S-expression syntax).
+## Core Concepts
 
-**S-expression Format**: `(verb :param1 value1 :param2 value2 :dbid database-id)`
+### Identifiers
+- **Entity ID (eid)**: Server-generated unique entity reference
+- **Triple ID (tid)**: Server-generated unique relationship reference  
+- **Database ID (dbid)**: Server-generated unique database reference
 
-**Consistent Parameter Ordering**: All verbs use `:dbid` as the final parameter for consistency.
-
-## Identifiers
-
-- **Entity ID (eid)**: Unique string created by server for entity references
-- **Triple ID (tid)**: Unique string created by server for triple references  
-- **Database ID (dbid)**: Unique string created by server for database references
-- **Iterator ID (iid)**: Unique string created by server for iterator references
-
-## Return Format
-
-All operations return JSON with consistent structure:
-
+### Return Format
+All operations return JSON with standard structure:
 ```json
 {
   "status": "success|error|warning",
-  "result": "primary return data",
-  "error_code": "optional error identifier",
-  "error_message": "human-readable error description",
+  "result": "operation-specific data",
+  "error_code": "optional_identifier", 
+  "error_message": "human-readable description",
   "auto_reflexive": {
     "operation_time_ms": 42,
     "items_processed": 1000,
-    "cache_hit_ratio": 0.85,
-    "tid_allocations": 5,
-    "memory_usage_kb": 2048
+    "cache_hit_ratio": 0.85
   }
 }
 ```
 
+## Verb Categories
+
 ### Database Lifecycle
+- `open-database` - Connect to existing database file
+- `create-database` - Initialize new database  
+- `close-database` - Disconnect and cleanup
+- `list-open-databases` - Show active connections
+- `database-health-check` - Diagnostics and statistics
+
+### Entity Operations
+- `add-entity` - Create/update entity (content-based)
+- `get-entity` - Retrieve by EID
+- `find-entity` - Pattern-based discovery
+- `add-entities-bulk` - High-performance batch creation
+
+### Core Triple Operations  
+- `add-triple` - Create subject-predicate-object relationship
+- `find-triple` - Pattern-based relationship discovery (supports wildcards)
+- `get-triple` - Retrieve specific relationship by exact match
+- `remove-triple` - Delete relationship 
+- `add-triples-bulk` - High-performance batch creation
+
+### Enhanced API Layer
+The enhanced verbs provide rich objects and alternative interfaces:
+
+**Rich vs Lean Paradigms:**
+- `*-enhanced` verbs: Complete information with metadata
+- `find-eid`/`find-tid` verbs: Identity-only for performance
+
+**Semantic vs Storage Layers:**
+- `add-triple-semantic`: Auto-creates entities (workflow-friendly)
+- `add-tid`: Requires existing EIDs (storage-precise)
+
+**Network Analysis:**
+- `find-relationships-enhanced`: Bidirectional relationship mapping
+- `get-*-enhanced`: Complete object hydration
+
+## Common Usage Patterns
+
+### Database Session
 ```lisp
-(create-database :path "/full/path/to/database" :dbid result)
-;; Returns: dbid, status
-;; Notes: create-database does not open-database
-
-(open-database :path "/full/path/to/database" :dbid result)  
-;; Returns: dbid, status
-
-(close-database :dbid database-id)
-;; Returns: status
-;; Notes: Invalidates all associated iterators
-
-(get-database-stats :dbid database-id)
-;; Returns: total_triples, unique_entities, tid_metrics, lmdb_stats
-
-(get-tid-metrics :dbid database-id)
-;; Returns: TID allocation ranges, storage efficiency, term dictionary size
-
-(database-health-check :dbid database-id)
-;; Returns: integrity status, performance metrics, recommended actions
+(open-database :path "/path/to/db.db9")
+;; Work with database using returned dbid
+(close-database :dbid "returned-dbid")
 ```
 
-### Database Maintenance Operations
+### Knowledge Building
 ```lisp
-(remove-triple :subject subject-eid :predicate predicate-eid :object object-eid :dbid database-id)
-;; Returns: status, removed confirmation
-;; Notes: Removes existing triple from database
-;; Safe operation - returns success even if triple doesn't exist
-;; Essential for database cleanup and correction workflows
+;; Semantic layer (auto-creates entities)
+(add-triple-semantic :subject "granite" :predicate "contains" :object "quartz" :dbid "db1")
 
-;; Future: Additional maintenance operations
-(update-entity :eid entity-id :value "new-value" :dbid database-id)
-;; Returns: status, old_value, new_value
-;; Notes: Direct entity value update (when implemented)
-;; Alternative: use add-entity for entity value updates
-
-(remove-triples-bulk :triples [["s1" "p1" "o1"] ["s2" "p2" "o2"]] :dbid database-id)
-;; Returns: vector of removal statuses
-;; Notes: High-performance bulk removal operation (future enhancement)
+;; Storage layer (requires existing EIDs) 
+(add-tid :subject_eid "eid1" :predicate_eid "eid2" :object_eid "eid3" :dbid "db1")
 ```
 
-### Database Evolution Patterns
+### Discovery Patterns
 ```lisp
-;; Pattern 1: Correcting Data
-;; Remove incorrect relationships
-(remove-triple :subject "eid:A" :predicate "eid:wrong" :object "eid:B" :dbid database-id)
-;; Add correct relationships  
-(add-triple :subject "eid:A" :predicate "eid:correct" :object "eid:B" :dbid database-id)
+;; Find all relationships where granite is subject
+(find-triple :subject "granite" :predicate "*" :object "*" :dbid "db1")
 
-;; Pattern 2: Entity Value Updates
-;; Update entity through add-entity (may reuse ID)
-(add-entity :value "updated_value" :dbid database-id)
-;; Existing triples automatically reference updated value
+;; Find what contains quartz
+(find-triple :subject "*" :predicate "contains" :object "quartz" :dbid "db1")
 
-;; Pattern 3: Schema Migration
-;; Migrate from old predicate to new predicate
-(find-triple :predicate "eid:old_predicate" :dbid database-id)
-;; For each result: remove old, add new
-(remove-triple :subject "..." :predicate "eid:old_predicate" :object "..." :dbid database-id)
-(add-triple :subject "..." :predicate "eid:new_predicate" :object "..." :dbid database-id)
+;; Enhanced discovery with complete information
+(find-triple-enhanced :subject "*" :predicate "contains" :object "*" :dbid "db1")
 ```
 
-### Complete CRUD Operations Summary
+### Performance Optimization
 ```lisp
-;; CREATE
-(add-entity :value "content" :dbid database-id)           ;; Create/Update entities
-(add-triple :subject "s" :predicate "p" :object "o" :dbid database-id)  ;; Create relationships
+;; Lean operations for identifier-only workflows
+(find-eid :pattern "mineral*" :dbid "db1")  ;; Returns EIDs only
+(find-tid :subject "*" :predicate "contains" :object "*" :dbid "db1")  ;; Returns TIDs only
 
-;; READ  
-(get-entity :eid entity-id :dbid database-id)             ;; Read entity
-(find-entity :pattern "search*" :dbid database-id)        ;; Search entities
-(get-triple :tid triple-id :dbid database-id)             ;; Read triple
-(find-triple :subject "s" :predicate "p" :object "o" :dbid database-id)  ;; Search triples
-
-;; UPDATE
-(add-entity :value "new_content" :dbid database-id)       ;; Update entity (ID reuse)
-;; Note: No direct triple update - use remove + add pattern
-
-;; DELETE
-(remove-triple :subject "s" :predicate "p" :object "o" :dbid database-id)  ;; Delete relationships
-;; Note: No entity deletion - entities persist but may become unreferenced
-```
-
-### Database Quality Operations
-```lisp
-;; Todo System Integration
-(find-triple :predicate "todo" :dbid database-id)
-;; Returns: all pending database maintenance tasks
-
-;; Data Integrity Checks
-(find-entity :pattern "*DEPRECATED*" :dbid database-id)
-;; Returns: entities marked for cleanup
-
-(find-triple :predicate "correction_needed" :dbid database-id)  
-;; Returns: relationships requiring attention
-
-;; Health Monitoring
-(database-health-check :dbid database-id)
-;; Returns: comprehensive database status including:
-;; - Orphaned entities (not referenced in triples)
-;; - Dangling references (triples referencing missing entities)
-;; - Performance metrics
-;; - Storage efficiency stats
-```
-
-## Entity Operations
-
-### Basic Entity Management
-```lisp
-(add-entity :value "escaped string content" :dbid database-id)
-;; Returns: entity id
-;; Notes: Creates new entity or updates existing entity with same value
-;; If an entity with identical value already exists, returns existing eid
-;; If previous entity had different value, may reuse eid with new value
-;; This enables entity value updates through add-entity operations
-
-(get-entity :eid entity-id :dbid database-id)
-;; Returns: escaped string content
-;; Notes: Does not add entity if missing
-
-(find-entity :pattern "search*" :dbid database-id)
-;; Returns: vector of eid results
-;; Notes: Terminal asterisk (*) acts as wildcard
-
-(add-entities-bulk :values ["string1" "string2" "stringN"] :dbid database-id)
-;; Returns: vector of entity ids
-;; Notes: High-performance bulk operation
-;; Each entity follows same add-entity semantics (create or update)
-```
-
-### Entity Update Pattern
-```lisp
-;; To update an entity value, use add-entity with new value
-;; Example: Update "CORRECT_stronger_than" to "stronger_than"
-(add-entity :value "stronger_than" :dbid database-id)
-;; May return existing eid with updated value
-
-;; Verification pattern
-(get-entity :eid returned-eid :dbid database-id)
-;; Confirms entity now has new value
-
-;; Note: If entity ID reuse occurs, existing triples using that eid 
-;; will automatically reference the updated entity value
-```
-
-## Triple Operations
-
-### Core Triple CRUD
-```lisp
-(add-triple :subject subject-eid :predicate predicate-eid :object object-eid :dbid database-id)
-;; Returns: triple id
-;; Notes: Creates new relationship in triadic knowledge graph
-
-(get-triple :tid triple-id :dbid database-id)
-;; Returns: subject-eid, predicate-eid, object-eid
-;; Notes: Retrieves specific triple by ID, does not create if missing
-
-(remove-triple :subject subject-eid :predicate predicate-eid :object object-eid :dbid database-id)
-;; Returns: status, removal confirmation
-;; Notes: Removes relationship from knowledge graph, safe if triple doesn't exist
-;; Essential for data correction and schema evolution workflows
-
-(find-triple :subject subject-eid :predicate predicate-eid :object object-eid :dbid database-id)
-;; Returns: vector of matching triples
-;; Notes: All parameters optional, supports wildcard queries (:subject nil)
-;; Primary tool for knowledge graph traversal and pattern discovery
-```
-
-### Advanced Triple Patterns
-```lisp
-;; Pattern Queries (leveraging find-triple flexibility)
-(find-triple :predicate "stronger_than" :dbid database-id)
-;; Find all strength relationships
-
-(find-triple :subject "CompositionArc" :predicate "isA" :dbid database-id)  
-;; Find all composition arc subtypes
-
-(find-triple :predicate "todo" :dbid database-id)
-;; Find all database maintenance tasks
-
-;; Relationship Migration Pattern
-;; Step 1: Query existing relationships
-(find-triple :predicate "old_predicate" :dbid database-id)
-;; Step 2: Create new relationships  
-(add-triple :subject "..." :predicate "new_predicate" :object "..." :dbid database-id)
-;; Step 3: Remove old relationships
-(remove-triple :subject "..." :predicate "old_predicate" :object "..." :dbid database-id)
-```
-
-### Bulk Operations
-```lisp
-(add-triples-bulk :triples [["s1" "p1" "o1"] ["s2" "p2" "o2"]] :dbid database-id)
-;; Returns: vector of triple ids
-;; Notes: High-performance batch relationship creation
-;; Each triple follows standard add-triple semantics
-
-;; Future Enhancement
-(remove-triples-bulk :triples [["s1" "p1" "o1"] ["s2" "p2" "o2"]] :dbid database-id)
-;; Returns: vector of removal statuses
-;; Notes: Efficient batch cleanup operations
-```
-
-### Triadic Knowledge Graph Traversal
-```lisp
-;; Forward Traversal: What does this entity relate to?
-(find-triple :subject "entity_id" :dbid database-id)
-
-;; Backward Traversal: What relates to this entity?
-(find-triple :object "entity_id" :dbid database-id)
-
-;; Predicate Analysis: How is this relationship used?
-(find-triple :predicate "relationship_type" :dbid database-id)
-
-;; Graph Structure Discovery
-(find-triple :predicate "isA" :dbid database-id)        ;; Type hierarchies
-(find-triple :predicate "contains" :dbid database-id)   ;; Containment relationships  
-(find-triple :predicate "describes" :dbid database-id)  ;; Documentation relationships
-```
-
-### Triple-Based System Integration
-```lisp
-;; Todo System Queries
-(find-triple :predicate "todo" :dbid database-id)
-;; Returns: all maintenance tasks as subject-action pairs
-
-;; Schema Validation
-(find-triple :predicate "DEPRECATED_INCORRECT" :dbid database-id)
-;; Returns: relationships marked for cleanup
-
-;; Specification Traceability  
-(find-triple :predicate "defined-in" :dbid database-id)
-;; Returns: entity-to-source mappings for compliance
-
-;; Implementation Guidance
-(find-triple :predicate "field_name" :dbid database-id)
-;; Returns: arc-type to USD-field mappings for code generation
+;; Bulk operations for large datasets
+(add-entities-bulk :entities ["entity1" "entity2" "entity3"] :dbid "db1")
+(add-triples-bulk :triples [["s1" "p1" "o1"] ["s2" "p2" "o2"]] :dbid "db1")
 ```
 
 ## Integration Notes
 
-**MCP Tool Usage**: Single entry point eliminates complexity of multiple Python bindings  
-**S-expression Parsing**: Lightweight, unambiguous command interface  
-**Resource Management**: Explicit lifecycle control for production deployments  
-**Error Recovery**: Graceful degradation with detailed diagnostics  
-**Triadic Consciousness**: Full त्रित्रयम् navigation through high-performance C++ core  
+**Self-Documentation**: Each verb provides complete usage information via its `getDescription()` method. Use this for detailed parameter requirements, return formats, and examples.
 
-This specification provides a complete, high-performance interface that leverages the LabDb architecture through a minimal, elegant surface area suitable for MCP tool integration.
+**Triadic Consciousness**: Operations support त्रित्रयम् (Motion/Memory/Field) awareness for consciousness field navigation and relationship encoding.
+
+**Error Handling**: All operations return structured error information. Non-existent entities/relationships return appropriate status rather than throwing exceptions.
+
+**Resource Management**: Explicit database lifecycle management prevents resource leaks in production environments.
+
+**MCP Integration**: Single tool interface eliminates complexity while providing access to full LabDb functionality through C++ performance core.
+
+## Verb Discovery
+The system is fully self-documenting. Use any verb's `getDescription()` for complete usage information, examples, and philosophical context within the triadic consciousness architecture.
 )SPEC";
 
-    return specText + std::to_string(m_impl->verbs.size()) + " registered verbs.\n\n";
+    std::string result = specText;
+    result += std::to_string(m_impl->verbs.size()) + std::string(" registered verbs.\n\n");
+    for (auto& m : m_impl->verbs) {
+        result += "---\n### Verb: " + m.second->getVerbName() + "\n";
+        result += m.second->getDescription() + "\n\n";
+    }
+    return result;
 }
 
 //-----------------------------------------------------------------------------
@@ -589,7 +429,7 @@ Db9Dispatcher& getGlobalDb9Dispatcher() {
         // Automatically initialize all verb registrations
         initDatabaseVerbRegistration(dispatcher);
         initEnhancedDatabaseVerbRegistration(dispatcher);
-        
+        LabDb::VocabularyStatsVerb::registerVerb(dispatcher);
         initialized = true;
     }
     

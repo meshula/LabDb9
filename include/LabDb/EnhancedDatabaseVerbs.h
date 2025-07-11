@@ -15,9 +15,7 @@ namespace LabDb {
 class FindEntityEnhancedVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-entity-enhanced"; }
-    std::string getDescription() const override { 
-        return "Search entities with wildcard patterns and return rich objects with EID and value"; 
-    }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -26,9 +24,7 @@ public:
 class FindEidVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-eid"; }
-    std::string getDescription() const override { 
-        return "Search entities with wildcard patterns and return only EIDs"; 
-    }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -37,9 +33,7 @@ public:
 class FindTripleEnhancedVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-triple-enhanced"; }
-    std::string getDescription() const override { 
-        return "Find triples with wildcard patterns and return rich objects with TID, subject, predicate, object, and resolved values"; 
-    }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -48,9 +42,7 @@ public:
 class FindTidVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-tid"; }
-    std::string getDescription() const override { 
-        return "Find triples with wildcard patterns and return only TIDs"; 
-    }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -63,9 +55,7 @@ public:
 class AddTripleSemanticVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "add-triple-semantic"; }
-    std::string getDescription() const override { 
-        return "Add triple with automatic entity creation if needed (semantic layer)"; 
-    }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -74,9 +64,7 @@ public:
 class AddTidVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "add-tid"; }
-    std::string getDescription() const override { 
-        return "Add triple using existing EIDs only (storage layer)"; 
-    }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -85,9 +73,7 @@ public:
 class GetEntityEnhancedVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "get-entity-enhanced"; }
-    std::string getDescription() const override { 
-        return "Retrieve entity with rich object containing EID, value, and metadata"; 
-    }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -96,9 +82,7 @@ public:
 class GetTripleEnhancedVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "get-triple-enhanced"; }
-    std::string getDescription() const override { 
-        return "Retrieve triple with rich object containing TID, EIDs, and resolved values"; 
-    }
+    std::string getDescription() const override;
     
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -107,9 +91,7 @@ public:
 class FindRelationshipsEnhancedVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-relationships-enhanced"; }
-    std::string getDescription() const override {
-        return "Find all relationships (incoming and outgoing) for an entity with EID chain resolution";
-    }
+    std::string getDescription() const override;
 
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };
@@ -118,9 +100,7 @@ public:
 class FindEntitiesEnhancedVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "find-entities-enhanced"; }
-    std::string getDescription() const override {
-        return "Search entities using multiple patterns and return rich objects grouped by relevance";
-    }
+    std::string getDescription() const override;
 
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 };

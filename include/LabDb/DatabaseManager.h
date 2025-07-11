@@ -48,3 +48,4 @@ private:
     std::string generateDbid();
 };
 
+} // Labdb

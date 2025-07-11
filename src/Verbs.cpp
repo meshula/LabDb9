@@ -1,5 +1,6 @@
 #include "LabDb/Verbs.h"
 #include "LabDb/DatabaseVerbs.h"
+#include "LabDb/DatabaseManager.h"
 #include "LabDb/EntityId.h"
 #include <unordered_set>
 #include <sstream>
