@@ -4,6 +4,7 @@ lego-box/
 
 # Build directories
 build/
+build-*/
 cmake-build-*/
 out/
 

@@ -38,44 +38,6 @@ std::string generateDbidDiagnosisMessage(const std::string& operation_name) {
     return msg.str();
 }
 
-std::string extractStringParam(const lab::Text::Sexpr& sexpr, const std::string& param_name) {
-    // Look for :param_name value pattern in the parsed S-expression
-    for (size_t i = 0; i < sexpr.expr.size() - 1; ++i) {
-        const auto& elem = sexpr.expr[i];
-        
-        // Look for atoms that match our parameter name
-        if (elem.token == tsSexprAtom) {
-            int stringIndex = elem.ref;
-            if (stringIndex < static_cast<int>(sexpr.strings.size())) {
-                const std::string& token = sexpr.strings[stringIndex];
-                if (token == ":" + param_name) {
-                    // Found parameter, get next value
-                    if (i + 1 < sexpr.expr.size()) {
-                        const auto& value_elem = sexpr.expr[i + 1];
-                        if (value_elem.token == tsSexprAtom) {
-                            int valueIndex = value_elem.ref;
-                            if (valueIndex < static_cast<int>(sexpr.strings.size())) {
-                                return sexpr.strings[valueIndex];
-                            }
-                        } else if (value_elem.token == tsSexprString) {
-                            int valueIndex = value_elem.ref;
-                            if (valueIndex < static_cast<int>(sexpr.strings.size())) {
-                                return sexpr.strings[valueIndex];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    if (param_name == "dbid") {
-        throw std::runtime_error(generateDbidDiagnosisMessage("operation") + " (Parameter :dbid is required)");
-    } else {
-        throw std::runtime_error("Required parameter :" + param_name + " not found");
-    }
-}
-
 } // anonymous namespace
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 #include "LabDb/EnhancedDatabaseVerbs.h"
+#include "LabDb/DatabaseManager.h"
 #include "LabDb/DatabaseVerbs.h"
 #include "LabDb/Db9Dispatcher.h"
 #include "LabDb/NonoStore.h"

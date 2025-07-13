@@ -602,6 +602,359 @@ void TestEnhancedEntityPatternParsing() {
 
 
 //-----------------------------------------------------------------------------
+// DB9 Filename Extraction Test (matches db9 tool's expectations)
+//-----------------------------------------------------------------------------
+
+void TestDb9FilenameExtraction() {
+    TEST_START("DB9 Filename Extraction");
+
+    {
+        TEST_SECTION("Simple path with § delimiters (db9 open-database pattern)");
+        
+        // Test the exact pattern used by db9 open-database command
+        std::string db9_cmd = "(open-database :path §/tmp/test.db9§)";
+        ParseResult result = ParseSexpr(db9_cmd);
+        
+        AXIOM(result.success, "DB9 command should parse successfully");
+        
+        // Show debug info
+        std::cout << "    🔍 Parse success: " << result.success << std::endl;
+        std::cout << "    🔍 Atoms found: " << result.atoms.size() << std::endl;
+        std::cout << "    🔍 Strings found: " << result.strings.size() << std::endl;
+        
+        for (size_t i = 0; i < result.atoms.size(); ++i) {
+            std::cout << "    🔍 Atom[" << i << "]: '" << result.atoms[i] << "'" << std::endl;
+        }
+        for (size_t i = 0; i < result.strings.size(); ++i) {
+            std::cout << "    🔍 String[" << i << "]: '" << result.strings[i] << "'" << std::endl;
+        }
+        
+        // Expected structure: (open-database :path <string>)
+        // Should have atoms: ["open-database", ":path"] and strings: ["/tmp/test.db9"]
+        AXIOM(result.atoms.size() >= 2, "Should have at least open-database and :path atoms");
+        AXIOM(result.strings.size() >= 1, "Should have at least the path string");
+        
+        // Check specific expected values
+        AXIOM(result.atoms[0] == "open-database", "First atom should be command name");
+        
+        // Find :path parameter
+        bool found_path_param = false;
+        for (const auto& atom : result.atoms) {
+            if (atom == ":path") {
+                found_path_param = true;
+                break;
+            }
+        }
+        AXIOM(found_path_param, "Should find :path parameter atom");
+        
+        // Find the path string
+        bool found_path_string = false;
+        for (const auto& str : result.strings) {
+            if (str == "/tmp/test.db9") {
+                found_path_string = true;
+                std::cout << "    ✅ Found expected path string: '" << str << "'" << std::endl;
+                break;
+            }
+        }
+        AXIOM(found_path_string, "Should find exact path string '/tmp/test.db9'");
+    }
+
+    {
+        TEST_SECTION("Long path with § delimiters (original problem case)");
+        
+        // Test the exact original command that was failing
+        std::string original_cmd = "(open-database :path §/Users/nporcino/dev/Lab/core-spec-wg/cleanroom/foundational_types.db9§)";
+        ParseResult result = ParseSexpr(original_cmd);
+        
+        AXIOM(result.success, "Original command should parse successfully");
+        
+        std::cout << "    🔍 Original command parse:" << std::endl;
+        std::cout << "    🔍 Parse success: " << result.success << std::endl;
+        std::cout << "    🔍 Atoms found: " << result.atoms.size() << std::endl;
+        std::cout << "    🔍 Strings found: " << result.strings.size() << std::endl;
+        
+        for (size_t i = 0; i < result.strings.size(); ++i) {
+            std::cout << "    🔍 String[" << i << "]: '" << result.strings[i] << "' (length=" << result.strings[i].length() << ")" << std::endl;
+        }
+        
+        // The critical test: should find the full path string
+        bool found_full_path = false;
+        std::string expected_path = "/Users/nporcino/dev/Lab/core-spec-wg/cleanroom/foundational_types.db9";
+        for (const auto& str : result.strings) {
+            if (str == expected_path) {
+                found_full_path = true;
+                std::cout << "    ✅ Found expected full path: '" << str << "'" << std::endl;
+                break;
+            } else if (!str.empty()) {
+                std::cout << "    🔍 Found different string: '" << str << "' (expected: '" << expected_path << "')" << std::endl;
+            }
+        }
+        AXIOM(found_full_path, "Should find exact full path string");
+    }
+
+    {
+        TEST_SECTION("Mixed delimiter comparison (§ vs \" for same path)");
+        
+        std::string sect_cmd = "(open-database :path §/tmp/test.db9§)";
+        std::string quote_cmd = "(open-database :path \"/tmp/test.db9\")";
+        
+        ParseResult sect_result = ParseSexpr(sect_cmd);
+        ParseResult quote_result = ParseSexpr(quote_cmd);
+        
+        AXIOM(sect_result.success, "§ delimited command should parse");
+        AXIOM(quote_result.success, "\" delimited command should parse");
+        
+        // Both should extract the same path string
+        std::string sect_path, quote_path;
+        for (const auto& str : sect_result.strings) {
+            if (str.find("/tmp/test.db9") != std::string::npos) {
+                sect_path = str;
+                break;
+            }
+        }
+        for (const auto& str : quote_result.strings) {
+            if (str.find("/tmp/test.db9") != std::string::npos) {
+                quote_path = str;
+                break;
+            }
+        }
+        
+        std::cout << "    🔍 § delimiter path: '" << sect_path << "'" << std::endl;
+        std::cout << "    🔍 \" delimiter path: '" << quote_path << "'" << std::endl;
+        
+        AXIOM(sect_path == quote_path, "Both delimiters should extract identical path");
+        AXIOM(sect_path == "/tmp/test.db9", "Path should be exactly '/tmp/test.db9'");
+    }
+
+    {
+        TEST_SECTION("Empty string edge case");
+        
+        std::string empty_cmd = "(test :param §§)";
+        ParseResult result = ParseSexpr(empty_cmd);
+        
+        AXIOM(result.success, "Empty § string should parse");
+        
+        // Should find an empty string
+        bool found_empty = false;
+        for (const auto& str : result.strings) {
+            if (str.empty()) {
+                found_empty = true;
+                std::cout << "    ✅ Found empty string as expected" << std::endl;
+                break;
+            }
+        }
+        AXIOM(found_empty, "Should find empty string for §§");
+    }
+
+    TEST_SUCCESS("DB9 Filename Extraction");
+}
+
+void TestSectionSignStringDelimiter() {
+    TEST_START("Section Sign (§) String Delimiter");
+
+    {
+        TEST_SECTION("Basic § delimited strings (both encodings)");
+        
+        // Simple § delimited string (Latin-1 encoding will be preferred)
+        std::string simple = "(test §hello world§)";
+        
+        // Debug: Show what encoding we actually have
+        std::cout << "    🔍 Debug: String bytes: " << DebugUnicode(simple) << std::endl;
+        std::cout << "    🔍 Debug: String length: " << simple.length() << std::endl;
+        
+        // Check specifically what the § characters are
+        for (size_t i = 0; i < simple.length(); ++i) {
+            if ((unsigned char)simple[i] == 0xC2 || (unsigned char)simple[i] == 0xA7) {
+                std::cout << "    🔍 Found byte 0x" << std::hex << (int)(unsigned char)simple[i] 
+                          << std::dec << " at position " << i << std::endl;
+            }
+        }
+        
+        ParseResult result = ParseSexpr(simple);
+        std::cout << "    🔍 Parse success: " << result.success << std::endl;
+        std::cout << "    🔍 Atoms found: " << result.atoms.size() << std::endl;
+        std::cout << "    🔍 Strings found: " << result.strings.size() << std::endl;
+        
+        // Show what was actually parsed
+        for (size_t i = 0; i < result.atoms.size(); ++i) {
+            std::cout << "    🔍 Atom[" << i << "]: '" << result.atoms[i] << "'" << std::endl;
+        }
+        for (size_t i = 0; i < result.strings.size(); ++i) {
+            std::cout << "    🔍 String[" << i << "]: '" << result.strings[i] << "'" << std::endl;
+        }
+        
+        AXIOM(result.success, "Simple § delimited string should parse");
+        AXIOM(result.strings.size() == 1, "Should find exactly one string");
+        AXIOM(result.strings[0] == "hello world", "String content should be correct");
+        
+        // UTF-8 encoded § string (for comprehensive testing)
+        std::string utf8_test = "(test \xC2\xA7utf8 section\xC2\xA7)";
+        ParseResult utf8_result = ParseSexpr(utf8_test);
+        AXIOM(utf8_result.success, "UTF-8 § delimited string should parse");
+        AXIOM(utf8_result.strings.size() == 1, "Should find exactly one string");
+        AXIOM(utf8_result.strings[0] == "utf8 section", "UTF-8 string content should be correct");
+    }
+
+    {
+        TEST_SECTION("File path parsing with § delimiters (BUG REPRODUCTION)");
+        
+        // This should reproduce the original bug where file paths include literal § bytes
+        std::string path_test = "(open-database :path §/Users/nporcino/dev/Lab/core-spec-wg/cleanroom/foundational_types.db9§)";
+        ParseResult result = ParseSexpr(path_test);
+        
+        AXIOM(result.success, "File path § string should parse successfully");
+        AXIOM(result.atoms.size() >= 2, "Should have verb and parameter names");
+        AXIOM(result.strings.size() >= 1, "Should find the path string");
+        
+        // Critical test: the path should NOT contain literal § characters
+        bool found_path_string = false;
+        for (const auto& str : result.strings) {
+            if (str.find("/Users/nporcino") != std::string::npos) {
+                found_path_string = true;
+                std::cout << "    🔍 Parsed path: '" << str << "'" << std::endl;
+                
+                // Check for literal § bytes that indicate the bug
+                AXIOM(str.find("\xC2\xA7") == std::string::npos, 
+                      "Path should NOT contain literal UTF-8 § bytes (\\xC2\\xA7)");
+                AXIOM(str.find("\xA7") == std::string::npos, 
+                      "Path should NOT contain literal Latin-1 § bytes (\\xA7)");
+                AXIOM(str.find("§") == std::string::npos, 
+                      "Path should NOT contain § characters");
+                      
+                // Should be the clean path
+                AXIOM(str == "/Users/nporcino/dev/Lab/core-spec-wg/cleanroom/foundational_types.db9",
+                      "Path should be clean without delimiter characters");
+            }
+        }
+        AXIOM(found_path_string, "Should find the file path string in parsed results");
+    }
+
+    {
+        TEST_SECTION("§ strings containing double quotes");
+        
+        // § string with embedded double quotes
+        std::string with_quotes = "(test §this string has a quote \"§)";
+        ParseResult result = ParseSexpr(with_quotes);
+        AXIOM(result.success, "§ string with double quotes should parse");
+        AXIOM(result.strings.size() == 1, "Should find exactly one string");
+        AXIOM(result.strings[0] == "this string has a quote \"", "String should contain unescaped double quote");
+    }
+
+    {
+        TEST_SECTION("Mixed § and \" delimited strings");
+        
+        // Expression with both § and " delimited strings
+        std::string mixed = "(test §this string has a quote \"§ \"this string has a §!\")";
+        ParseResult result = ParseSexpr(mixed);
+        AXIOM(result.success, "Mixed § and \" strings should parse");
+        AXIOM(result.strings.size() == 2, "Should find exactly two strings");
+        AXIOM(result.strings[0] == "this string has a quote \"", "First string should contain unescaped quote");
+        AXIOM(result.strings[1] == "this string has a §!", "Second string should contain § character");
+    }
+
+    {
+        TEST_SECTION("Nested expressions with § strings");
+        
+        // Nested expression using § strings
+        std::string nested = "(outer (inner §nested string with \"quotes\"§) atom)";
+        ParseResult result = ParseSexpr(nested);
+        AXIOM(result.success, "Nested expression with § string should parse");
+        AXIOM(result.strings.size() == 1, "Should find exactly one string");
+        AXIOM(result.strings[0] == "nested string with \"quotes\"", "Nested string should be correct");
+    }
+
+    {
+        TEST_SECTION("§ strings with special characters");
+        
+        // § string with various special characters
+        std::string special = "(test §unicode: त्रित्रयम् emoji: 🌊 symbols: @#$%§)";
+        ParseResult result = ParseSexpr(special);
+        AXIOM(result.success, "§ string with special characters should parse");
+        AXIOM(result.strings.size() == 1, "Should find exactly one string");
+        AXIOM(result.strings[0].find("त्रित्रयम्") != std::string::npos, "Should contain unicode text");
+        AXIOM(result.strings[0].find("🌊") != std::string::npos, "Should contain emoji");
+    }
+
+    {
+        TEST_SECTION("Empty § strings");
+        
+        // Empty § delimited string
+        std::string empty_string = "(test §§)";
+        ParseResult result = ParseSexpr(empty_string);
+        AXIOM(result.success, "Empty § string should parse");
+        AXIOM(result.strings.size() == 1, "Should find exactly one string");
+        AXIOM(result.strings[0] == "", "String should be empty");
+    }
+
+    {
+        TEST_SECTION("§ strings with whitespace");
+        
+        // § string with leading/trailing whitespace
+        std::string whitespace = "(test §  spaced content  §)";
+        ParseResult result = ParseSexpr(whitespace);
+        AXIOM(result.success, "§ string with whitespace should parse");
+        AXIOM(result.strings.size() == 1, "Should find exactly one string");
+        AXIOM(result.strings[0] == "  spaced content  ", "Whitespace should be preserved");
+    }
+
+    {
+        TEST_SECTION("Complex file path scenarios");
+        
+        // Various file path patterns that might be used with db9
+        std::vector<std::string> path_tests = {
+            "(create-database :path §/tmp/test.db9§)",
+            "(open-database :path §/Users/user/Documents/data.db9§)",
+            "(backup-database :source §source.db9§ :dest §backup.db9§)",
+            "(find-entity :pattern §granite*§ :dbid §test-db§)"
+        };
+        
+        for (const auto& test : path_tests) {
+            std::cout << "    🔍 Testing path: " << test << std::endl;
+            ParseResult result = ParseSexpr(test);
+            AXIOM(result.success, "Path expression should parse: " + test);
+            
+            // Verify no § characters leaked into parsed strings
+            for (const auto& str : result.strings) {
+                AXIOM(str.find("§") == std::string::npos, 
+                      "Parsed string should not contain § character: " + str);
+                AXIOM(str.find("\xC2\xA7") == std::string::npos, 
+                      "Parsed string should not contain UTF-8 § bytes: " + str);
+                std::cout << "    ✅ Clean string: '" << str << "'" << std::endl;
+            }
+        }
+    }
+
+    {
+        TEST_SECTION("UTF-8 § specific byte sequence testing");
+        
+        // Test specific byte sequences to ensure our fix handles them correctly
+        
+        // Manual UTF-8 § construction
+        std::string utf8_manual;
+        utf8_manual += "(test ";
+        utf8_manual += "\xC2\xA7";  // UTF-8 opening §
+        utf8_manual += "content with UTF-8 delimiters";
+        utf8_manual += "\xC2\xA7";  // UTF-8 closing §
+        utf8_manual += ")";
+        
+        std::cout << "    🔍 Manual UTF-8 test: " << DebugUnicode(utf8_manual) << std::endl;
+        
+        ParseResult utf8_result = ParseSexpr(utf8_manual);
+        AXIOM(utf8_result.success, "Manual UTF-8 § string should parse");
+        AXIOM(utf8_result.strings.size() == 1, "Should find exactly one string");
+        AXIOM(utf8_result.strings[0] == "content with UTF-8 delimiters", 
+              "UTF-8 § parsed content should be clean");
+        
+        // Ensure the parsed string doesn't contain the delimiter bytes
+        AXIOM(utf8_result.strings[0].find("\xC2\xA7") == std::string::npos,
+              "Parsed content must not contain UTF-8 § bytes");
+    }
+
+    TEST_SUCCESS("Section Sign (§) String Delimiter");
+}
+
+
+//-----------------------------------------------------------------------------
 // Main Test Runner
 //-----------------------------------------------------------------------------
 
@@ -617,6 +970,8 @@ int main() {
         TestVisualParenthesesLookalikes();
         TestRealWorldTriadicData();
         TestEnhancedEntityPatternParsing();
+        TestDb9FilenameExtraction();  // New test for db9 filename extraction
+        TestSectionSignStringDelimiter();
 
         
         // Original quick test preserved
@@ -624,6 +979,12 @@ int main() {
         auto emoji_result = ParseSexpr("(🌊 त्रित्रयम् \"consciousness 🧘\")");
         AXIOM(emoji_result.success, "Additional emoji test failed");
         std::cout << "✅ PASSED: Additional unicode integration\n";
+
+        // Quick test of the new § delimiter with your specific example
+        std::cout << "\n🧪 Quick § Delimiter Test...\n";
+        auto section_result = ParseSexpr("(test §this string has a quote \"§ \"this string has a §!\")");
+        AXIOM(section_result.success, "§ delimiter test failed");
+        std::cout << "✅ PASSED: § delimiter integration\n";
         
         std::cout << "\n🎉 ALL UNICODE ROBUSTNESS TESTS PASSED!\n";
         std::cout << "S-expression parser is robust against unicode edge cases.\n";

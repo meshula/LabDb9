@@ -290,6 +290,45 @@ This specification provides LLMs with essential information to use the `db9` too
 **Format**: `(verb :param1 value1 :param2 value2 :dbid database-id)`  
 **Convention**: `:dbid` parameter always last for consistency
 
+## String Quoting Best Practices for LLMs
+
+### PREFERRED: Use § character for string delimiters when possible
+
+The § character provides several advantages over traditional double quotes, especially when constructing JSON or working with quoted content:
+```lisp
+;; ✅ PREFERRED - Easy to construct, no escaping needed
+(add-triple :subject §granite§ :predicate §contains§ :object §mineral with "quoted" text§ :dbid §db1§)
+
+;; ✅ Also works - Traditional double quotes (more escaping needed in JSON)
+(add-triple :subject "granite" :predicate "contains" :object "mineral with \"quoted\" text" :dbid "db1")
+```
+
+### Why § is better for LLMs:
+
+- JSON Construction: No need to escape double quotes when building JSON arrays
+- Mixed Content: Easy to include double quotes inside strings without escaping
+- Readability: Clear visual distinction from JSON's double quotes
+- Simplicity: Reduces cognitive load when generating S-expressions programmatically
+
+When to use each:
+
+- § delimiters: Preferred for all new S-expressions, especially when strings contain quotes
+- " delimiters: Compatible fallback, useful when § character is not available
+- Mixed usage: Both can be used in the same expression when needed
+
+Examples with complex strings:
+
+```lisp
+;; Complex strings with embedded quotes - § makes this trivial
+(add-entity :value §The "granite" contains quartz crystals§ :dbid §db1§)
+
+;; Mixed delimiters when you need § character in content
+(add-triple :subject §entity§ :predicate §contains§ :object "text with § symbol" :dbid §db1§)
+
+;; Nested JSON-like content becomes much easier
+(add-entity :value §{"type": "rock", "composition": "quartz and feldspar"}§ :dbid §db1§)
+```
+
 ## Core Concepts
 
 ### Identifiers
@@ -354,41 +393,41 @@ The enhanced verbs provide rich objects and alternative interfaces:
 
 ### Database Session
 ```lisp
-(open-database :path "/path/to/db.db9")
+(open-database :path §/path/to/db.db9§)
 ;; Work with database using returned dbid
-(close-database :dbid "returned-dbid")
+(close-database :dbid §returned-dbid§)
 ```
 
 ### Knowledge Building
 ```lisp
 ;; Semantic layer (auto-creates entities)
-(add-triple-semantic :subject "granite" :predicate "contains" :object "quartz" :dbid "db1")
+(add-triple-semantic :subject §granite§ :predicate §contains§ :object §quartz§ :dbid §db1§)
 
 ;; Storage layer (requires existing EIDs) 
-(add-tid :subject_eid "eid1" :predicate_eid "eid2" :object_eid "eid3" :dbid "db1")
+(add-tid :subject_eid §eid1§ :predicate_eid §eid2§ :object_eid §eid3§ :dbid §db1§)
 ```
 
 ### Discovery Patterns
 ```lisp
 ;; Find all relationships where granite is subject
-(find-triple :subject "granite" :predicate "*" :object "*" :dbid "db1")
+(find-triple :subject §granite§ :predicate §*§ :object §*§ :dbid §db1§)
 
 ;; Find what contains quartz
-(find-triple :subject "*" :predicate "contains" :object "quartz" :dbid "db1")
+(find-triple :subject §*§ :predicate §contains§ :object §quartz§ :dbid §db1§)
 
 ;; Enhanced discovery with complete information
-(find-triple-enhanced :subject "*" :predicate "contains" :object "*" :dbid "db1")
+(find-triple-enhanced :subject §*§ :predicate §contains§ :object §*§ :dbid §db1")
 ```
 
 ### Performance Optimization
 ```lisp
 ;; Lean operations for identifier-only workflows
-(find-eid :pattern "mineral*" :dbid "db1")  ;; Returns EIDs only
-(find-tid :subject "*" :predicate "contains" :object "*" :dbid "db1")  ;; Returns TIDs only
+(find-eid :pattern §mineral*§ :dbid §db1§)  ;; Returns EIDs only
+(find-tid :subject §*§ :predicate §contains§ :object §*§ :dbid §db1§)  ;; Returns TIDs only
 
 ;; Bulk operations for large datasets
-(add-entities-bulk :entities ["entity1" "entity2" "entity3"] :dbid "db1")
-(add-triples-bulk :triples [["s1" "p1" "o1"] ["s2" "p2" "o2"]] :dbid "db1")
+(add-entities-bulk :entities [§entity1§ §entity2§ §entity3§] :dbid §db1§)
+(add-triples-bulk :triples [[§s1§ §p1§ §o1§] [§s2§ §p2§ §o2§]] :dbid §db1§)
 ```
 
 ## Integration Notes

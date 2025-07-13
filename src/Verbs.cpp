@@ -109,6 +109,10 @@ std::string IDb9Verb::extractStringParam(const ::lab::Text::Sexpr& sexpr,
                         if (valueElem.token == tsSexprAtom && valueElem.ref >= 0 && 
                             valueElem.ref < static_cast<int>(sexpr.strings.size())) {
                             return sexpr.strings[valueElem.ref];
+                        } else if (valueElem.token == tsSexprString && valueElem.ref >= 0 && 
+                                   valueElem.ref < static_cast<int>(sexpr.strings.size())) {
+                            // Handle § delimited strings (tsSexprString tokens)
+                            return sexpr.strings[valueElem.ref];
                         }
                     }
                 }

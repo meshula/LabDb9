@@ -422,6 +422,54 @@ private:
                     return curr;
                 continue;
             }
+            // Handle § delimited strings (both Latin-1 and UTF-8)
+            if (*curr.curr == '\xA7') { // Latin-1 §
+                StrView str;
+                curr = curr.GetString2(0, '\xA7', true, str).ScanForNonWhiteSpace();
+                expr.push_back({ tsSexprString, (int)strings.size() });
+                strings.push_back(std::string(str.curr, str.sz));
+                if (curr.sz == 0)
+                    return curr;
+                continue;
+            }
+            if (curr.sz > 1 && *curr.curr == '\xC2' && *(curr.curr + 1) == '\xA7') { // UTF-8 §
+                // Manual UTF-8 § parsing since GetString2 expects single-byte delimiters
+                const char* original_start = curr.curr;
+                const char* original_limit = curr.curr + curr.sz;
+                
+                curr.curr += 2; // Skip opening UTF-8 §
+                curr.sz -= 2;
+                
+                const char* start = curr.curr;
+                const char* end = curr.curr;
+                const char* limit = curr.curr + curr.sz;
+                
+                // Find closing UTF-8 § sequence
+                while (end < limit - 1) {
+                    if (*end == '\xC2' && *(end + 1) == '\xA7') {
+                        break;
+                    }
+                    ++end;
+                }
+                
+                if (end < limit - 1 && end + 2 <= original_limit) {
+                    // Found closing delimiter and it's within bounds
+                    expr.push_back({ tsSexprString, (int)strings.size() });
+                    strings.push_back(std::string(start, end - start));
+                    curr.curr = end + 2; // Skip closing UTF-8 §
+                    curr.sz = original_limit - (end + 2);
+                } else {
+                    // No closing delimiter or out of bounds - treat as unterminated string
+                    expr.push_back({ tsSexprString, (int)strings.size() });
+                    strings.push_back(std::string(start, limit - start));
+                    curr.curr = original_limit;
+                    curr.sz = 0;
+                }
+                curr = curr.ScanForNonWhiteSpace();
+                if (curr.sz == 0)
+                    return curr;
+                continue;
+            }
             if (*curr.curr == ')') {
                 --balance;
                 expr.push_back({ tsSexprPopList, 0 });
@@ -447,6 +495,8 @@ private:
                     break;
                 if (*curr.curr == ';')
                     break;
+                // Removed § checks from atom tokenization to prevent false positives
+                // with multi-byte UTF-8 sequences like 🧠 which contains A7 byte
                 token.sz++;
                 curr.curr++;
                 curr.sz--;
@@ -1630,6 +1680,62 @@ tsStrView_t tsStrViewParseSexpr(tsStrView_t* s, tsParsedSexpr_t* currCell, int b
             continue;
         }
 
+        if (*curr.curr == '\xA7') { // Latin-1 encoding of § character
+            tsStrView_t str;
+            curr = tsStrViewGetString2(&curr, '\xA7', true, &str); // parse a string with § delimiter
+            tsParsedSexpr_t* cell = tsParsedSexpr_New();
+            cell->token = tsSexprString;
+            cell->str = str;
+            currCell->next = cell;
+            currCell = cell;
+            continue;
+        }
+
+        if (*curr.curr == '\xC2' && curr.sz > 1 && *(curr.curr + 1) == '\xA7') { // UTF-8 encoding of § character
+            // Skip the UTF-8 § character (2 bytes)
+            tsStrView_t adjusted_curr = curr;
+            adjusted_curr.curr += 2;
+            adjusted_curr.sz -= 2;
+            
+            // Find the closing UTF-8 § character manually since tsStrViewGetString2 
+            // expects single-byte delimiters but UTF-8 § is 2 bytes (C2 A7)
+            tsStrView_t str;
+            char const* start = adjusted_curr.curr;
+            char const* end = adjusted_curr.curr;
+            char const* const limit = adjusted_curr.curr + adjusted_curr.sz;
+            
+            // Scan for closing UTF-8 § sequence (C2 A7)
+            while (end < limit - 1) {
+                if (*end == '\xC2' && *(end + 1) == '\xA7') {
+                    break; // Found closing delimiter
+                }
+                ++end;
+            }
+            
+            if (end < limit - 1) {
+                // Found proper closing delimiter
+                str.curr = start;
+                str.sz = end - start;
+                
+                // Position after the closing UTF-8 § (skip 2 bytes)
+                curr.curr = end + 2;
+                curr.sz = limit - (end + 2);
+            } else {
+                // No closing delimiter found - treat as unterminated string
+                str.curr = start;
+                str.sz = limit - start;
+                curr.curr = limit;
+                curr.sz = 0;
+            }
+            
+            tsParsedSexpr_t* cell = tsParsedSexpr_New();
+            cell->token = tsSexprString;
+            cell->str = str;
+            currCell->next = cell;
+            currCell = cell;
+            continue;
+        }
+
         if (*curr.curr == '"') {
             tsStrView_t str;
             curr = tsStrViewGetString(&curr, true, &str); // parse a string, dealing with escaped characters
@@ -1657,11 +1763,17 @@ tsStrView_t tsStrViewParseSexpr(tsStrView_t* s, tsParsedSexpr_t* currCell, int b
             continue;
         }
 
-        // consume a token, stopping at white space, parens, or semicolons
+        // consume a token, stopping at white space, parens, semicolons, or § delimiters
         tsStrView_t token = curr;
         token.sz = 0;
         while (curr.sz > 0) {
             if (*curr.curr == '(' || *curr.curr == ')' || *curr.curr == ';' || tsIsWhiteSpace(*curr.curr))
+                break;
+            // Stop at Latin-1 § character
+            if (*curr.curr == '\xA7')
+                break;
+            // Stop at UTF-8 § character (2-byte sequence C2 A7)
+            if (*curr.curr == '\xC2' && curr.sz > 1 && *(curr.curr + 1) == '\xA7')
                 break;
             curr.curr += 1;
             curr.sz -= 1;
