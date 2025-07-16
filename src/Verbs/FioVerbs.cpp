@@ -113,56 +113,178 @@ namespace FioUtils {
 //-----------------------------------------------------------------------------
 // FioUtils Implementation  
 //-----------------------------------------------------------------------------
+// Complete rewrite of FioUtils::unescapeDb9String function
+// This goes around line 118 in src/Verbs/FioVerbs.cpp
 
-    // if a ƒ character is found, it is replaced with a backslash
-    std::string unescapeDb9String(const std::string& input) {
-        std::string result;
-        result.reserve(input.size()); // Reserve space for efficiency
+std::string unescapeDb9String(const std::string& input) {
+    std::string result;
+    result.reserve(input.size()); // Reserve space for efficiency
+    
+    for (size_t i = 0; i < input.size(); ++i) {
+        bool processed = false;
         
-        for (size_t i = 0; i < input.size(); ++i) {
-            bool processed_f = false;
-            
-            // Handle ƒ character (both Latin-1 and UTF-8)
-            // Check for Latin-1 ƒ (single byte)
-            if (static_cast<unsigned char>(input[i]) == 0x83) { // Latin-1 ƒ
-                // Check for double ƒƒ -> single ƒ
-                if (i + 1 < input.size() && static_cast<unsigned char>(input[i + 1]) == 0x83) {
-                    // ƒƒ -> ƒ (keep one ƒ, skip the second)
-                    result += input[i];
-                    i += 1; // Skip the second ƒ
-                } else {
-                    // Single ƒ -> backslash
-                    result += '\\';
-                }
-                processed_f = true;
-            }
-            // Check for UTF-8 ƒ (two bytes: 0xC6 0x92)
-            else if (i + 1 < input.size() && 
-                     static_cast<unsigned char>(input[i]) == 0xC6 && 
-                     static_cast<unsigned char>(input[i + 1]) == 0x92) {
-
-                // Check for double ƒƒ -> single ƒ (UTF-8)
-                if (i + 3 < input.size() &&
-                    static_cast<unsigned char>(input[i + 2]) == 0xC6 &&
-                    static_cast<unsigned char>(input[i + 3]) == 0x92) {
-                    // ƒƒ -> ƒ (keep one UTF-8 ƒ, skip the second)
-                    result += input[i];     // First byte of ƒ
-                    result += input[i + 1]; // Second byte of ƒ
-                    i += 3; // Skip both ƒ characters, will increment to skip second
-                } else {
-                    // Single ƒ -> backslash
-                    result += '\\';
-                    i += 1; // Skip the second byte of UTF-8 ƒ
-                }
-                processed_f = true;
-            }
-            
-            if (!processed_f) {
+        // =================================================================
+        // PHASE 1: Handle ƒ character conversion to actual escape characters
+        // =================================================================
+        
+        // Handle ƒ character (both Latin-1 and UTF-8) followed by escape character
+        // Check for Latin-1 ƒ (single byte)
+        if (static_cast<unsigned char>(input[i]) == 0x83) { // Latin-1 ƒ
+            // Check for double ƒƒ -> single ƒ
+            if (i + 1 < input.size() && static_cast<unsigned char>(input[i + 1]) == 0x83) {
+                // ƒƒ -> ƒ (keep one ƒ, skip the second)
                 result += input[i];
+                i += 1; // Skip the second ƒ
+                processed = true;
+            } else if (i + 1 < input.size()) {
+                // Single ƒ followed by escape character -> actual escape
+                char escape_char = input[i + 1];
+                switch (escape_char) {
+                    case 'n':
+                        result += '\n';  // ƒn -> actual newline
+                        i += 1;          // Skip the 'n'
+                        processed = true;
+                        break;
+                    case 't':
+                        result += '\t';  // ƒt -> actual tab
+                        i += 1;          // Skip the 't'
+                        processed = true;
+                        break;
+                    case 'r':
+                        result += '\r';  // ƒr -> carriage return
+                        i += 1;          // Skip the 'r'
+                        processed = true;
+                        break;
+                    default:
+                        // ƒ followed by unknown char -> just backslash + char
+                        result += '\\';
+                        processed = true;
+                        break;
+                }
+            } else {
+                // ƒ at end of string -> backslash
+                result += '\\';
+                processed = true;
             }
         }
-        return result;
+        // Check for UTF-8 ƒ (two bytes: 0xC6 0x92)
+        else if (i + 1 < input.size() &&
+                 static_cast<unsigned char>(input[i]) == 0xC6 &&
+                 static_cast<unsigned char>(input[i + 1]) == 0x92) {
+            
+            // Check for double ƒƒ -> single ƒ (UTF-8)
+            if (i + 3 < input.size() &&
+                static_cast<unsigned char>(input[i + 2]) == 0xC6 &&
+                static_cast<unsigned char>(input[i + 3]) == 0x92) {
+                // ƒƒ -> ƒ (keep one UTF-8 ƒ, skip the second)
+                result += input[i];     // First byte of ƒ
+                result += input[i + 1]; // Second byte of ƒ
+                i += 3; // Skip both ƒ characters, will increment to skip second
+                processed = true;
+            } else if (i + 2 < input.size()) {
+                // Single ƒ followed by escape character -> actual escape
+                char escape_char = input[i + 2];
+                switch (escape_char) {
+                    case 'n':
+                        result += '\n';  // ƒn -> actual newline
+                        i += 2;          // Skip UTF-8 ƒ + 'n'
+                        processed = true;
+                        break;
+                    case 't':
+                        result += '\t';  // ƒt -> actual tab
+                        i += 2;          // Skip UTF-8 ƒ + 't'
+                        processed = true;
+                        break;
+                    case 'r':
+                        result += '\r';  // ƒr -> carriage return
+                        i += 2;          // Skip UTF-8 ƒ + 'r'
+                        processed = true;
+                        break;
+                    default:
+                        // ƒ followed by unknown char -> just backslash + char
+                        result += '\\';
+                        i += 1; // Skip second byte of UTF-8 ƒ
+                        processed = true;
+                        break;
+                }
+            } else {
+                // ƒ at end of string -> backslash
+                result += '\\';
+                i += 1; // Skip second byte of UTF-8 ƒ
+                processed = true;
+            }
+        }
+        
+        // =================================================================
+        // PHASE 2: Handle double backslash sequences -> literal backslash + character
+        // =================================================================
+        
+        else if (input[i] == '\\' && i + 1 < input.size() && input[i + 1] == '\\') {
+            // Found \\ - this is a literal backslash sequence
+            if (i + 2 < input.size()) {
+                char after_double_backslash = input[i + 2];
+                switch (after_double_backslash) {
+                    case 'n':
+                        result += "\\n";  // \\n -> literal \n (backslash + n)
+                        i += 2;           // Skip \\n
+                        processed = true;
+                        break;
+                    case 't':
+                        result += "\\t";  // \\t -> literal \t (backslash + t)
+                        i += 2;           // Skip \\t
+                        processed = true;
+                        break;
+                    case 'r':
+                        result += "\\r";  // \\r -> literal \r (backslash + r)
+                        i += 2;           // Skip \\r
+                        processed = true;
+                        break;
+                    default:
+                        // \\ followed by other char -> literal backslash + continue processing
+                        result += '\\';
+                        i += 1;      // Skip one backslash, let next iteration handle the rest
+                        processed = true;
+                        break;
+                }
+            } else {
+                // \\ at end -> literal backslash
+                result += '\\';
+                i += 1;      // Skip one backslash
+                processed = true;
+            }
+        }
+        
+        // =================================================================
+        // PHASE 3: Handle regular characters
+        // =================================================================
+        
+        if (!processed) {
+            result += input[i];
+        }
     }
+    
+    return result;
+}
+
+// =================================================================
+// OPTIONAL: Helper function for testing/debugging
+// =================================================================
+
+std::string escapeForDisplay(const std::string& input) {
+    std::string result;
+    for (char c : input) {
+        switch (c) {
+            case '\n': result += "\\n"; break;
+            case '\t': result += "\\t"; break;
+            case '\r': result += "\\r"; break;
+            case '\\': result += "\\\\"; break;
+            case '"':  result += "\\\""; break;
+            default:   result += c; break;
+        }
+    }
+    return result;
+}
+
 
     //-------------------------------------------------------------------------
     // Triadic Consciousness Path Context Implementation
@@ -405,8 +527,15 @@ Usage:
 - Range validation against actual file content
 - Enhanced permission error guidance
 
-**🎯 Revolutionary Benefits:**
-\n**🚀 ƒ → \\ Escaping System:**\n- ƒ characters are automatically converted to backslashes in content\n- Perfect for C++ escape sequences: §printf(\"Hello worldƒn\");§ → printf(\"Hello world\\n\");\n- Double ƒƒ → single ƒ for literal ƒ characters when needed\n- Works with both § delimiters and traditional quotes\n- Examples:\n  - §std::cout << \"Line oneƒnLine two\";§ → std::cout << \"Line one\\nLine two\";\n  - §regex(\"patternƒd+\")§ → regex(\"pattern\\d+\")\n  - §path(\"C:ƒƒUsersƒƒfile\")§ → path(\"C:\\Users\\file\")\n
+**🚀 ƒ → \\ Escaping System:
+- ƒ characters are automatically converted to backslashes in content
+- Perfect for C++ escape sequences: §printf(\"Hello worldƒn\");§ → printf(\"Hello world\\n\");
+- Double ƒƒ → single ƒ for literal ƒ characters when needed
+- Works with both § delimiters and traditional quotes
+- Examples:
+  - §std::cout << \"Line oneƒnLine two\";§ → std::cout << \"Line one\\nLine two\";
+  - §regex(\"patternƒd+\")§ → regex(\"pattern\\d+\")
+  - §path(\"C:ƒƒUsersƒƒfile\")§ → path(\"C:\\Users\\file\")
 - No more regex nightmares - visual, line-based editing
 - Escaping paradise with § delimiters  
 - Surgical precision - replace exactly what you intend
@@ -866,7 +995,12 @@ Usage:
 - `lines_returned` - Number of lines returned
 - `total_lines` - Total lines in file
 - `range_spec` - Parsed range specification
-\n**🧘 FIO Ecosystem Integration:**\n- Part of the revolutionary trilogy: fio-search (find) + fio-read (see) + fio-write (change)\n- Use fio-read to examine content before precise editing with fio-write\n- Note: fio-read shows content as-is without ƒ escaping (see fio-write for ƒ → \\ system)\n
+
+**🧘 FIO Ecosystem Integration:**
+- Part of the revolutionary trilogy: fio-search (find) + fio-read (see) + fio-write (change)
+- Use fio-read to examine content before precise editing with fio-write
+- Note: fio-read shows content as-is without ƒ escaping (see fio-write for ƒ → \\ system)
+
 )DESC";
 }
 
@@ -1071,7 +1205,16 @@ Usage:
 (fio-write :path §src/code.cpp§ :lines §@24§ :content §    new_function_name();§)
 
 ;; 4. VERIFY the change
-\n**🚀 ƒ → \\ Escaping System:**\n- ƒ characters in search patterns are automatically converted to backslashes\n- Perfect for searching C++ code patterns with escape sequences\n- Double ƒƒ → single ƒ for literal ƒ characters when needed\n- Works across all search modes (literal, pathspec, regex)\n- Examples:\n  - Search for: §printfƒ(§ → finds: printf\\(\n  - Search for: §.*ƒn§ → finds: .*\\n\n  - Regex search: §\\w+ƒd+§ → searches: \\w+\\d+\n
+**🚀 ƒ → \\ Escaping System:**
+- ƒ characters in search patterns are automatically converted to backslashes
+- Perfect for searching C++ code patterns with escape sequences
+- Double ƒƒ → single ƒ for literal ƒ characters when needed
+- Works across all search modes (literal, pathspec, regex)
+- Examples:
+  - Search for: §printfƒ(§ → finds: printf\\(
+  - Search for: §.*ƒn§ → finds: .*\\n
+  - Regex search: §\\w+ƒd+§ → searches: \\w+\\d+
+
 (fio-search :path §src/code.cpp§ :literal §new_function_name§)
 ```
 
