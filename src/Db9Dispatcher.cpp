@@ -3,6 +3,7 @@
 #include "LabDb/DatabaseVerbs.h"
 #include "LabDb/EnhancedDatabaseVerbs.h"
 #include "Verbs/VocabularyStatsVerb.h"
+#include "Verbs/FioVerbs.h"
 
 #include <sstream>
 #include <iomanip>
@@ -17,8 +18,7 @@ namespace {
     // Escape JSON string
     std::string escapeJson(const std::string& input) {
         std::string escaped;
-        escaped.reserve(input.size() + input.size() / 10); // Reserve extra space for escapes
-        
+        escaped.reserve(input.size() * 2); // Reserve extra space
         for (char c : input) {
             switch (c) {
                 case '"':  escaped += "\\\""; break;
@@ -48,7 +48,7 @@ namespace {
 std::string Db9Response::toJson() const {
     std::ostringstream json;
     json << "{\n";
-    
+
     // Status
     json << "  \"status\": \"";
     switch (status) {
@@ -57,10 +57,10 @@ std::string Db9Response::toJson() const {
         case Warning: json << "warning"; break;
     }
     json << "\",\n";
-    
+
     // Result
     json << "  \"result\": \"" << escapeJson(result) << "\",\n";
-    
+
     // Error information (optional)
     if (!error_code.empty()) {
         json << "  \"error_code\": \"" << escapeJson(error_code) << "\",\n";
@@ -68,7 +68,7 @@ std::string Db9Response::toJson() const {
     if (!error_message.empty()) {
         json << "  \"error_message\": \"" << escapeJson(error_message) << "\",\n";
     }
-    
+
     // Auto-reflexive metrics
     json << "  \"auto_reflexive\": {\n";
     json << "    \"operation_time_ms\": " << auto_reflexive.operation_time_ms.count() << ",\n";
@@ -77,7 +77,7 @@ std::string Db9Response::toJson() const {
     json << "    \"tid_allocations\": " << auto_reflexive.tid_allocations << ",\n";
     json << "    \"memory_usage_kb\": " << auto_reflexive.memory_usage_kb << "\n";
     json << "  }\n";
-    
+
     json << "}";
     return json.str();
 }
@@ -89,97 +89,168 @@ class Db9Dispatcher::Impl {
 public:
     std::unordered_map<std::string, std::unique_ptr<IDb9Verb>> verbs;
     std::mutex verbMutex; // Thread safety for verb registration
-    
-    Db9Response executeVerb(const std::string& verbName, const ::lab::Text::Sexpr& sexpr) {
-        auto startTime = std::chrono::high_resolution_clock::now();
-        
-        std::lock_guard<std::mutex> lock(verbMutex);
-        auto it = verbs.find(verbName);
-        if (it == verbs.end()) {
-            Db9Response response;
-            response.status = Db9Response::Error;
-            response.error_code = "UNKNOWN_VERB";
-            response.error_message = "Unknown verb: " + verbName;
-            response.result = "";
-            
-            auto endTime = std::chrono::high_resolution_clock::now();
-            response.auto_reflexive.operation_time_ms = 
-                std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-            
-            return response;
-        }
-        
-        try {
-            Db9Response response = it->second->execute(sexpr);
-            
-            // Add timing if not already set
-            if (response.auto_reflexive.operation_time_ms.count() == 0) {
-                auto endTime = std::chrono::high_resolution_clock::now();
-                response.auto_reflexive.operation_time_ms = 
-                    std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-            }
-            
-            return response;
-        }
-        catch (const std::exception& e) {
-            Db9Response response;
-            response.status = Db9Response::Error;
-            response.error_code = "EXECUTION_ERROR";
-            response.error_message = std::string("Verb execution failed: ") + e.what();
-            response.result = "";
-            
-            auto endTime = std::chrono::high_resolution_clock::now();
-            response.auto_reflexive.operation_time_ms = 
-                std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-            
-            return response;
-        }
+
+    Db9Response executeVerb(const std::string& verbName, const ::lab::Text::Sexpr& sexpr);
+    Db9Response getVerbDescription(const std::string& verbName);
+    Db9Response parseSexprAndExecute(const std::string& sexprCommand);
+};
+
+Db9Response Db9Dispatcher::Impl::executeVerb(const std::string& verbName, const ::lab::Text::Sexpr& sexpr) {
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    std::lock_guard<std::mutex> lock(verbMutex);
+    auto it = verbs.find(verbName);
+    if (it == verbs.end()) {
+        Db9Response response;
+        response.status = Db9Response::Error;
+        response.error_code = "UNKNOWN_VERB";
+        response.error_message = "Unknown verb: " + verbName;
+        response.result = "";
+
+        auto endTime = std::chrono::high_resolution_clock::now();
+        response.auto_reflexive.operation_time_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+        return response;
     }
-    
-    Db9Response parseSexprAndExecute(const std::string& sexprCommand) {
-        try {
-            // Parse the S-expression
-            ::lab::Text::Sexpr sexpr((::lab::Text::StrView(sexprCommand)));
-            
-            // Validate we have a proper S-expression
-            if (sexpr.expr.empty() || sexpr.expr[0].token != tsSexprPushList) {
-                Db9Response response;
-                response.status = Db9Response::Error;
-                response.error_code = "PARSE_ERROR";
-                response.error_message = "Invalid S-expression: must start with '('";
-                return response;
-            }
-            
-            // Extract verb name (first atom after opening paren)
-            std::string verbName;
-            size_t exprIndex = 1; // Skip the initial PushList
-            if (exprIndex < sexpr.expr.size() && sexpr.expr[exprIndex].token == tsSexprAtom) {
-                int stringIndex = sexpr.expr[exprIndex].ref;
-                if (stringIndex < sexpr.strings.size()) {
-                    verbName = sexpr.strings[stringIndex];
-                }
-            }
-            
-            if (verbName.empty()) {
-                Db9Response response;
-                response.status = Db9Response::Error;
-                response.error_code = "PARSE_ERROR";
-                response.error_message = "No verb found in S-expression";
-                return response;
-            }
-            
-            // Execute the verb
-            return executeVerb(verbName, sexpr);
+
+    try {
+        Db9Response response = it->second->execute(sexpr);
+
+        // Add timing if not already set
+        if (response.auto_reflexive.operation_time_ms.count() == 0) {
+            auto endTime = std::chrono::high_resolution_clock::now();
+            response.auto_reflexive.operation_time_ms =
+                std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         }
-        catch (const std::exception& e) {
+
+        return response;
+    }
+    catch (const std::exception& e) {
+        Db9Response response;
+        response.status = Db9Response::Error;
+        response.error_code = "EXECUTION_ERROR";
+        response.error_message = std::string("Verb execution failed: ") + e.what();
+        response.result = "";
+
+        auto endTime = std::chrono::high_resolution_clock::now();
+        response.auto_reflexive.operation_time_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+        return response;
+    }
+}
+
+Db9Response Db9Dispatcher::Impl::getVerbDescription(const std::string& verbName) {
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    std::lock_guard<std::mutex> lock(verbMutex);
+    auto it = verbs.find(verbName);
+    if (it == verbs.end()) {
+        Db9Response response;
+        response.status = Db9Response::Error;
+        response.error_code = "UNKNOWN_VERB";
+        response.error_message = "Unknown verb: " + verbName + ". Cannot get description.";
+        response.result = "";
+
+        auto endTime = std::chrono::high_resolution_clock::now();
+        response.auto_reflexive.operation_time_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+        return response;
+    }
+
+    try {
+        // Get description from the verb
+        std::string description = it->second->getDescription();
+
+        Db9Response response;
+        response.status = Db9Response::Success;
+        response.result = description;
+        response.error_code = "";
+        response.error_message = "";
+
+        auto endTime = std::chrono::high_resolution_clock::now();
+        response.auto_reflexive.operation_time_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        response.auto_reflexive.items_processed = 1; // One description retrieved
+
+        return response;
+    }
+    catch (const std::exception& e) {
+        Db9Response response;
+        response.status = Db9Response::Error;
+        response.error_code = "DESCRIPTION_ERROR";
+        response.error_message = std::string("Failed to get verb description: ") + e.what();
+        response.result = "";
+
+        auto endTime = std::chrono::high_resolution_clock::now();
+        response.auto_reflexive.operation_time_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+        return response;
+    }
+}
+
+Db9Response Db9Dispatcher::Impl::parseSexprAndExecute(const std::string& sexprCommand) {
+    try {
+        // Parse the S-expression
+        ::lab::Text::Sexpr sexpr((::lab::Text::StrView(sexprCommand)));
+
+        // Validate we have a proper S-expression
+        if (sexpr.expr.empty() || sexpr.expr[0].token != tsSexprPushList) {
             Db9Response response;
             response.status = Db9Response::Error;
             response.error_code = "PARSE_ERROR";
-            response.error_message = std::string("S-expression parsing failed: ") + e.what();
+            response.error_message = "Invalid S-expression: must start with '('";
             return response;
         }
+
+        // Extract verb name (first atom after opening paren)
+        std::string verbName;
+        size_t exprIndex = 1; // Skip the initial PushList
+        if (exprIndex < sexpr.expr.size() && sexpr.expr[exprIndex].token == tsSexprAtom) {
+            int stringIndex = sexpr.expr[exprIndex].ref;
+            if (stringIndex < sexpr.strings.size()) {
+                verbName = sexpr.strings[stringIndex];
+            }
+        }
+
+        if (verbName.empty()) {
+            Db9Response response;
+            response.status = Db9Response::Error;
+            response.error_code = "PARSE_ERROR";
+            response.error_message = "No verb found in S-expression";
+            return response;
+        }
+
+        // Check for help/documentation request
+        // Look for help tokens after the verb name
+        std::string helpToken;
+        size_t nextExprIndex = exprIndex + 1; // Next position after verb name
+        if (nextExprIndex < sexpr.expr.size() && sexpr.expr[nextExprIndex].token == tsSexprAtom) {
+            int helpStringIndex = sexpr.expr[nextExprIndex].ref;
+            if (helpStringIndex < sexpr.strings.size()) {
+                helpToken = sexpr.strings[helpStringIndex];
+            }
+        }
+
+        // Check if this is a help request
+        if (helpToken == "help" || helpToken == "getDescription" || helpToken == "readme" || helpToken == "?") {
+            return getVerbDescription(verbName);
+        }
+
+        // Execute the verb
+        return executeVerb(verbName, sexpr);
     }
-};
+    catch (const std::exception& e) {
+        Db9Response response;
+        response.status = Db9Response::Error;
+        response.error_code = "PARSE_ERROR";
+        response.error_message = std::string("S-expression parsing failed: ") + e.what();
+        return response;
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Db9Dispatcher public interface
@@ -195,66 +266,66 @@ Db9Response Db9Dispatcher::executeCommand(const std::string& sexprCommand) {
 
 Db9Response Db9Dispatcher::executeCommands(const std::vector<std::string>& sexprCommands) {
     Db9Response aggregatedResponse;
-    
+
     if (sexprCommands.empty()) {
         aggregatedResponse.status = Db9Response::Error;
         aggregatedResponse.error_code = "NO_COMMANDS";
         aggregatedResponse.error_message = "No S-expression commands provided";
         return aggregatedResponse;
     }
-    
+
     std::ostringstream resultArray;
     resultArray << "[\n";
-    
+
     // Track aggregate metrics
     std::chrono::milliseconds totalTime(0);
     int64_t totalItems = 0;
     int32_t totalTidAllocations = 0;
     int64_t totalMemoryUsage = 0;
     bool hasErrors = false;
-    
+
     for (size_t i = 0; i < sexprCommands.size(); ++i) {
         if (i > 0) resultArray << ",\n";
-        
+
         Db9Response response = m_impl->parseSexprAndExecute(sexprCommands[i]);
         resultArray << "  " << response.toJson();
-        
+
         // Aggregate metrics
         totalTime += response.auto_reflexive.operation_time_ms;
         totalItems += response.auto_reflexive.items_processed;
         totalTidAllocations += response.auto_reflexive.tid_allocations;
         totalMemoryUsage += response.auto_reflexive.memory_usage_kb;
-        
+
         if (response.status == Db9Response::Error) {
             hasErrors = true;
         }
     }
-    
+
     resultArray << "\n]";
-    
+
     // Set aggregated response
     aggregatedResponse.status = hasErrors ? Db9Response::Warning : Db9Response::Success;
     aggregatedResponse.result = resultArray.str();
-    
+
     if (hasErrors) {
         aggregatedResponse.error_code = "PARTIAL_FAILURES";
         aggregatedResponse.error_message = "Some commands in the batch failed - see individual results";
     }
-    
+
     // Set aggregate metrics
     aggregatedResponse.auto_reflexive.operation_time_ms = totalTime;
     aggregatedResponse.auto_reflexive.items_processed = totalItems;
-    aggregatedResponse.auto_reflexive.cache_hit_ratio = sexprCommands.size() > 0 ? 
+    aggregatedResponse.auto_reflexive.cache_hit_ratio = sexprCommands.size() > 0 ?
         (totalItems > 0 ? 1.0 : 0.0) : 0.0; // Simplified calculation
     aggregatedResponse.auto_reflexive.tid_allocations = totalTidAllocations;
     aggregatedResponse.auto_reflexive.memory_usage_kb = totalMemoryUsage;
-    
+
     return aggregatedResponse;
 }
 
 void Db9Dispatcher::registerVerb(std::unique_ptr<IDb9Verb> verb) {
     if (!verb) return;
-    
+
     std::lock_guard<std::mutex> lock(m_impl->verbMutex);
     std::string verbName = verb->getVerbName();
     m_impl->verbs[verbName] = std::move(verb);
@@ -263,11 +334,11 @@ void Db9Dispatcher::registerVerb(std::unique_ptr<IDb9Verb> verb) {
 std::vector<std::string> Db9Dispatcher::getAvailableVerbs() const {
     std::lock_guard<std::mutex> lock(m_impl->verbMutex);
     std::vector<std::string> verbs;
-    
+
     for (const auto& pair : m_impl->verbs) {
         verbs.push_back(pair.first);
     }
-    
+
     std::sort(verbs.begin(), verbs.end());
     return verbs;
 }
@@ -275,7 +346,7 @@ std::vector<std::string> Db9Dispatcher::getAvailableVerbs() const {
 std::string Db9Dispatcher::getSpecification() const {
     // For now, return a placeholder - this will be populated with the full
     // markdown specification from db9-tool-spec.md
-    // return a big chunk of inlined markdown text delimited by R"SPEC(...)"SPEC
+    // return a big chunk of inlined markdown text delimited by R"SPEC(...)SPEC
 
     const char* specText = R"SPEC(
 # db9 Tool - LLM Interface Specification
@@ -285,9 +356,9 @@ This specification provides LLMs with essential information to use the `db9` too
 
 ## Tool Interface
 
-**Tool Name**: `db9`  
-**Parameters**: Array of S-expression strings  
-**Format**: `(verb :param1 value1 :param2 value2 :dbid database-id)`  
+**Tool Name**: `db9`
+**Parameters**: Array of S-expression strings
+**Format**: `(verb :param1 value1 :param2 value2 :dbid database-id)`
 **Convention**: `:dbid` parameter always last for consistency
 
 ## String Quoting Best Practices for LLMs
@@ -447,13 +518,18 @@ The system is fully self-documenting. Use any verb's `getDescription()` for comp
 )SPEC";
 
     std::string result = specText;
-    result += std::to_string(m_impl->verbs.size()) + std::string(" registered verbs.\n\n");
-    for (auto& m : m_impl->verbs) {
-        result += "---\n### Verb: " + m.second->getVerbName() + "\n";
+    result += "\n\n## Available Verbs\n";
+    result += std::to_string(m_impl->verbs.size()) + std::string(" registered verbs.\n");
+
+    for (const auto& m : m_impl->verbs) {
+        result += "---\n";
+        result += "### Verb: " + m.first + "\n\n";
         result += m.second->getDescription() + "\n\n";
     }
+
     return result;
 }
+
 
 //-----------------------------------------------------------------------------
 // Global dispatcher singleton
@@ -469,10 +545,13 @@ Db9Dispatcher& getGlobalDb9Dispatcher() {
         initDatabaseVerbRegistration(dispatcher);
         initEnhancedDatabaseVerbRegistration(dispatcher);
         LabDb::VocabularyStatsVerb::registerVerb(dispatcher);
+        initFioVerbRegistration(dispatcher);
         initialized = true;
     }
     
     return dispatcher;
 }
 
+
 } // namespace LabDb
+

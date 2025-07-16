@@ -80,6 +80,14 @@ add_executable(test_enhanced_api
 target_link_libraries(test_enhanced_api labdb)
 add_test(NAME EnhancedApiTest COMMAND test_enhanced_api)
 
+# FIO-Write TDD test (Test-driven development for fio-write functionality)
+add_executable(test_fio_write
+    cpp/test_fio_write.cpp
+)
+target_link_libraries(test_fio_write labdb)
+target_include_directories(test_fio_write PRIVATE ../include)
+add_test(NAME FioWriteTest COMMAND test_fio_write)
+
 # EID Chain Debug test (Debug EID resolution chains)
 add_executable(eid_debug_test
     cpp/eid_debug_test.cpp
@@ -92,6 +100,13 @@ add_executable(benchmark_performance
     cpp/benchmark_performance.cpp
 )
 target_link_libraries(benchmark_performance labdb)
+
+# Rope functionality test
+add_executable(test_rope_minimal
+    cpp/test_rope_minimal.cpp
+)
+target_link_libraries(test_rope_minimal labdb)
+add_test(NAME RopeMinimalTest COMMAND test_rope_minimal)
 
 # Python tests (if Python bindings are available)
 if(BUILD_PYTHON_BINDINGS)

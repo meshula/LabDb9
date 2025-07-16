@@ -57,9 +57,7 @@ option(BUILD_TESTS "Build test suite" ON)
 
 # Python configuration (used when LABDB_MCP=ON)
 # LABDB_PYDIR: Python installation directory (e.g., /opt/conda/envs/myenv)
-# LABDB_PYEXE: Python executable path (e.g., /opt/conda/envs/myenv/bin/python3)
 set(LABDB_PYDIR "" CACHE STRING "Python installation directory for LABDB_MCP")
-set(LABDB_PYEXE "" CACHE STRING "Python executable for LABDB_MCP")
 
 if(LABDB_MCP)
     # Validate LABDB_PYDIR is defined and writable
@@ -82,17 +80,30 @@ if(LABDB_MCP)
     
     message(STATUS "LABDB_MCP: Using Python directory: ${LABDB_PYDIR} [validated]")
     
+    # Use whatever python is in PATH to get its executable path
+    execute_process(
+        COMMAND python -c "import sys; print(sys.executable)"
+        OUTPUT_VARIABLE LABDB_PYEXE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE PYTHON_RESULT
+    )
+
+    if(NOT PYTHON_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to get Python executable path")
+    endif()
+
+    message(STATUS "LABDB_MCP: Using Python executable: ${LABDB_PYEXE}")
+
     # Validate LABDB_PYEXE is defined and executable exists
     if(NOT LABDB_PYEXE)
-        message(FATAL_ERROR "LABDB_MCP=ON requires LABDB_PYEXE to be defined. "
-                           "Example: -DLABDB_PYEXE=/opt/conda/envs/myenv/bin/python3")
+        message(FATAL_ERROR "LABDB_MCP=ON requires a Python interpreter to be available.")
     endif()
     
     if(NOT EXISTS "${LABDB_PYEXE}")
         message(FATAL_ERROR "LABDB_PYEXE executable does not exist: ${LABDB_PYEXE}")
     endif()
     
-    if(NOT IS_EXECUTABLE "${LABDB_PYEXE}")
+    if(NOT EXISTS "${LABDB_PYEXE}")
         message(FATAL_ERROR "LABDB_PYEXE is not executable: ${LABDB_PYEXE}")
     endif()
     
@@ -161,6 +172,8 @@ add_library(labdb
     src/Verbs.cpp
     src/Verbs/VocabularyStatsVerb.h
     src/Verbs/VocabularyStatsVerb.cpp
+    src/Verbs/FioVerbs.cpp
+    src/Verbs/FioVerbs.h
 )
 
 target_include_directories(labdb
