@@ -87,7 +87,8 @@ std::string Db9Response::toJson() const {
 //-----------------------------------------------------------------------------
 class Db9Dispatcher::Impl {
 public:
-    std::unordered_map<std::string, std::unique_ptr<IDb9Verb>> verbs;
+    std::unordered_map<std::string, std::string> verbAliases; // Maps alias -> verb_name
+    std::unordered_map<std::string, std::shared_ptr<IDb9Verb>> verbs;
     std::mutex verbMutex; // Thread safety for verb registration
 
     Db9Response executeVerb(const std::string& verbName, const ::lab::Text::Sexpr& sexpr);
@@ -95,27 +96,36 @@ public:
     Db9Response parseSexprAndExecute(const std::string& sexprCommand);
 };
 
-Db9Response Db9Dispatcher::Impl::executeVerb(const std::string& verbName, const ::lab::Text::Sexpr& sexpr) {
-    auto startTime = std::chrono::high_resolution_clock::now();
-
-    std::lock_guard<std::mutex> lock(verbMutex);
-    auto it = verbs.find(verbName);
-    if (it == verbs.end()) {
+Db9Response Db9Dispatcher::Impl::executeVerb(const std::string& verbName, const ::lab::Text::Sexpr& sexpr) 
+{
+    std::shared_ptr<IDb9Verb> verb;
+    {
+        std::lock_guard<std::mutex> lock(verbMutex);
+        auto it = verbs.find(verbName);
+        if (it != verbs.end()) {
+            verb = it->second;
+        } else {
+            // Check if it's an alias
+            auto alias_it = verbAliases.find(verbName);
+            if (alias_it != verbAliases.end()) {
+                it = verbs.find(alias_it->second);
+                if (it != verbs.end()) {
+                    verb = it->second;
+                }
+            }
+        }
+    }
+    if (!verb) {
         Db9Response response;
         response.status = Db9Response::Error;
         response.error_code = "UNKNOWN_VERB";
         response.error_message = "Unknown verb: " + verbName;
-        response.result = "";
-
-        auto endTime = std::chrono::high_resolution_clock::now();
-        response.auto_reflexive.operation_time_ms =
-            std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-
         return response;
     }
 
+    auto startTime = std::chrono::high_resolution_clock::now();
     try {
-        Db9Response response = it->second->execute(sexpr);
+        Db9Response response = verb->execute(sexpr);
 
         // Add timing if not already set
         if (response.auto_reflexive.operation_time_ms.count() == 0) {
@@ -331,6 +341,20 @@ void Db9Dispatcher::registerVerb(std::unique_ptr<IDb9Verb> verb) {
     m_impl->verbs[verbName] = std::move(verb);
 }
 
+void Db9Dispatcher::registerVerbAlias(const std::string& verb, const std::vector<std::string>& aliases) {
+    std::lock_guard<std::mutex> lock(m_impl->verbMutex);
+    
+    // Verify the verb exists
+    if (m_impl->verbs.find(verb) == m_impl->verbs.end()) {
+        return; // Silently ignore aliases for non-existent verbs
+    }
+    
+    // Register all aliases for this verb
+    for (const std::string& alias : aliases) {
+        m_impl->verbAliases[alias] = verb;
+    }
+}
+
 std::vector<std::string> Db9Dispatcher::getAvailableVerbs() const {
     std::lock_guard<std::mutex> lock(m_impl->verbMutex);
     std::vector<std::string> verbs;
@@ -341,6 +365,12 @@ std::vector<std::string> Db9Dispatcher::getAvailableVerbs() const {
 
     std::sort(verbs.begin(), verbs.end());
     return verbs;
+}
+
+IDb9Verb* Db9Dispatcher::getVerbByName(const std::string& verbName) const {
+    std::lock_guard<std::mutex> lock(m_impl->verbMutex);
+    auto it = m_impl->verbs.find(verbName);
+    return (it != m_impl->verbs.end()) ? it->second.get() : nullptr;
 }
 
 std::string Db9Dispatcher::getSpecification() const {
@@ -554,4 +584,3 @@ Db9Dispatcher& getGlobalDb9Dispatcher() {
 
 
 } // namespace LabDb
-

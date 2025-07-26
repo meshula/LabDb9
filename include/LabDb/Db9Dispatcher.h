@@ -31,8 +31,14 @@ public:
     
     // Register a verb implementation
     void registerVerb(std::unique_ptr<IDb9Verb> verb);
+
+    // Register verb aliases
+    void registerVerbAlias(const std::string& verb, const std::vector<std::string>& aliases);
     
     // Get available verbs (for db9-readme)
+    
+    // Get specific verb by name for introspection
+    IDb9Verb* getVerbByName(const std::string& verbName) const;
     std::vector<std::string> getAvailableVerbs() const;
     
     // Get full specification as markdown (for db9-readme implementation)

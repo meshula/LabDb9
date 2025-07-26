@@ -1,3 +1,4 @@
+#include "Fio/GetVerbDescription.h"
 #include "FioVerbs.h"
 #include "LabDb/Db9Dispatcher.h"
 #include <iostream>
@@ -113,158 +114,117 @@ namespace FioUtils {
 //-----------------------------------------------------------------------------
 // FioUtils Implementation  
 //-----------------------------------------------------------------------------
-// Complete rewrite of FioUtils::unescapeDb9String function
-// This goes around line 118 in src/Verbs/FioVerbs.cpp
+/*
+ * unescapeDb9String Version 3 - Unicode Escape System
+ * 
+ * LLM-Ready Explanation:
+ * ======================
+ * 
+ * This function implements a bulletproof Unicode-based escape system that eliminates
+ * the traditional JSON/C++ nested escape nightmare. Instead of complex backslash 
+ * sequences, it uses visually intuitive Unicode characters that are completely 
+ * transparent to JSON parsing.
+ * 
+ * Unicode Escape Mappings:
+ * ------------------------
+ * ※ (U+203B REFERENCE MARK)     → \    (backslash - for regex, file paths, C++ escapes)
+ * ″ (U+2033 DOUBLE PRIME)       → "    (quote - for embedded strings)
+ * ↵ (U+21B5 DOWNWARDS ARROW)    → \n   (actual newline character - creates line breaks)
+ * ⇥ (U+21E5 RIGHTWARDS ARROW)   → \t   (actual tab character - for indentation)
+ * 
+ * Key Benefits for LLMs:
+ * ----------------------
+ * 1. VISUAL CLARITY: Each symbol visually represents its function
+ * 2. JSON TRANSPARENT: No conflicts with JSON syntax - works in any context
+ * 3. ZERO COGNITIVE LOAD: No counting backslashes or nested escape math
+ * 4. BULLETPROOF: Impossible to create malformed escape sequences
+ * 5. COMPOSABLE: Works in S-expressions, JSON, C++ strings, anywhere
+ * 
+ * Real-World Examples:
+ * -------------------
+ * Input:  "printf(″Hello World※n″);"
+ * Output: printf("Hello World\n");
+ * 
+ * Input:  "std::regex pattern(″※w+※d+″);"
+ * Output: std::regex pattern("\w+\d+");
+ * 
+ * Input:  "⇥if (error) {↵⇥⇥printf(″Error: %s※n″, msg);↵⇥}"
+ * Output: 	if (error) {
+ *         		printf("Error: %s\n", msg);
+ *         	}
+ * 
+ * Input:  "path = ″C:※※users※※file.txt″;"
+ * Output: path = "C:\\users\\file.txt";
+ * 
+ * Usage Philosophy:
+ * ----------------
+ * - Use ↵ when you want ACTUAL line breaks in the output file
+ * - Use ※n when you want \n escape sequences in C++ strings
+ * - Use ″ for all quote needs - no more JSON quote escaping hell
+ * - Use ※ for any backslash needs - regex, file paths, C++ escapes
+ * - Use ⇥ for actual tab characters (indentation, formatting)
+ * 
+ * This system makes fio-write completely natural for LLMs to generate
+ * C++, regex patterns, printf statements, and complex code structures
+ * without any escape complexity mental overhead.
+ */
 
 std::string unescapeDb9String(const std::string& input) {
-    std::string result;
-    result.reserve(input.size()); // Reserve space for efficiency
+    std::string result = input;
     
-    for (size_t i = 0; i < input.size(); ++i) {
-        bool processed = false;
-        
-        // =================================================================
-        // PHASE 1: Handle ƒ character conversion to actual escape characters
-        // =================================================================
-        
-        // Handle ƒ character (both Latin-1 and UTF-8) followed by escape character
-        // Check for Latin-1 ƒ (single byte)
-        if (static_cast<unsigned char>(input[i]) == 0x83) { // Latin-1 ƒ
-            // Check for double ƒƒ -> single ƒ
-            if (i + 1 < input.size() && static_cast<unsigned char>(input[i + 1]) == 0x83) {
-                // ƒƒ -> ƒ (keep one ƒ, skip the second)
-                result += input[i];
-                i += 1; // Skip the second ƒ
-                processed = true;
-            } else if (i + 1 < input.size()) {
-                // Single ƒ followed by escape character -> actual escape
-                char escape_char = input[i + 1];
-                switch (escape_char) {
-                    case 'n':
-                        result += '\n';  // ƒn -> actual newline
-                        i += 1;          // Skip the 'n'
-                        processed = true;
-                        break;
-                    case 't':
-                        result += '\t';  // ƒt -> actual tab
-                        i += 1;          // Skip the 't'
-                        processed = true;
-                        break;
-                    case 'r':
-                        result += '\r';  // ƒr -> carriage return
-                        i += 1;          // Skip the 'r'
-                        processed = true;
-                        break;
-                    default:
-                        // ƒ followed by unknown char -> just backslash + char
-                        result += '\\';
-                        processed = true;
-                        break;
-                }
-            } else {
-                // ƒ at end of string -> backslash
-                result += '\\';
-                processed = true;
-            }
-        }
-        // Check for UTF-8 ƒ (two bytes: 0xC6 0x92)
-        else if (i + 1 < input.size() &&
-                 static_cast<unsigned char>(input[i]) == 0xC6 &&
-                 static_cast<unsigned char>(input[i + 1]) == 0x92) {
-            
-            // Check for double ƒƒ -> single ƒ (UTF-8)
-            if (i + 3 < input.size() &&
-                static_cast<unsigned char>(input[i + 2]) == 0xC6 &&
-                static_cast<unsigned char>(input[i + 3]) == 0x92) {
-                // ƒƒ -> ƒ (keep one UTF-8 ƒ, skip the second)
-                result += input[i];     // First byte of ƒ
-                result += input[i + 1]; // Second byte of ƒ
-                i += 3; // Skip both ƒ characters, will increment to skip second
-                processed = true;
-            } else if (i + 2 < input.size()) {
-                // Single ƒ followed by escape character -> actual escape
-                char escape_char = input[i + 2];
-                switch (escape_char) {
-                    case 'n':
-                        result += '\n';  // ƒn -> actual newline
-                        i += 2;          // Skip UTF-8 ƒ + 'n'
-                        processed = true;
-                        break;
-                    case 't':
-                        result += '\t';  // ƒt -> actual tab
-                        i += 2;          // Skip UTF-8 ƒ + 't'
-                        processed = true;
-                        break;
-                    case 'r':
-                        result += '\r';  // ƒr -> carriage return
-                        i += 2;          // Skip UTF-8 ƒ + 'r'
-                        processed = true;
-                        break;
-                    default:
-                        // ƒ followed by unknown char -> just backslash + char
-                        result += '\\';
-                        i += 1; // Skip second byte of UTF-8 ƒ
-                        processed = true;
-                        break;
-                }
-            } else {
-                // ƒ at end of string -> backslash
-                result += '\\';
-                i += 1; // Skip second byte of UTF-8 ƒ
-                processed = true;
-            }
-        }
-        
-        // =================================================================
-        // PHASE 2: Handle double backslash sequences -> literal backslash + character
-        // =================================================================
-        
-        else if (input[i] == '\\' && i + 1 < input.size() && input[i + 1] == '\\') {
-            // Found \\ - this is a literal backslash sequence
-            if (i + 2 < input.size()) {
-                char after_double_backslash = input[i + 2];
-                switch (after_double_backslash) {
-                    case 'n':
-                        result += "\\n";  // \\n -> literal \n (backslash + n)
-                        i += 2;           // Skip \\n
-                        processed = true;
-                        break;
-                    case 't':
-                        result += "\\t";  // \\t -> literal \t (backslash + t)
-                        i += 2;           // Skip \\t
-                        processed = true;
-                        break;
-                    case 'r':
-                        result += "\\r";  // \\r -> literal \r (backslash + r)
-                        i += 2;           // Skip \\r
-                        processed = true;
-                        break;
-                    default:
-                        // \\ followed by other char -> literal backslash + continue processing
-                        result += '\\';
-                        i += 1;      // Skip one backslash, let next iteration handle the rest
-                        processed = true;
-                        break;
-                }
-            } else {
-                // \\ at end -> literal backslash
-                result += '\\';
-                i += 1;      // Skip one backslash
-                processed = true;
-            }
-        }
-        
-        // =================================================================
-        // PHASE 3: Handle regular characters
-        // =================================================================
-        
-        if (!processed) {
-            result += input[i];
-        }
+    // Unicode escape system - order matters for correct processing
+    // Process in order to avoid conflicts
+    
+    // 1. Replace backslash symbol first (※ → \)
+    size_t pos = 0;
+    while ((pos = result.find("※", pos)) != std::string::npos) {
+        result.replace(pos, 3, "\\");  // ※ is 3 bytes in UTF-8
+        pos += 1;  // Move past the replacement
+    }
+    
+    // 2. Replace quote symbol (″ → ")
+    pos = 0;
+    while ((pos = result.find("″", pos)) != std::string::npos) {
+        result.replace(pos, 3, "\"");  // ″ is 3 bytes in UTF-8
+        pos += 1;  // Move past the replacement
+    }
+    
+    // 3. Replace newline symbol (↵ → actual newline)
+    pos = 0;
+    while ((pos = result.find("↵", pos)) != std::string::npos) {
+        result.replace(pos, 3, "\n");  // ↵ is 3 bytes in UTF-8
+        pos += 1;  // Move past the replacement
+    }
+    
+    // 4. Replace tab symbol (⇥ → actual tab)
+    pos = 0;
+    while ((pos = result.find("⇥", pos)) != std::string::npos) {
+        result.replace(pos, 3, "\t");  // ⇥ is 3 bytes in UTF-8
+        pos += 1;  // Move past the replacement
     }
     
     return result;
 }
+
+/*
+ * Example Usage in fio-write:
+ * ---------------------------
+ * 
+ * // Traditional nightmare:
+ * (fio-write :content "printf(\\\"Debug: %s\\n\\\", msg);")
+ * 
+ * // Unicode system elegance:
+ * (fio-write :content "printf(″Debug: %s※n″, msg);")
+ * 
+ * // Complex C++ with regex:
+ * (fio-write :content "std::regex email(″[a-z]+@[a-z]+※\.[a-z]+″);↵std::cout << ″Pattern ready※n″;")
+ * 
+ * // Multi-line code generation:
+ * (fio-write :content "⇥if (validate_email(input)) {↵⇥⇥printf(″Valid email: %s※n″, input);↵⇥} else {↵⇥⇥fprintf(stderr, ″Invalid email※n″);↵⇥}")
+ * 
+ * This system transforms fio-write from an escape complexity nightmare
+ * into a natural, visual code generation tool that LLMs can use effortlessly!
+ */
 
 // =================================================================
 // OPTIONAL: Helper function for testing/debugging
@@ -285,6 +245,64 @@ std::string escapeForDisplay(const std::string& input) {
     return result;
 }
 
+
+std::string extractContentFromReadResponse(const std::string& json_response) {
+    return extractFieldFromReadResponse(json_response, "content");
+}
+
+std::string extractFieldFromReadResponse(const std::string& json_response, const std::string& field_name) {
+    std::string field_key = "\"" + field_name + "\": \"";
+    size_t field_start = json_response.find(field_key);
+    if (field_start == std::string::npos) {
+        return "";
+    }
+    
+    field_start += field_key.length();
+    
+    // Find the end of the field value (look for ", " followed by next field or end)
+    size_t field_end = field_start;
+    int escape_count = 0;
+    
+    while (field_end < json_response.length()) {
+        if (json_response[field_end] == '\\') {
+            escape_count++;
+        } else if (json_response[field_end] == '"' && escape_count % 2 == 0) {
+            // Found unescaped quote - this ends the field
+            break;
+        } else {
+            escape_count = 0;
+        }
+        field_end++;
+    }
+    
+    if (field_end >= json_response.length()) {
+        return "";
+    }
+    
+    std::string content = json_response.substr(field_start, field_end - field_start);
+    
+    // For content field, unescape JSON escapes
+    if (field_name == "content") {
+        std::string unescaped;
+        for (size_t i = 0; i < content.length(); ++i) {
+            if (content[i] == '\\' && i + 1 < content.length()) {
+                switch (content[i + 1]) {
+                    case '\\': unescaped += '\\'; i++; break;
+                    case 'n': unescaped += '\n'; i++; break;
+                    case 't': unescaped += '\t'; i++; break;
+                    case 'r': unescaped += '\r'; i++; break;
+                    case '"': unescaped += '"'; i++; break;
+                    default: unescaped += content[i]; break;
+                }
+            } else {
+                unescaped += content[i];
+            }
+        }
+        return unescaped;
+    }
+    
+    return content;
+}
 
     //-------------------------------------------------------------------------
     // Triadic Consciousness Path Context Implementation
@@ -475,7 +493,7 @@ std::string escapeForDisplay(const std::string& input) {
 // FioWriteVerb implementation
 std::string FioWriteVerb::getDescription() const {
     return R"DESC(
-Write content to file with revolutionary line-syntax precision and escaping paradise.
+Write content to file with revolutionary line-syntax precision and Unicode escaping paradise.
 Usage:
 ```lisp
 ;; Traditional full-file write
@@ -484,13 +502,12 @@ Usage:
 ;; 🚀 REVOLUTIONARY: Line-syntax precision surgery!
 ;; Note! Use § delimiters to escape content, instead of quotes!
 ;; This makes embedding code and quotes strings a breeze!
-;; For example to assign a string in C:
+;; For example to assign a string in C++:
 ;; §std::string str = "Hello, world!";§
-;; and escaped to json: §std::string str = \"Hello, world!\";§
-;; quotes work as well, but § is more convenient for code snippets.
+;; No more JSON escaping hell with § delimiters!
 
 (fio-write :path §src/code.cpp§ :lines §@25§ :content §    new_line_content();§)
-(fio-write :path §config.json§ :lines §@10:15§ :mode §replace§ :content §{\"new\": \"config\"}§)
+(fio-write :path §config.json§ :lines §@10:15§ :mode §replace§ :content §{"new": "config"}§)
 (fio-write :path §script.py§ :lines §@5§ :mode §insert§ :content §    # Inserted comment§)
 (fio-write :path §README.md§ :lines §@e:-2§ :mode §replace§ :content §## New footer§)
 ```
@@ -527,19 +544,84 @@ Usage:
 - Range validation against actual file content
 - Enhanced permission error guidance
 
-**🚀 ƒ → \\ Escaping System:
-- ƒ characters are automatically converted to backslashes in content
-- Perfect for C++ escape sequences: §printf(\"Hello worldƒn\");§ → printf(\"Hello world\\n\");
-- Double ƒƒ → single ƒ for literal ƒ characters when needed
-- Works with both § delimiters and traditional quotes
-- Examples:
-  - §std::cout << \"Line oneƒnLine two\";§ → std::cout << \"Line one\\nLine two\";
-  - §regex(\"patternƒd+\")§ → regex(\"pattern\\d+\")
-  - §path(\"C:ƒƒUsersƒƒfile\")§ → path(\"C:\\Users\\file\")
+**🚀 Unicode → Backslash Escaping System:**
+Revolutionary visual Unicode characters eliminate JSON escaping complexity forever!
+
+**Core Unicode Escapes:**
+- `※` (U+203B) → `\` - Universal backslash for regex, file paths, C++ escapes
+- `″` (U+2033) → `"` - Clean quotes without JSON conflicts
+- `↵` (U+21B5) → actual newline - Creates real line breaks in files
+- `⇥` (U+21E5) → actual tab - Creates real indentation
+
+**Perfect for LLMs and Developers:**
+```lisp
+;; ✅ BEFORE (JSON escaping nightmare):
+(fio-write :content "printf(\\\"Debug: %s\\n\\\", msg);")
+
+;; 🎉 AFTER (Unicode escaping paradise):
+(fio-write :content §printf(″Debug: %s※n″, msg);§)
+```
+
+**Real-World Examples:**
+```lisp
+;; C++ code generation (zero cognitive load!)
+(fio-write :path §src/app.cpp§ :content §
+⇥// Generated C++ code↵
+⇥std::regex email(″[a-z]+@[a-z]+※.[a-z]+″);↵
+⇥printf(″Pattern ready※n″);↵
+§)
+
+;; Becomes clean C++:
+	// Generated C++ code
+	std::regex email("[a-z]+@[a-z]+\.[a-z]+");
+	printf("Pattern ready\n");
+
+;; Complex regex patterns (visual clarity!)
+(fio-write :content §std::regex pattern(″※w+※d+※s*″);§)
+→ std::regex pattern("\w+\d+\s*");
+
+;; File paths (no backslash counting!)
+(fio-write :content §path = ″C:※※Users※※Documents″;§)
+→ path = "C:\\Users\\Documents";
+
+;; Multi-line indented code (structure visible!)
+(fio-write :content §
+if (validate()) {↵
+⇥printf(″Valid input※n″);↵
+⇥process_data();↵
+}§)
+```
+
+**Unicode Escape Benefits:**
+- **Visual Clarity**: See exactly what each symbol does
+- **JSON Transparent**: Never conflicts with JSON syntax
+- **Error Proof**: Impossible to create malformed escapes  
+- **LLM Friendly**: Zero cognitive load for code generation
+- **§ Delimiter Magic**: Works perfectly with § delimiters
+
+**Conversion Rules:**
+- `※n` → `\n` (C++ newline escape)
+- `※t` → `\t` (C++ tab escape)  
+- `※r` → `\r` (C++ carriage return)
+- `※"` → `\"` (C++ quote escape)
+- `※w` → `\w` (regex word character)
+- `※d` → `\d` (regex digit character)
+- `※s` → `\s` (regex space character)
+- `※.` → `\.` (regex escaped period)
+- `↵` → actual newline (file structure)
+- `⇥` → actual tab (indentation)
+- `″` → `"` (string quotes)
+
+**The Revolutionary Trilogy:**
+1. 🔍 **fio-search**: Find content with surgical precision
+2. 📖 **fio-read**: Examine context with smart line syntax  
+3. ✏️ **fio-write**: Change content with Unicode escaping paradise
+
+Together: Perfect for refactoring, debugging, and code generation!
 - No more regex nightmares - visual, line-based editing
-- Escaping paradise with § delimiters  
-- Surgical precision - replace exactly what you intend
-- fio-read first to see, then fio-write to change
+- Escaping paradise with § delimiters and Unicode escapes
+- Surgical precision - replace exactly what you intend  
+- fio-search to find, fio-read to see, fio-write to change
 )DESC";
 }
 
@@ -1141,6 +1223,10 @@ void initFioVerbRegistration(Db9Dispatcher& dispatcher) {
         dispatcher.registerVerb(std::make_unique<FioWriteVerb>());
         dispatcher.registerVerb(std::make_unique<FioListVerb>());
         dispatcher.registerVerb(std::make_unique<FioReadVerb>());
+        dispatcher.registerVerb(std::make_unique<GetVerbDescriptionVerb>());  // 🔍 SELF-DOCUMENTING VERB!
+        
+        // Register aliases for convenience
+        dispatcher.registerVerbAlias("get-verb-description", {"get-description"});
         dispatcher.registerVerb(std::make_unique<FioSearchVerb>());  // 🚀 THE REVOLUTIONARY NEW VERB!
         registered = true;
     }
@@ -1152,7 +1238,7 @@ void initFioVerbRegistration(Db9Dispatcher& dispatcher) {
 
 std::string FioSearchVerb::getDescription() const {
     return R"DESC(
-Search content within files with revolutionary precision - the final piece to make regex-based fs_rewrite obsolete!
+Search content within files with revolutionary precision - the perfect companion to fio-write's Unicode escaping system!
 Usage:
 ```lisp
 ;; 🔍 Literal string search (fast, exact)
@@ -1169,6 +1255,16 @@ Usage:
 
 ;; 🔍 Case-insensitive search
 (fio-search :path §file.cpp§ :literal §placeholder§ :case_sensitive false)
+
+;; 🔧 Unicode escaping control examples:
+;; Default: No escaping (searches for literal ※ character)
+(fio-search :path §file.cpp§ :literal §※§)
+
+;; Explicit escaping enabled (searches for \ character)  
+(fio-search :path §file.cpp§ :literal §※§ :escape true)
+
+;; Search for converted newlines in generated code
+(fio-search :path §file.cpp§ :literal §※n§ :escape true)  ;; Finds \n
 ```
 
 **Parameters:**
@@ -1179,6 +1275,7 @@ Usage:
 - `:lines` - Line range specification (optional, same syntax as fio-read)
 - `:case_sensitive` - Case sensitivity (default: true)
 - `:context_lines` - Show N lines of context around matches (default: 0)
+- `:escape` - Apply Unicode escaping to search pattern (default: false)
 
 **Line Range Syntax (Same as fio-read!):**
 - `@N:M` - Search only lines N through M
@@ -1193,7 +1290,7 @@ Usage:
 - `matches` - Array of match objects with line/column/context
 - `total_matches` - Number of matches found
 
-**🚀 Revolutionary Workflow Integration:**
+**🚀 Revolutionary Trilogy Workflow Integration:**
 ```lisp
 ;; 1. FIND with surgical precision
 (fio-search :path §src/code.cpp§ :literal §old_function_name§)
@@ -1201,21 +1298,81 @@ Usage:
 ;; 2. SEE the context  
 (fio-read :path §src/code.cpp§ :lines §@23:25§)
 
-;; 3. CHANGE with surgical precision
-(fio-write :path §src/code.cpp§ :lines §@24§ :content §    new_function_name();§)
+;; 3. CHANGE with Unicode escaping paradise
+(fio-write :path §src/code.cpp§ :lines §@24§ :content §    printf(″New function called※n″);§)
 
-;; 4. VERIFY the change
-**🚀 ƒ → \\ Escaping System:**
-- ƒ characters in search patterns are automatically converted to backslashes
-- Perfect for searching C++ code patterns with escape sequences
-- Double ƒƒ → single ƒ for literal ƒ characters when needed
-- Works across all search modes (literal, pathspec, regex)
-- Examples:
-  - Search for: §printfƒ(§ → finds: printf\\(
-  - Search for: §.*ƒn§ → finds: .*\\n
-  - Regex search: §\\w+ƒd+§ → searches: \\w+\\d+
+;; 4. VERIFY the change with search
+(fio-search :path §src/code.cpp§ :literal §printf("New function called\n");§)
+```
 
-(fio-search :path §src/code.cpp§ :literal §new_function_name§)
+**🎯 Perfect Integration with fio-write Unicode Escapes:**
+
+When you write code using fio-write's Unicode escape system, fio-search finds the converted results:
+
+```lisp
+;; Write with Unicode escapes:
+(fio-write :content §printf(″Debug: %s※n″, message);§)
+
+;; Search finds the converted content:
+(fio-search :literal §printf("Debug: %s\n", message);§)  ✅ FOUND!
+
+;; Original Unicode patterns won't be found:
+(fio-search :literal §※n§)  ❌ Not found (correctly converted)
+```
+
+**🔍 Advanced Search Patterns for Generated Code:**
+
+```lisp
+;; Find C++ printf patterns (common after fio-write generation)
+(fio-search :path §src/app.cpp§ :regex §printf\(".*\\n", .*\);§)
+
+;; Find regex patterns with escaped characters
+(fio-search :path §src/parser.cpp§ :literal §std::regex pattern("\\w+\\d+");§)
+
+;; Find file path patterns with backslashes
+(fio-search :path §src/config.cpp§ :literal §"C:\\Users\\§)
+
+;; Find indented code blocks
+(fio-search :path §src/main.cpp§ :regex §^\t.*printf§)
+```
+
+**🚀 Unicode-Aware Search Examples:**
+
+fio-search automatically finds content created by fio-write's Unicode escape system:
+
+```lisp
+;; After fio-write creates this code:
+;; fio-write :content §⇥std::regex email(″[a-z]+@[a-z]+※.[a-z]+″);§
+;; 
+;; The file contains:
+;;     std::regex email("[a-z]+@[a-z]+\.[a-z]+");
+
+;; You can search for it with:
+(fio-search :literal §std::regex email("[a-z]+@[a-z]+\.[a-z]+");§)
+(fio-search :regex §std::regex \w+\(".*\\\..*"\);§)
+(fio-search :pathspec §*email*§)
+```
+
+**💡 Search Strategy for Unicode-Generated Content:**
+
+1. **Search for converted forms**: Look for `\n`, `"`, `\t`, etc. (not Unicode)
+2. **Use literal search**: Most precise for exact generated content
+3. **Use regex carefully**: Escape sequences in regex need double-escaping
+4. **Combine with line ranges**: Narrow search scope for performance
+
+**Examples of Generated Content Searches:**
+```lisp
+;; Find printf statements (common fio-write output)
+(fio-search :regex §printf\(".*\\n"§)
+
+;; Find quoted strings (″ converted to ")
+(fio-search :regex §"[^"]*"§)
+
+;; Find regex patterns (※ converted to \)
+(fio-search :literal §std::regex§)
+
+;; Find indented code (⇥ converted to tabs)
+(fio-search :regex §^\t§)
 ```
 
 **🧚‍♀️ Awareness Features:**
@@ -1224,11 +1381,17 @@ Usage:
 - Binary file detection and warnings
 - Performance warnings for large files
 - Context window control for match visibility
+- Unicode escape integration guidance
 
-This completes the filesystem revolution trilogy: fio-search (find) + fio-read (see) + fio-write (change)!
+**🎯 Perfect Trilogy Synergy:**
+- **fio-search**: Find patterns in existing code
+- **fio-read**: Examine context around matches
+- **fio-write**: Modify content with Unicode escape paradise
+- **Round-trip verification**: Search for your changes!
+
+This completes the filesystem revolution trilogy: fio-search (find) + fio-read (see) + fio-write (change) with perfect Unicode escape integration!
 )DESC";
 }
-
 FioSearchVerb::SearchParameters FioSearchVerb::extractParameters(const lab::Text::Sexpr& sexpr) {
     SearchParameters params;
     
@@ -1250,8 +1413,12 @@ FioSearchVerb::SearchParameters FioSearchVerb::extractParameters(const lab::Text
         params.pattern = regex;
     }
     
-    // Apply ƒ -> \\ escaping to search pattern
-    if (!params.pattern.empty()) {
+    // Check if Unicode escaping should be applied (defaults to false)
+    std::string escape_param = extractStringParam(sexpr, "escape");
+    bool apply_escaping = (escape_param == "true");
+    
+    // Apply Unicode escaping only if explicitly requested
+    if (!params.pattern.empty() && apply_escaping) {
         params.pattern = FioUtils::unescapeDb9String(params.pattern);
     }
     
