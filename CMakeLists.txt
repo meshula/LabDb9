@@ -174,6 +174,8 @@ add_library(labdb
     src/Verbs/VocabularyStatsVerb.cpp
     src/Verbs/FioVerbs.cpp
     src/Verbs/FioVerbs.h
+    src/Verbs/Fio/GetVerbDescription.cpp
+    src/Verbs/Fio/GetVerbDescription.h
 )
 
 target_include_directories(labdb

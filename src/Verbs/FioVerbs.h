@@ -177,6 +177,30 @@ namespace FioUtils {
     /// Convert filesystem time to ISO string
     std::string formatFileTime(const std::filesystem::file_time_type& time);
 
+    /**
+     * Extract file content from fio-read JSON response
+     * 
+     * Parses JSON response from fio-read and extracts the "content" field,
+     * properly unescaping JSON escape sequences (\n, \t, \\, \").
+     * 
+     * @param json_response Raw JSON string from fio-read response
+     * @return Extracted and unescaped file content
+     */
+    std::string extractContentFromReadResponse(const std::string& json_response);
+    
+    /**
+     * Extract specific field from fio-read JSON response
+     * 
+     * Generic utility to extract any field from fio-read JSON responses.
+     * Useful for extracting "total_lines", "lines_returned", etc.
+     * 
+     * @param json_response Raw JSON string from fio-read response  
+     * @param field_name Name of the field to extract (without quotes)
+     * @return Field value as string, empty if not found
+     */
+    std::string extractFieldFromReadResponse(const std::string& json_response, const std::string& field_name);
+
+
     //-------------------------------------------------------------------------
     // Triadic Consciousness Path Context
     //-------------------------------------------------------------------------
