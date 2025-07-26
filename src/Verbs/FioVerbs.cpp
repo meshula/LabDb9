@@ -1,4 +1,5 @@
 #include "Fio/GetVerbDescription.h"
+#include "Fio/SetCwd.h"
 #include "FioVerbs.h"
 #include "LabDb/Db9Dispatcher.h"
 #include <iostream>
@@ -175,28 +176,35 @@ std::string unescapeDb9String(const std::string& input) {
     // Unicode escape system - order matters for correct processing
     // Process in order to avoid conflicts
     
-    // 1. Replace backslash symbol first (※ → \)
+    // 1. Replace rare hallucinated need for ※' with just a tick
     size_t pos = 0;
+    while ((pos = result.find("※'", pos)) != std::string::npos) {
+        result.replace(pos, 4, "'");  // ※ is 3 bytes in UTF-8
+        pos += 1;  // Move past the replacement
+    }
+
+    // 2. Replace backslash symbol first (※ → \)
+    pos = 0;
     while ((pos = result.find("※", pos)) != std::string::npos) {
         result.replace(pos, 3, "\\");  // ※ is 3 bytes in UTF-8
         pos += 1;  // Move past the replacement
     }
     
-    // 2. Replace quote symbol (″ → ")
+    // 3. Replace quote symbol (″ → ")
     pos = 0;
     while ((pos = result.find("″", pos)) != std::string::npos) {
         result.replace(pos, 3, "\"");  // ″ is 3 bytes in UTF-8
         pos += 1;  // Move past the replacement
     }
     
-    // 3. Replace newline symbol (↵ → actual newline)
+    // 4. Replace newline symbol (↵ → actual newline)
     pos = 0;
     while ((pos = result.find("↵", pos)) != std::string::npos) {
         result.replace(pos, 3, "\n");  // ↵ is 3 bytes in UTF-8
         pos += 1;  // Move past the replacement
     }
     
-    // 4. Replace tab symbol (⇥ → actual tab)
+    // 5. Replace tab symbol (⇥ → actual tab)
     pos = 0;
     while ((pos = result.find("⇥", pos)) != std::string::npos) {
         result.replace(pos, 3, "\t");  // ⇥ is 3 bytes in UTF-8
@@ -740,8 +748,28 @@ Db9Response FioWriteVerb::performTouchOperation(const std::string& path, std::ch
 //-----------------------------------------------------------------------------
 
 Db9Response FioWriteVerb::performFullFileWrite(const std::string& path, const std::string& content, std::chrono::steady_clock::time_point start_time) {
-    // Ensure parent directory exists
     std::filesystem::path target_path(path);
+    
+    // Safety check: prevent writing to root filesystem with relative paths
+    if (target_path.is_relative()) {
+        try {
+            auto cwd = std::filesystem::current_path();
+            if (cwd == "/") {
+                AutoReflexiveMetrics metrics;
+                std::string safety_message = "Safety check failed: Cannot write relative path '" + path + 
+                                           "' when current working directory is root (/). " +
+                                           "This would write to the root filesystem. " +
+                                           "Use absolute paths or run from appropriate working directory.";
+                return Db9Response{Db9Response::Error, "", "unsafe_root_write", safety_message, metrics};
+            }
+        } catch (const std::exception& e) {
+            AutoReflexiveMetrics metrics;
+            std::string error_message = "Error checking current working directory: " + std::string(e.what());
+            return Db9Response{Db9Response::Error, "", "cwd_check_failed", error_message, metrics};
+        }
+    }
+    
+    // Ensure parent directory exists (only for absolute paths or safe relative paths)
     if (target_path.has_parent_path()) {
         std::filesystem::create_directories(target_path.parent_path());
     }
@@ -750,7 +778,88 @@ Db9Response FioWriteVerb::performFullFileWrite(const std::string& path, const st
     std::ofstream file(path);
     if (!file.is_open()) {
         AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "file_open_failed", "Could not open file for writing", metrics};
+        
+        // Enhanced diagnostics for file open failure
+        std::string diagnostic_info = "Could not open file for writing. ";
+        
+        // 1. Path information
+        diagnostic_info += "Path: '" + path + "'. ";
+        
+        // 2. Path resolution (absolute vs relative + cwd)
+        if (target_path.is_absolute()) {
+            diagnostic_info += "Path is absolute. ";
+        } else {
+            diagnostic_info += "Path is relative. ";
+            try {
+                auto cwd = std::filesystem::current_path();
+                diagnostic_info += "Current working directory: '" + cwd.string() + "'. ";
+                auto resolved_path = std::filesystem::absolute(target_path);
+                diagnostic_info += "Resolved absolute path: '" + resolved_path.string() + "'. ";
+            } catch (const std::exception& e) {
+                diagnostic_info += "Error getting current directory: " + std::string(e.what()) + ". ";
+            }
+        }
+        
+        // 3. File existence check
+        std::error_code ec;
+        if (std::filesystem::exists(target_path, ec)) {
+            diagnostic_info += "File exists. ";
+            
+            // 4. File permissions check
+            auto file_perms = std::filesystem::status(target_path, ec).permissions();
+            if (ec) {
+                diagnostic_info += "Error checking file permissions: " + ec.message() + ". ";
+            } else {
+                using std::filesystem::perms;
+                bool owner_write = (file_perms & perms::owner_write) != perms::none;
+                bool group_write = (file_perms & perms::group_write) != perms::none;  
+                bool others_write = (file_perms & perms::others_write) != perms::none;
+                diagnostic_info += "File permissions - owner_write: " + std::string(owner_write ? "yes" : "no") + 
+                                   ", group_write: " + std::string(group_write ? "yes" : "no") + 
+                                   ", others_write: " + std::string(others_write ? "yes" : "no") + ". ";
+            }
+        } else {
+            diagnostic_info += "File does not exist. ";
+        }
+        
+        // 5. Parent directory checks
+        auto parent_path = target_path.parent_path();
+        if (parent_path.empty()) {
+            diagnostic_info += "No parent directory (root level file). ";
+        } else {
+            if (std::filesystem::exists(parent_path, ec)) {
+                diagnostic_info += "Parent directory exists. ";
+                
+                // Check parent directory permissions
+                auto parent_file_perms = std::filesystem::status(parent_path, ec).permissions();
+                if (ec) {
+                    diagnostic_info += "Error checking parent directory permissions: " + ec.message() + ". ";
+                } else {
+                    using std::filesystem::perms;
+                    bool parent_write = (parent_file_perms & perms::owner_write) != perms::none;
+                    diagnostic_info += "Parent directory writable: " + std::string(parent_write ? "yes" : "no") + ". ";
+                }
+            } else {
+                diagnostic_info += "Parent directory does not exist: '" + parent_path.string() + "'. ";
+                if (ec) {
+                    diagnostic_info += "Error: " + ec.message() + ". ";
+                }
+            }
+        }
+        
+        // 6. Filesystem space check (basic)
+        try {
+            auto space_info = std::filesystem::space(target_path.parent_path());
+            if (space_info.available == 0) {
+                diagnostic_info += "No available disk space. ";
+            } else {
+                diagnostic_info += "Available disk space: " + std::to_string(space_info.available / (1024 * 1024)) + " MB. ";
+            }
+        } catch (const std::exception& e) {
+            diagnostic_info += "Error checking disk space: " + std::string(e.what()) + ". ";
+        }
+        
+        return Db9Response{Db9Response::Error, "", "file_open_failed", diagnostic_info, metrics};
     }
     
     file << content;
@@ -1224,6 +1333,7 @@ void initFioVerbRegistration(Db9Dispatcher& dispatcher) {
         dispatcher.registerVerb(std::make_unique<FioListVerb>());
         dispatcher.registerVerb(std::make_unique<FioReadVerb>());
         dispatcher.registerVerb(std::make_unique<GetVerbDescriptionVerb>());  // 🔍 SELF-DOCUMENTING VERB!
+        dispatcher.registerVerb(std::make_unique<SetCwdVerb>());  // 🛡️ SAFE WORKING DIRECTORY CHANGER!
         
         // Register aliases for convenience
         dispatcher.registerVerbAlias("get-verb-description", {"get-description"});
