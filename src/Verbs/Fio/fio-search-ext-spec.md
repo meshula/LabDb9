@@ -10,8 +10,8 @@
 - [x] **Build Verification**: Ensure utf8proc builds correctly on target platforms
 
 #### Text Processing Refactoring
-- [ ] **Factor unescapeDb9String**: Move from `FioVerbs.cpp` to `/Users/nick/dev/Lab/LabDb9/src/TextEscaping.cpp` and `/Users/nick/dev/Lab/LabDb9/include/TextEscaping.h`
-- [ ] **Factor escapeForDisplay**: Move from `FioVerbs.cpp` to TextUtils
+- [x] **Factor unescapeDb9String**: Move from `FioVerbs.cpp` to `/Users/nick/dev/Lab/LabDb9/src/TextEscaping.cpp` and `/Users/nick/dev/Lab/LabDb9/include/TextEscaping.h`
+- [x] **Factor escapeForDisplay**: Move from `FioVerbs.cpp` to TextUtils
 
 #### Unicode Normalization Engine
 - [x] **NormalizedText Structure**: Implement the core normalization data structure
@@ -23,7 +23,7 @@
 - [x] **Functional Testing**: Verified with Śūnya-Dhruva test cases
 
 #### Testing Infrastructure
-- [ ] **Unit Test Framework**: Set up tests in `/Users/nick/dev/Lab/LabDb9/tests/cpp/`
+- [x] **Unit Test Framework**: Set up tests in `/Users/nick/dev/Lab/LabDb9/tests/cpp/`
 - [ ] **Test Data**: Create Unicode test corpus in `/Users/nick/dev/Lab/LabDb9/tests/cpp/testenv/`
 - [ ] **Sanskrit Test Cases**: Specific test cases for Śūnya, Dhruva, and Devanagari
 - [ ] **Normalization Verification**: Validate utf8proc behavior matches expectations
