@@ -73,10 +73,14 @@ LineRange parseLineSpec(const std::string& lines_param) {
         std::string end_str = spec.substr(colon_pos + 1);
         
         if (start_str == "e") {
-            // @e:-20 = last 20 lines
+            // @e:-20 = last 20 lines, @e:0 = append at end
             if (end_str.starts_with("-")) {
                 range.type = LineRange::FromEnd;
                 range.count = std::abs(std::stoi(end_str));
+            } else if (end_str == "0") {
+                // @e:0 = append at end (treat as Full for append operations)
+                range.type = LineRange::Full;
+                range.count = 0;
             } else {
                 range.valid = false;
             }
@@ -490,6 +494,19 @@ Revolutionary visual Unicode characters eliminate JSON escaping complexity forev
 
 **Real-World Examples:**
 ```lisp
+
+;; ✅ For generating C++ printf statements:
+(fio-write :content §printf(″Debug: %s※n″, msg);§)
+;; → printf("Debug: %s\n", msg);
+
+;; ✅ For creating multi-line file structure:
+(fio-write :content §Line 1↵Line 2↵Line 3§)
+;; → Creates actual 3-line file
+
+;; ✅ For generating regex patterns:
+(fio-write :content §std::regex pattern(″※w+※d+″);§)
+;; → std::regex pattern("\w+\d+");
+
 ;; C++ code generation (zero cognitive load!)
 (fio-write :path §src/app.cpp§ :content §
 ⇥// Generated C++ code↵
@@ -571,10 +588,13 @@ Db9Response FioWriteVerb::execute(const lab::Text::Sexpr& sexpr) {
         auto pathContext = FioUtils::createPathContext(path);
 
         // Check for line surgery FIRST (regardless of content)
-        if (!lines_param.empty()) {
-            // Apply ƒ -> \\ escaping to content (even if empty for deletion)
+        // Force line surgery for append/insert modes, even without explicit :lines
+        if (!lines_param.empty() || mode == "append" || mode == "insert") {
+            // Default to @e:0 (end-of-file) when no :lines specified for append/insert
+            std::string effective_lines = lines_param.empty() ? "@e:0" : lines_param;
+            // Apply \ -> †† escaping to content (even if empty for deletion)
             content = LabDb::TextEscaping::unescapeDb9String(content);
-            return performLineSurgery(path, content, lines_param, mode, start_time);
+            return performLineSurgery(path, content, effective_lines, mode, start_time);
         }
 
         // For full-file operations, check content
@@ -905,50 +925,94 @@ Db9Response FioWriteVerb::performLineSurgery(const std::string& path, const std:
     
     return Db9Response{Db9Response::Success, result.str(), "", "", metrics};
 }
-
-int FioWriteVerb::performLineReplacement(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range) {
+FioWriteVerb::IndexRange FioWriteVerb::calculateIndices(const LineRange& range, int file_line_count) {
     int start_idx, end_idx;
     
-    if (range.type == LineRange::SingleLine) {
-        start_idx = range.start - 1; // Convert to 0-based
-        end_idx = start_idx;
-    } else if (range.type == LineRange::Range) {
-        start_idx = range.start - 1; // Convert to 0-based
-        end_idx = start_idx + range.count - 1;
-    } else if (range.type == LineRange::FromEnd) {
-        // @e:-3 means last 3 lines
-        int total_lines = static_cast<int>(lines.size());
-        start_idx = total_lines - range.count; // Start of last N lines
-        end_idx = total_lines - 1;             // End of file
-    } else if (range.type == LineRange::FromStart) {
-        // @0:N means first N lines
-        start_idx = 0;
-        end_idx = range.count - 1;
-    } else {
-        return 0; // Unsupported range type for replacement
+    switch (range.type) {
+        case LineRange::Full:
+            // Full file - for replace: whole file, for insert/append: at end
+            start_idx = 0;
+            end_idx = file_line_count - 1;
+            break;
+            
+        case LineRange::SingleLine:
+            start_idx = range.start - 1; // Convert to 0-based
+            end_idx = start_idx;
+            break;
+            
+        case LineRange::Range:
+            start_idx = range.start - 1; // Convert to 0-based
+            end_idx = start_idx + range.count - 1;
+            break;
+            
+        case LineRange::FromEnd:
+            // @e:-3 means last 3 lines
+            start_idx = file_line_count - range.count;
+            end_idx = file_line_count - 1;
+            break;
+            
+        case LineRange::FromStart:
+            // @0:N means first N lines
+            start_idx = 0;
+            end_idx = range.count - 1;
+            break;
+            
+        default:
+            return IndexRange(0, 0, false); // Invalid
     }
     
-    // Validate range bounds
+    // Validate and clamp bounds
     start_idx = std::max(0, start_idx);
-    end_idx = std::min(static_cast<int>(lines.size()) - 1, end_idx);
+    end_idx = std::min(file_line_count - 1, std::max(start_idx, end_idx));
     
-    if (start_idx > end_idx || start_idx >= static_cast<int>(lines.size())) {
-        return 0; // Invalid range
+    if (start_idx >= file_line_count && range.type != LineRange::Full) {
+        return IndexRange(0, 0, false); // Invalid range
     }
     
-    int lines_removed = end_idx - start_idx + 1;
+    return IndexRange(start_idx, end_idx, true);
+}
+
+// Now refactor all three functions to use this:
+
+int FioWriteVerb::performLineReplacement(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range) {
+    IndexRange indices = calculateIndices(range, lines.size());
+    if (!indices.valid) {
+        return 0;
+    }
+    
+    int lines_removed = indices.end_idx - indices.start_idx + 1;
     
     // Remove the original lines
-    lines.erase(lines.begin() + start_idx, lines.begin() + end_idx + 1);
+    lines.erase(lines.begin() + indices.start_idx, lines.begin() + indices.end_idx + 1);
     
     // Insert new content at the same position
-    lines.insert(lines.begin() + start_idx, new_content.begin(), new_content.end());
+    lines.insert(lines.begin() + indices.start_idx, new_content.begin(), new_content.end());
     
     return lines_removed;
 }
 
 int FioWriteVerb::performLineInsertion(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range) {
-    int insert_idx = (range.type == LineRange::SingleLine) ? range.start - 1 : range.start - 1;
+    IndexRange indices = calculateIndices(range, lines.size());
+    if (!indices.valid) {
+        return 0;
+    }
+    
+    int insert_idx;
+    
+    if (range.type == LineRange::Full) {
+        // Insert at end for "full" file
+        insert_idx = lines.size();
+    } else if (range.type == LineRange::FromEnd) {
+        // @e:-1 should insert just before the last line
+        // @e:-3 should insert just before the last 3 lines
+        insert_idx = lines.size() - range.count;
+    } else {
+        // For SingleLine, Range, FromStart: insert before the specified line
+        insert_idx = indices.start_idx;
+    }
+    
+    // Boundary protection
+    insert_idx = std::max(0, std::min(insert_idx, static_cast<int>(lines.size())));
     
     // Insert new content, shifting existing lines down
     lines.insert(lines.begin() + insert_idx, new_content.begin(), new_content.end());
@@ -957,7 +1021,30 @@ int FioWriteVerb::performLineInsertion(std::vector<std::string>& lines, const st
 }
 
 int FioWriteVerb::performLineAppend(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range) {
-    int append_idx = (range.type == LineRange::SingleLine) ? range.start : range.start + range.count - 1;
+    IndexRange indices = calculateIndices(range, lines.size());
+    if (!indices.valid) {
+        return 0;
+    }
+    
+    int append_idx;
+    
+    if (range.type == LineRange::Full) {
+        // Append at end for "full" file
+        append_idx = lines.size();
+    } else if (range.type == LineRange::FromEnd) {
+        // @e:-1 should append after the line before the last line
+        // @e:-3 should append after the line before the last 3 lines
+        append_idx = lines.size() - range.count;
+    } else if (range.type == LineRange::SingleLine) {
+        // Append after the specified line
+        append_idx = indices.start_idx + 1;
+    } else {
+        // For Range, FromStart: append after the range
+        append_idx = indices.end_idx + 1;
+    }
+    
+    // Boundary protection
+    append_idx = std::max(0, std::min(append_idx, static_cast<int>(lines.size())));
     
     // Insert new content after the specified line
     lines.insert(lines.begin() + append_idx, new_content.begin(), new_content.end());

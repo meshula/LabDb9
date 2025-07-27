@@ -27,6 +27,14 @@ public:
     std::string getDescription() const override;
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 
+    struct IndexRange {
+        int start_idx;  // 0-based start index
+        int end_idx;    // 0-based end index
+        bool valid;
+        
+        IndexRange(int start, int end, bool v = true) : start_idx(start), end_idx(end), valid(v) {}
+    };
+
 private:
     struct WriteParameters {
         std::string path;
@@ -48,6 +56,7 @@ private:
     std::string createBackupPath(const std::string& original_path);
     bool validatePath(const std::string& path);
     std::string generateTimestamp();
+    IndexRange calculateIndices(const LineRange& range, int file_line_count);
 };
 
 /// List directory contents with filtering and metadata
