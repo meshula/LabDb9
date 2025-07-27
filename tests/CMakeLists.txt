@@ -136,4 +136,12 @@ else()
     message(STATUS "Python tests skipped - BUILD_PYTHON_BINDINGS=OFF")
 endif()
 
+
+# TextEscaping test
+add_executable(test_text_escaping
+    cpp/test_text_escaping.cpp
+)
+target_link_libraries(test_text_escaping labdb)
+target_include_directories(test_text_escaping PRIVATE ../include)
+add_test(NAME TextEscapingTest COMMAND test_text_escaping)
 message(STATUS "Test targets configured")

@@ -4,8 +4,46 @@ project(LabDb VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Use FetchContent to get LMDB
+# Use FetchContent to get LMDB and UTF8PROC
 include(FetchContent)
+
+# UTF8PROC for Unicode normalization
+FetchContent_Declare(
+    utf8proc
+    GIT_REPOSITORY https://github.com/JuliaStrings/utf8proc.git
+    GIT_TAG v2.9.0
+)
+FetchContent_GetProperties(utf8proc)
+if(NOT utf8proc_POPULATED)
+    FetchContent_Populate(utf8proc)
+endif()
+
+# Declare your own target
+add_library(utf8proc STATIC
+    ${utf8proc_SOURCE_DIR}/utf8proc.c
+)
+
+# Header-only, so just include the directory
+target_include_directories(utf8proc
+    PUBLIC
+        $<BUILD_INTERFACE:${utf8proc_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include/utf8proc>
+)
+
+# Set properties for install
+set_target_properties(utf8proc PROPERTIES
+    EXPORT_NAME utf8proc
+    PUBLIC_HEADER ${utf8proc_SOURCE_DIR}/utf8proc.h
+)
+
+# Install target and headers
+install(TARGETS utf8proc
+    EXPORT LabDbTargets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    PUBLIC_HEADER DESTINATION include/utf8proc
+)
 
 # LMDB doesn't have an official CMake build, so we'll build it ourselves
 FetchContent_Declare(
@@ -15,11 +53,15 @@ FetchContent_Declare(
     SOURCE_SUBDIR libraries/liblmdb
 )
 
-# Check if we can fetch LMDB
-FetchContent_MakeAvailable(lmdb)
+# Check if LMDB was populated correctly
+FetchContent_GetProperties(lmdb)
+if(NOT lmdb_POPULATED)
+    FetchContent_Populate(lmdb)
+endif()
 
 # Create LMDB target manually since it doesn't have CMake support
 set(LMDB_SOURCE_DIR ${lmdb_SOURCE_DIR}/libraries/liblmdb)
+message(STATUS "LMDB Binary Directory: ${lmdb_BINARY_DIR}")
 
 add_library(lmdb_lib STATIC
     ${LMDB_SOURCE_DIR}/mdb.c
@@ -43,6 +85,7 @@ set(LMDB_FOUND TRUE)
 set(LMDB_INCLUDE_DIRS ${LMDB_SOURCE_DIR})
 set(LMDB_LIBRARIES lmdb_lib)
 
+message(STATUS "UTF8PROC configured via FetchContent")
 message(STATUS "LMDB configured via FetchContent")
 
 # ==============================================================================
@@ -147,6 +190,7 @@ add_library(labdb
     include/LabDb/LmdbStore.h
     include/LabDb/NonoStore.h
     include/LabDb/NonostoreKeys.h
+    include/LabDb/NormalizeText.h
     include/LabDb/PerformanceBenchmark.h
     include/LabDb/TermDictionary.h
     include/LabDb/TIDSequenceGenerator.h
@@ -163,8 +207,10 @@ add_library(labdb
     src/LmdbStore.cpp
     src/NonoStore.cpp
     src/NonostoreKeys.cpp
+    src/NormalizeText.cpp
     src/PerformanceBenchmark.cpp
     src/TermDictionary.cpp
+    src/TextEscaping.cpp
     src/TIDSequenceGenerator.cpp
     src/TriadicQuery.cpp
     src/TripleStore.cpp
@@ -189,7 +235,9 @@ target_include_directories(labdb
 )
 
 target_link_libraries(labdb 
-    PUBLIC ${LMDB_LIBRARIES}  # Make it PUBLIC so it gets exported
+    PUBLIC 
+        ${LMDB_LIBRARIES}  # Make it PUBLIC so it gets exported
+        utf8proc           # Unicode normalization library
 )
 
 # ==============================================================================

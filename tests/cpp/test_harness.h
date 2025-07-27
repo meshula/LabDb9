@@ -5,6 +5,11 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include <vector>
+#include <functional>
+#include <sstream>
+
+namespace labdb9_test {
 
 //-----------------------------------------------------------------------------
 // Test Framework Macros (matching existing LabDb9 pattern)
@@ -25,34 +30,36 @@
     std::cout << "  📋 " << desc << "\n";
 
 //-----------------------------------------------------------------------------
-// Global test state (minimal version)
+// Global test state
 //-----------------------------------------------------------------------------
 struct TestState {
-    std::string test_db_path;
+    std::string current_test;
+    bool current_test_passed{true};
     int tests_run{0};
     int tests_passed{0};
+    int assertions_run{0};
+    int assertions_passed{0};
+    std::vector<std::string> failures;
     int verbosity{1}; // 0=minimal, 1=normal, 2=verbose
-    
-    TestState() : test_db_path("/tmp/labdb_rope_test") {}
 };
 
-//-----------------------------------------------------------------------------
-// Helper Functions
-//-----------------------------------------------------------------------------
-inline void validateResponse(const std::string& response,
-                            bool expectSuccess,
-                            const std::string& context) {
-    bool isSuccess = response.find("success") != std::string::npos ||
-                    response.find(":status \"success\"") != std::string::npos;
-    
-    if (expectSuccess) {
-        AXIOM(isSuccess, context + " - Expected success but got: " + response);
-    } else {
-        AXIOM(!isSuccess, context + " - Expected failure but got success");
-    }
-}
+// Global test state instance
+inline TestState g_state;
 
+//-----------------------------------------------------------------------------
+// Test case structure
+//-----------------------------------------------------------------------------
+struct TestCase {
+    std::string name;
+    std::function<void()> func;
+};
+
+// Global test registry
+inline std::vector<TestCase> g_tests;
+
+//-----------------------------------------------------------------------------
 // Core assertion macros (gtest-style but minimal)
+//-----------------------------------------------------------------------------
 #define EXPECT_TRUE(condition) \
     do { \
         g_state.assertions_run++; \
@@ -96,46 +103,7 @@ inline void validateResponse(const std::string& response,
         } \
     } while(0)
 
-#define EXPECT_NE(not_expected, actual) \
-    do { \
-        g_state.assertions_run++; \
-        if ((not_expected) != (actual)) { \
-            g_state.assertions_passed++; \
-        } else { \
-            g_state.current_test_passed = false; \
-            std::ostringstream oss; \
-            oss << g_state.current_test << ": EXPECT_NE failed at " << __FILE__ << ":" << __LINE__ \
-                << " - Both values are: " << (actual); \
-            g_state.failures.push_back(oss.str()); \
-            std::cout << "  ❌ Values should not be equal: " << (actual) << " (line " << __LINE__ << ")" << std::endl; \
-        } \
-    } while(0)
-
-#define ASSERT_TRUE(condition) \
-    do { \
-        EXPECT_TRUE(condition); \
-        if (!(condition)) return; \
-    } while(0)
-
-#define ASSERT_FALSE(condition) \
-    do { \
-        EXPECT_FALSE(condition); \
-        if (condition) return; \
-    } while(0)
-
-#define ASSERT_EQ(expected, actual) \
-    do { \
-        EXPECT_EQ(expected, actual); \
-        if ((expected) != (actual)) return; \
-    } while(0)
-
-#define ASSERT_NE(not_expected, actual) \
-    do { \
-        EXPECT_NE(not_expected, actual); \
-        if ((not_expected) == (actual)) return; \
-    } while(0)
-
-// Test registration macro
+// Test registration and execution
 #define TEST(test_name) \
     void test_##test_name(); \
     static bool registered_##test_name = []() { \
@@ -203,19 +171,9 @@ inline int run_all_tests() {
     return all_passed ? 0 : 1;
 }
 
-// Helper macros for setup/teardown without inheritance
-#define SETUP_TEST() \
-    static void setup_test_environment()
-
-#define TEARDOWN_TEST() \
-    static void teardown_test_environment()
-
-#define RUN_SETUP() setup_test_environment()
-#define RUN_TEARDOWN() teardown_test_environment()
-
 } // namespace labdb9_test
 
-// Main test runner macro for minimal main() functions
+// Main test runner macro
 #define LABDB9_TEST_MAIN() \
     int main() { \
         return labdb9_test::run_all_tests(); \

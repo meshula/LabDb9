@@ -2,6 +2,7 @@
 #include "Fio/SetCwd.h"
 #include "FioVerbs.h"
 #include "LabDb/Db9Dispatcher.h"
+#include "LabDb/TextEscaping.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -169,89 +170,6 @@ namespace FioUtils {
  * C++, regex patterns, printf statements, and complex code structures
  * without any escape complexity mental overhead.
  */
-
-std::string unescapeDb9String(const std::string& input) {
-    std::string result = input;
-    
-    // Unicode escape system - order matters for correct processing
-    // Process in order to avoid conflicts
-    
-    // 1. Replace rare hallucinated need for ※' with just a tick
-    size_t pos = 0;
-    while ((pos = result.find("※'", pos)) != std::string::npos) {
-        result.replace(pos, 4, "'");  // ※ is 3 bytes in UTF-8
-        pos += 1;  // Move past the replacement
-    }
-
-    // 2. Replace backslash symbol first (※ → \)
-    pos = 0;
-    while ((pos = result.find("※", pos)) != std::string::npos) {
-        result.replace(pos, 3, "\\");  // ※ is 3 bytes in UTF-8
-        pos += 1;  // Move past the replacement
-    }
-    
-    // 3. Replace quote symbol (″ → ")
-    pos = 0;
-    while ((pos = result.find("″", pos)) != std::string::npos) {
-        result.replace(pos, 3, "\"");  // ″ is 3 bytes in UTF-8
-        pos += 1;  // Move past the replacement
-    }
-    
-    // 4. Replace newline symbol (↵ → actual newline)
-    pos = 0;
-    while ((pos = result.find("↵", pos)) != std::string::npos) {
-        result.replace(pos, 3, "\n");  // ↵ is 3 bytes in UTF-8
-        pos += 1;  // Move past the replacement
-    }
-    
-    // 5. Replace tab symbol (⇥ → actual tab)
-    pos = 0;
-    while ((pos = result.find("⇥", pos)) != std::string::npos) {
-        result.replace(pos, 3, "\t");  // ⇥ is 3 bytes in UTF-8
-        pos += 1;  // Move past the replacement
-    }
-    
-    return result;
-}
-
-/*
- * Example Usage in fio-write:
- * ---------------------------
- * 
- * // Traditional nightmare:
- * (fio-write :content "printf(\\\"Debug: %s\\n\\\", msg);")
- * 
- * // Unicode system elegance:
- * (fio-write :content "printf(″Debug: %s※n″, msg);")
- * 
- * // Complex C++ with regex:
- * (fio-write :content "std::regex email(″[a-z]+@[a-z]+※\.[a-z]+″);↵std::cout << ″Pattern ready※n″;")
- * 
- * // Multi-line code generation:
- * (fio-write :content "⇥if (validate_email(input)) {↵⇥⇥printf(″Valid email: %s※n″, input);↵⇥} else {↵⇥⇥fprintf(stderr, ″Invalid email※n″);↵⇥}")
- * 
- * This system transforms fio-write from an escape complexity nightmare
- * into a natural, visual code generation tool that LLMs can use effortlessly!
- */
-
-// =================================================================
-// OPTIONAL: Helper function for testing/debugging
-// =================================================================
-
-std::string escapeForDisplay(const std::string& input) {
-    std::string result;
-    for (char c : input) {
-        switch (c) {
-            case '\n': result += "\\n"; break;
-            case '\t': result += "\\t"; break;
-            case '\r': result += "\\r"; break;
-            case '\\': result += "\\\\"; break;
-            case '"':  result += "\\\""; break;
-            default:   result += c; break;
-        }
-    }
-    return result;
-}
 
 
 std::string extractContentFromReadResponse(const std::string& json_response) {
@@ -655,14 +573,14 @@ Db9Response FioWriteVerb::execute(const lab::Text::Sexpr& sexpr) {
         // Check for line surgery FIRST (regardless of content)
         if (!lines_param.empty()) {
             // Apply ƒ -> \\ escaping to content (even if empty for deletion)
-            content = FioUtils::unescapeDb9String(content);
+            content = LabDb::TextEscaping::unescapeDb9String(content);
             return performLineSurgery(path, content, lines_param, mode, start_time);
         }
 
         // For full-file operations, check content
         if (!content.empty()) {
             // Apply ƒ -> \\ escaping to content
-            content = FioUtils::unescapeDb9String(content);
+            content = LabDb::TextEscaping::unescapeDb9String(content);
             return performFullFileWrite(path, content, start_time);
         }
 
@@ -1529,7 +1447,7 @@ FioSearchVerb::SearchParameters FioSearchVerb::extractParameters(const lab::Text
     
     // Apply Unicode escaping only if explicitly requested
     if (!params.pattern.empty() && apply_escaping) {
-        params.pattern = FioUtils::unescapeDb9String(params.pattern);
+        params.pattern = LabDb::TextEscaping::unescapeDb9String(params.pattern);
     }
     
     params.lines_param = extractStringParam(sexpr, "lines");
