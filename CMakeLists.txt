@@ -184,6 +184,7 @@ add_library(labdb
     include/LabDb/DatabaseVerbs.h
     include/LabDb/Db9Dispatcher.h
     include/LabDb/Db9Response.h
+    include/LabDb/DirectoryTraversal.h
     include/LabDb/EntityId.h
     include/LabDb/InceptionBridge.h
     include/LabDb/LabText.hpp
@@ -200,6 +201,7 @@ add_library(labdb
     include/Labdb/Verbs.h
     src/DatabaseManager.cpp
     src/DatabaseVerbs.cpp
+    src/DirectoryTraversal.cpp
     src/EnhancedDatabaseVerbs.cpp
     src/Db9Dispatcher.cpp
     src/EntityId.cpp
