@@ -2,11 +2,16 @@
 #include "Fio/SetCwd.h"
 #include "FioVerbs.h"
 #include "LabDb/Db9Dispatcher.h"
+#include "Fio/SearchResponse.h"
+#include "Fio/PatternMatcher.h"
+#include "LabDb/DirectoryTraversal.h"
+#include "LabDb/NormalizeText.h"
 #include "LabDb/TextEscaping.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <cassert>
+#include <map>
 #include <filesystem>
 #include <thread>        // For std::this_thread::sleep_for
 #include <chrono>   
@@ -45,10 +50,48 @@ std::string extractStringParam(const lab::Text::Sexpr& sexpr, const std::string&
 //-----------------------------------------------------------------------------
 
 struct LineRange {
-    enum Type { Full, Range, SingleLine, FromEnd, FromStart } type = Full;
+    enum Type { Full, Range, SingleLine, FromEnd, FromStart, AppendAtEnd } type = Full;
     int start = 0;      // -1 for "end", 0 for start
     int count = -1;     // number of lines or end position  
     bool valid = true;
+};
+
+// Write mode enum for fio-write safety and functionality
+struct WriteMode {
+    enum Type { 
+        Unspecified,    // No mode specified - defaults to Append for safety
+        Replace,        // Overwrite content (dangerous - explicit only)
+        Insert,         // Insert at line position
+        Append,         // Add at end (safe default)
+        Prepend,        // Insert at beginning
+        Unrecognized    // Invalid mode string
+    };
+    
+    static Type fromString(const std::string& mode_str) {
+        if (mode_str.empty()) return Unspecified;
+        
+        std::string mode_lower = mode_str;
+        std::transform(mode_lower.begin(), mode_lower.end(), mode_lower.begin(), ::tolower);
+        
+        if (mode_lower == "replace") return Replace;
+        if (mode_lower == "insert") return Insert;
+        if (mode_lower == "append") return Append;
+        if (mode_lower == "prepend") return Prepend;
+        
+        return Unrecognized;
+    }
+    
+    static std::string toString(Type type) {
+        switch (type) {
+            case Unspecified: return "unspecified";
+            case Replace: return "replace";
+            case Insert: return "insert";
+            case Append: return "append";
+            case Prepend: return "prepend";
+            case Unrecognized: return "unrecognized";
+        }
+        return "unknown";
+    }
 };
 
 LineRange parseLineSpec(const std::string& lines_param) {
@@ -78,8 +121,9 @@ LineRange parseLineSpec(const std::string& lines_param) {
                 range.type = LineRange::FromEnd;
                 range.count = std::abs(std::stoi(end_str));
             } else if (end_str == "0") {
-                // @e:0 = append at end (treat as Full for append operations)
-                range.type = LineRange::Full;
+                // @e:0 = append at end
+                range.type = LineRange::AppendAtEnd;
+                range.count = 0;
                 range.count = 0;
             } else {
                 range.valid = false;
@@ -439,14 +483,14 @@ Usage:
 (fio-write :path §src/code.cpp§ :lines §@25§ :content §    new_line_content();§)
 (fio-write :path §config.json§ :lines §@10:15§ :mode §replace§ :content §{"new": "config"}§)
 (fio-write :path §script.py§ :lines §@5§ :mode §insert§ :content §    # Inserted comment§)
-(fio-write :path §README.md§ :lines §@e:-2§ :mode §replace§ :content §## New footer§)
+(fio-write :path 
 ```
 
 **Parameters:**
 - `:path` - Target file path (required)
 - `:content` - Content to write (required)
 - `:lines` - Line surgery specification (optional, same syntax as fio-read)
-- `:mode` - Line operation mode: "replace" (default), "insert", "append"
+- `:mode` - Line operation mode: \append\ (safe default), \replace\, \insert\, \prepend\
 
 **Line Syntax (Same as fio-read!):**
 - `@N` - Single line N
@@ -576,7 +620,20 @@ Db9Response FioWriteVerb::execute(const lab::Text::Sexpr& sexpr) {
     std::string content = extractStringParam(sexpr, "content");
     std::string lines_param = extractStringParam(sexpr, "lines");
     std::string mode = extractStringParam(sexpr, "mode");
-    if (mode.empty()) mode = "replace";
+    // Parse and validate write mode (safe default: append)
+    WriteMode::Type write_mode = WriteMode::fromString(mode);
+    
+    // Handle mode validation and safety
+    if (write_mode == WriteMode::Unrecognized) {
+        AutoReflexiveMetrics metrics;
+        return Db9Response{Db9Response::Error, "", "invalid_mode", 
+                          "Invalid mode: '" + mode + "'. Must be 'replace', 'insert', 'append', or 'prepend'", metrics};
+    }
+    
+    // Default unspecified mode to append for safety
+    if (write_mode == WriteMode::Unspecified) {
+        write_mode = WriteMode::Append;
+    }
 
     if (path.empty()) {
         AutoReflexiveMetrics metrics;
@@ -589,12 +646,35 @@ Db9Response FioWriteVerb::execute(const lab::Text::Sexpr& sexpr) {
 
         // Check for line surgery FIRST (regardless of content)
         // Force line surgery for append/insert modes, even without explicit :lines
-        if (!lines_param.empty() || mode == "append" || mode == "insert") {
+        // Determine whether to use line surgery or simple file operations
+        bool use_line_surgery = false;
+        
+        if (!lines_param.empty()) {
+            // Explicit :lines parameter always triggers line surgery
+            use_line_surgery = true;
+        } else if (write_mode == WriteMode::Insert || write_mode == WriteMode::Prepend) {
+            // Insert and prepend always need line surgery
+            use_line_surgery = true;
+        } else if (write_mode == WriteMode::Append && std::filesystem::exists(path)) {
+            // Append to existing file needs line surgery
+            use_line_surgery = true;
+        }
+        // For append to non-existent file: use_line_surgery remains false (simple creation)
+        
+        if (use_line_surgery) {
             // Default to @e:0 (end-of-file) when no :lines specified for append/insert
             std::string effective_lines = lines_param.empty() ? "@e:0" : lines_param;
-            // Apply \ -> †† escaping to content (even if empty for deletion)
+            
+            // Parse line specification at this level (DRY cleanup)
+            LineRange range = parseLineSpec(effective_lines);
+            if (!range.valid) {
+                AutoReflexiveMetrics metrics;
+                return Db9Response{Db9Response::Error, "", "invalid_line_spec", "Invalid line specification: " + effective_lines, metrics};
+            }
+            
+            // Apply Unicode escaping to content (even if empty for deletion)
             content = LabDb::TextEscaping::unescapeDb9String(content);
-            return performLineSurgery(path, content, effective_lines, mode, start_time);
+            return performLineSurgery(path, content, range, static_cast<int>(write_mode), start_time);
         }
 
         // For full-file operations, check content
@@ -825,20 +905,14 @@ Db9Response FioWriteVerb::performFullFileWrite(const std::string& path, const st
     return Db9Response{Db9Response::Success, result.str(), "", "", metrics};
 }
 
-Db9Response FioWriteVerb::performLineSurgery(const std::string& path, const std::string& content, const std::string& lines_param, const std::string& mode, std::chrono::steady_clock::time_point start_time) {
-    // Parse line specification (reuse existing parser from fio-read)
-    LineRange range = parseLineSpec(lines_param);
-    if (!range.valid) {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "invalid_line_spec", "Invalid line specification: " + lines_param, metrics};
-    }
+// REMOVED: Old performLineSurgery function - now has cleaner signature
+
+Db9Response FioWriteVerb::performLineSurgery(const std::string& path, const std::string& content, 
+    const LineRange& range, int write_mode_type, 
+    std::chrono::steady_clock::time_point start_time) {
     
-    // Validate mode
-    if (mode != "replace" && mode != "insert" && mode != "append") {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "invalid_mode", "Invalid mode: " + mode + ". Must be 'replace', 'insert', or 'append'", metrics};
-    }
-    
+    WriteMode::Type write_mode = static_cast<WriteMode::Type>(write_mode_type);
+
     // Check if file exists for line operations
     if (!std::filesystem::exists(path)) {
         AutoReflexiveMetrics metrics;
@@ -879,12 +953,14 @@ Db9Response FioWriteVerb::performLineSurgery(const std::string& path, const std:
     
     int lines_affected = 0;
     
-    if (mode == "replace") {
+    if (write_mode == WriteMode::Replace) {
         lines_affected = performLineReplacement(lines, new_content_lines, range);
-    } else if (mode == "insert") {
+    } else if (write_mode == WriteMode::Insert) {
         lines_affected = performLineInsertion(lines, new_content_lines, range);
-    } else if (mode == "append") {
+    } else if (write_mode == WriteMode::Append) {
         lines_affected = performLineAppend(lines, new_content_lines, range);
+    } else if (write_mode == WriteMode::Prepend) {
+        lines_affected = performLinePrepend(lines, new_content_lines);
     }
     
     // Write the modified content back to file
@@ -911,11 +987,11 @@ Db9Response FioWriteVerb::performLineSurgery(const std::string& path, const std:
     std::ostringstream result;
     result << "{\"status\": \"line_surgery_complete\""
            << ", \"path\": \"" << path << "\""
-           << ", \"mode\": \"" << mode << "\""
+           << ", \"mode\": \"" << WriteMode::toString(write_mode) << "\""
            << ", \"lines_affected\": " << lines_affected
            << ", \"total_lines\": " << lines.size()
            << ", \"size_bytes\": " << file_size
-           << ", \"line_spec\": \"" << lines_param << "\""
+           << ", \"line_spec\": \"<parsed_range>\""
            << "}";
     
     AutoReflexiveMetrics metrics;
@@ -956,6 +1032,13 @@ FioWriteVerb::IndexRange FioWriteVerb::calculateIndices(const LineRange& range, 
             start_idx = 0;
             end_idx = range.count - 1;
             break;
+            break;
+            
+        case LineRange::AppendAtEnd:
+            // @e:0 = append at very end of file
+            start_idx = file_line_count;
+            end_idx = file_line_count;
+            break;
             
         default:
             return IndexRange(0, 0, false); // Invalid
@@ -965,7 +1048,7 @@ FioWriteVerb::IndexRange FioWriteVerb::calculateIndices(const LineRange& range, 
     start_idx = std::max(0, start_idx);
     end_idx = std::min(file_line_count - 1, std::max(start_idx, end_idx));
     
-    if (start_idx >= file_line_count && range.type != LineRange::Full) {
+    if (start_idx >= file_line_count && range.type != LineRange::Full && range.type != LineRange::AppendAtEnd) {
         return IndexRange(0, 0, false); // Invalid range
     }
     
@@ -1038,6 +1121,9 @@ int FioWriteVerb::performLineAppend(std::vector<std::string>& lines, const std::
     } else if (range.type == LineRange::SingleLine) {
         // Append after the specified line
         append_idx = indices.start_idx + 1;
+    } else if (range.type == LineRange::AppendAtEnd) {
+        // @e:0 = append at very end of file
+        append_idx = lines.size();
     } else {
         // For Range, FromStart: append after the range
         append_idx = indices.end_idx + 1;
@@ -1049,6 +1135,12 @@ int FioWriteVerb::performLineAppend(std::vector<std::string>& lines, const std::
     // Insert new content after the specified line
     lines.insert(lines.begin() + append_idx, new_content.begin(), new_content.end());
     
+    return static_cast<int>(new_content.size());
+}
+
+int FioWriteVerb::performLinePrepend(std::vector<std::string>& lines, const std::vector<std::string>& new_content) {
+    // Prepend content at the beginning of the file (ignores line ranges)
+    lines.insert(lines.begin(), new_content.begin(), new_content.end());
     return static_cast<int>(new_content.size());
 }
 
@@ -1214,15 +1306,15 @@ Db9Response FioReadVerb::execute(const lab::Text::Sexpr& sexpr) {
     }
     
     try {
-    // Create triadic path context for conscious filesystem operation
-    auto pathContext = FioUtils::createPathContext(path);
+        // Create triadic path context for conscious filesystem operation
+        auto pathContext = FioUtils::createPathContext(path);
         
         // Check file exists with conscious error reporting
         if (!pathContext.exists) {
             AutoReflexiveMetrics metrics;
             std::string contextual_error = FioUtils::createContextualErrorMessage(
-                pathContext, "fio-read", "File does not exist"
-            );
+                                                                                  pathContext, "fio-read", "File does not exist"
+                                                                                  );
             return Db9Response{Db9Response::Error, "", "file_not_found", contextual_error, metrics};
         }
         
@@ -1288,6 +1380,10 @@ Db9Response FioReadVerb::execute(const lab::Text::Sexpr& sexpr) {
                 }
                 break;
             }
+                
+            case LineRange::AppendAtEnd:
+                // AppendAtEnd doesn't make sense for read operations, treat as empty
+                break;
         }
         
         // Build content string
@@ -1304,12 +1400,12 @@ Db9Response FioReadVerb::execute(const lab::Text::Sexpr& sexpr) {
         // Create response JSON with triadic consciousness
         std::ostringstream result;
         result << "{\"content\": \"" << FioUtils::escapeJsonString(content.str()) << "\""
-               << ", \"lines_returned\": " << selected_lines.size()
-               << ", \"total_lines\": " << total_lines
-               << ", \"range_spec\": \"" << (lines_param.empty() ? "full" : lines_param) << "\""
-               << ", \"path\": \"" << FioUtils::escapeJsonString(path) << "\""
-               << ", \"path_context\": " << pathContext.toJsonString()
-               << "}";
+        << ", \"lines_returned\": " << selected_lines.size()
+        << ", \"total_lines\": " << total_lines
+        << ", \"range_spec\": \"" << (lines_param.empty() ? "full" : lines_param) << "\""
+        << ", \"path\": \"" << FioUtils::escapeJsonString(path) << "\""
+        << ", \"path_context\": " << pathContext.toJsonString()
+        << "}";
         
         AutoReflexiveMetrics metrics;
         metrics.operation_time_ms = std::chrono::milliseconds(duration_ms);
@@ -1322,8 +1418,8 @@ Db9Response FioReadVerb::execute(const lab::Text::Sexpr& sexpr) {
         // Create triadic context for error reporting
         auto pathContext = FioUtils::createPathContext(path);
         std::string contextual_error = FioUtils::createContextualErrorMessage(
-            pathContext, "fio-read", "File read failed: " + std::string(e.what())
-        );
+                                                                              pathContext, "fio-read", "File read failed: " + std::string(e.what())
+                                                                              );
         
         AutoReflexiveMetrics metrics;
         return Db9Response{Db9Response::Error, "", "read_failed", contextual_error, metrics};
@@ -1342,6 +1438,7 @@ void initFioVerbRegistration(Db9Dispatcher& dispatcher) {
         
         // Register aliases for convenience
         dispatcher.registerVerbAlias("get-verb-description", {"get-description"});
+        dispatcher.registerVerb(std::make_unique<FioSearchExtVerb>());  // 🔍 ENHANCED SEARCH WITH UNICODE & RECURSIVE SUPPORT!
         dispatcher.registerVerb(std::make_unique<FioSearchVerb>());  // 🚀 THE REVOLUTIONARY NEW VERB!
         registered = true;
     }
@@ -1514,7 +1611,7 @@ FioSearchVerb::SearchParameters FioSearchVerb::extractParameters(const lab::Text
     
     // Determine search mode based on which parameter is provided
     std::string literal = extractStringParam(sexpr, "literal");
-    std::string pathspec = extractStringParam(sexpr, "pathspec");  
+    std::string pathspec = extractStringParam(sexpr, "pathspec");
     std::string regex = extractStringParam(sexpr, "regex");
     
     if (!literal.empty()) {
@@ -1715,7 +1812,7 @@ std::vector<FioSearchVerb::SearchMatch> FioSearchVerb::searchGlob(const std::vec
             escaped += ".*";
         } else if (c == '?') {
             escaped += ".";
-        } else if (c == '.' || c == '^' || c == '$' || c == '+' || c == '(' || c == ')' || 
+        } else if (c == '.' || c == '^' || c == '$' || c == '+' || c == '(' || c == ')' ||
                    c == '[' || c == ']' || c == '{' || c == '}' || c == '|' || c == '\\') {
             escaped += "\\";
             escaped += c;
@@ -1767,20 +1864,20 @@ std::string FioSearchVerb::formatSearchResults(const std::vector<SearchMatch>& m
     }
     
     result << "{"
-           << "\"status\": \"search_complete\""
-           << ", \"path\": \"" << params.path << "\""
-           << ", \"search_type\": \"" << mode_str << "\""
-           << ", \"pattern\": \"" << FioUtils::escapeJsonString(params.pattern) << "\""
-           << ", \"matches\": [";
+    << "\"status\": \"search_complete\""
+    << ", \"path\": \"" << params.path << "\""
+    << ", \"search_type\": \"" << mode_str << "\""
+    << ", \"pattern\": \"" << FioUtils::escapeJsonString(params.pattern) << "\""
+    << ", \"matches\": [";
     
     for (size_t i = 0; i < matches.size(); ++i) {
         if (i > 0) result << ", ";
         
         const auto& match = matches[i];
         result << "{"
-               << "\"line\": " << match.line
-               << ", \"column\": " << match.column
-               << ", \"line_content\": \"" << FioUtils::escapeJsonString(match.line_content) << "\"";
+        << "\"line\": " << match.line
+        << ", \"column\": " << match.column
+        << ", \"line_content\": \"" << FioUtils::escapeJsonString(match.line_content) << "\"";
         
         if (!match.context.empty()) {
             result << ", \"context\": \"" << FioUtils::escapeJsonString(match.context) << "\"";
@@ -1790,7 +1887,7 @@ std::string FioSearchVerb::formatSearchResults(const std::vector<SearchMatch>& m
     }
     
     result << "]"
-           << ", \"total_matches\": " << matches.size();
+    << ", \"total_matches\": " << matches.size();
     
     // Add awareness fairy guidance
     if (matches.empty()) {
@@ -1815,6 +1912,218 @@ std::string FioSearchVerb::createContextWindow(const std::vector<std::string>& f
     }
     
     return context.str();
+}
+
+//-----------------------------------------------------------------------------
+// FioSearchExtVerb Implementation - Enhanced Search with Unicode & Recursive Support
+//-----------------------------------------------------------------------------
+
+std::string FioSearchExtVerb::getDescription() const {
+    return "Enhanced file search with recursive directory support, Unicode normalization, and contextual validation. "
+    "Builds on fio-search with enterprise-grade capabilities for systematic knowledge discovery.";
+}
+Db9Response FioSearchExtVerb::execute(const lab::Text::Sexpr& sexpr) {
+    auto start_time = std::chrono::steady_clock::now();
+    
+    // Extract search configuration
+    SearchConfig config = extractSearchConfig(sexpr);
+    
+    // Validate required parameters
+    if (config.path.empty()) {
+        return Db9Response{Db9Response::Error, "", "missing_path", "Path parameter is required", {}};
+    }
+    
+    if (config.patterns.empty()) {
+        return Db9Response{Db9Response::Error, "", "missing_patterns", "Patterns array is required", {}};
+    }
+    
+    try {
+        // Create PatternMatcher SearchConfig
+        LabDb::SearchConfig matcher_config;
+        matcher_config.patterns = config.patterns;
+        matcher_config.case_fold = config.case_fold;
+        matcher_config.ascii_fold = config.ascii_fold;
+        matcher_config.context_lines = config.context_lines;
+        matcher_config.max_results = config.max_results;
+        
+        // Create pattern matcher with configuration
+        LabDb::PatternMatcher matcher(matcher_config);
+        
+        // Perform search based on path type
+        std::vector<LabDb::MatchResult> results;
+        std::filesystem::path target_path(config.path);
+        
+        if (std::filesystem::is_directory(target_path) && config.recursive_depth > 0) {
+            // Recursive directory search
+            results = matcher.searchDirectory(config.path, config.recursive_depth, config.extensions);
+        } else {
+            // Single file search
+            results = matcher.searchFile(config.path);
+        }
+        
+        // Convert to SearchResponse format
+        using namespace LabDb::SearchEngine;
+        SearchResponse response;
+        response.status = "search_complete";
+        
+        // Convert MatchResult to EnhancedMatchResult
+        for (const auto& match : results) {
+            EnhancedMatchResult enhanced;
+            enhanced.file_path = match.file_path;
+            enhanced.line_number = match.line_number;
+            enhanced.column_start = match.column_position;
+            enhanced.pattern_used = match.pattern_used;
+            enhanced.matched_text = match.matched_text;
+            enhanced.normalization_type = match.normalization_type;
+            // Convert context lines
+            if (!match.context_lines.empty()) {
+                size_t total_context = match.context_lines.size();
+                size_t before_count = std::min(static_cast<size_t>(config.context_lines), total_context / 2);
+                for (size_t i = 0; i < before_count; i++) {
+                    enhanced.context_before.push_back(match.context_lines[i]);
+                }
+                for (size_t i = before_count; i < total_context; i++) {
+                    enhanced.context_after.push_back(match.context_lines[i]);
+                }
+            }
+            response.matches.push_back(enhanced);
+        }
+        
+        // Set statistics
+        response.stats.files_processed = matcher.getFilesProcessed();
+        response.stats.total_matches = matcher.getMatchesFound();
+        
+        // Apply max results limit
+        if (response.matches.size() > static_cast<size_t>(config.max_results)) {
+            response.matches.resize(config.max_results);
+            response.results_truncated = true;
+            response.truncation_reason = "Result limit reached: " + std::to_string(config.max_results) + " matches returned";
+        }
+        
+        // Convert to JSON using SearchResponse formatting
+        std::string json_result = formatSearchResponseJson(response);
+        
+        // Calculate metrics using AutoReflexiveMetrics
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        metrics.items_processed = static_cast<int>(response.matches.size());
+        
+        return Db9Response{Db9Response::Success, json_result, "search_complete", "", metrics};
+        
+    } catch (const std::exception& e) {
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        AutoReflexiveMetrics metrics;
+        metrics.operation_time_ms = duration;
+        
+        return Db9Response{Db9Response::Error, "", "search_failed", e.what(), metrics};
+    }
+}
+
+FioSearchExtVerb::SearchConfig FioSearchExtVerb::extractSearchConfig(const lab::Text::Sexpr& sexpr) {
+    SearchConfig config;
+    
+    // Extract basic parameters
+    config.path = extractStringParam(sexpr, "path");
+    config.recursive_depth = extractIntParam(sexpr, "recursive-depth", 0);
+    config.context_distance = extractIntParam(sexpr, "context-distance", 10);
+    config.context_lines = extractIntParam(sexpr, "context-lines", 2);
+    config.max_results = extractIntParam(sexpr, "max-results", 50);
+    config.max_file_size = extractIntParam(sexpr, "max-file-size", 10 * 1024 * 1024);
+    
+    // Extract boolean parameters
+    config.case_fold = extractBoolParam(sexpr, "case-fold", false);
+    config.ascii_fold = extractBoolParam(sexpr, "ascii-fold", false);
+    
+    // Extract string parameters
+    config.context_logic = extractStringParam(sexpr, "context-logic");
+    if (config.context_logic.empty()) config.context_logic = "any";
+    
+    config.output_file = extractStringParam(sexpr, "output");
+    config.format = extractStringParam(sexpr, "format");
+    if (config.format.empty()) config.format = "json";
+    
+    // Extract array parameters
+	// Fallback: also try to extract as a single string parameter
+	if (config.patterns.empty()) {
+		std::string single_pattern = extractStringParam(sexpr, "patterns");
+		if (!single_pattern.empty()) {
+			config.patterns.push_back(single_pattern);
+		}
+	}
+    config.patterns = extractStringArray(sexpr, "patterns");
+    config.extensions = extractStringArray(sexpr, "extensions");
+    config.require_context = extractStringArray(sexpr, "require-context");
+    config.exclude_dirs = extractStringArray(sexpr, "exclude-dirs");
+    
+    return config;
+}
+
+std::vector<std::string> FioSearchExtVerb::extractStringArray(const lab::Text::Sexpr& sexpr, const std::string& param_name) {
+	std::vector<std::string> result;
+	
+	// Find the parameter in the S-expression
+	for (size_t i = 0; i < sexpr.expr.size(); ++i) {
+		const auto& elem = sexpr.expr[i];
+		if (elem.token == tsSexprAtom) {
+			int stringIndex = elem.ref;
+			if (stringIndex >= 0 && stringIndex < static_cast<int>(sexpr.strings.size())) {
+				const std::string& atomValue = sexpr.strings[stringIndex];
+				if (atomValue == ":" + param_name || atomValue == param_name) {
+					// Found the parameter, check if next element is a list
+					if (i + 1 < sexpr.expr.size()) {
+						const auto& nextElem = sexpr.expr[i + 1];
+						if (nextElem.token == tsSexprPushList) {
+							// Found a list, collect string elements until PopList
+							for (size_t j = i + 2; j < sexpr.expr.size(); ++j) {
+								const auto& listElem = sexpr.expr[j];
+								if (listElem.token == tsSexprPopList) {
+									break; // End of list
+								}
+								if ((listElem.token == tsSexprAtom || listElem.token == tsSexprString) && 
+										listElem.ref >= 0 && listElem.ref < static_cast<int>(sexpr.strings.size())) {
+									result.push_back(sexpr.strings[listElem.ref]);
+								}
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return result;
+}
+
+
+int FioSearchExtVerb::extractIntParam(const lab::Text::Sexpr& sexpr, const std::string& param_name, int default_value) {
+    std::string str_value = extractStringParam(sexpr, param_name);
+    if (str_value.empty()) {
+        return default_value;
+    }
+    
+    try {
+        return std::stoi(str_value);
+    } catch (const std::exception&) {
+        return default_value;
+    }
+}
+
+bool FioSearchExtVerb::extractBoolParam(const lab::Text::Sexpr& sexpr, const std::string& param_name, bool default_value) {
+    std::string str_value = extractStringParam(sexpr, param_name);
+    if (str_value.empty()) {
+        return default_value;
+    }
+    
+    std::string lower_value = str_value;
+    std::transform(lower_value.begin(), lower_value.end(), lower_value.begin(), ::tolower);
+    
+    return (lower_value == "true" || lower_value == "yes" || lower_value == "1" || lower_value == "on");
 }
 
 } // namespace LabDb

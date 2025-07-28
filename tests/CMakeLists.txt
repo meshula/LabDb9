@@ -145,3 +145,29 @@ target_link_libraries(test_text_escaping labdb)
 target_include_directories(test_text_escaping PRIVATE ../include)
 add_test(NAME TextEscapingTest COMMAND test_text_escaping)
 message(STATUS "Test targets configured")
+
+# McGuffin Test Suite
+
+# DirectoryTraversal test
+add_executable(test_directory_traversal
+    cpp/test_directory_traversal.cpp
+)
+target_link_libraries(test_directory_traversal labdb)
+target_include_directories(test_directory_traversal PRIVATE ../include)
+add_test(NAME DirectoryTraversalTest COMMAND test_directory_traversal)
+
+# Extended Search test
+add_executable(test_extended_search
+    cpp/test_extended_search.cpp
+)
+target_link_libraries(test_extended_search labdb)
+target_include_directories(test_extended_search PRIVATE ../include)
+add_test(NAME ExtendedSearchTest COMMAND test_extended_search)
+
+# fio-search-ext Integration test
+add_executable(test_fio_search_ext
+    cpp/test_fio_search_ext.cpp
+)
+target_link_libraries(test_fio_search_ext labdb)
+target_include_directories(test_fio_search_ext PRIVATE ../include)
+add_test(NAME FioSearchExtTest COMMAND test_fio_search_ext)

@@ -4,6 +4,10 @@ project(LabDb VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# FetchContent_Populate is deprecated, but FetcContent_MakeAvailable calls the broken
+# CMakelists.txt in the lmdb and utf8proc repositories.
+cmake_policy(SET CMP0169 OLD)
+
 # Use FetchContent to get LMDB and UTF8PROC
 include(FetchContent)
 
@@ -225,6 +229,10 @@ add_library(labdb
     src/Verbs/Fio/GetVerbDescription.cpp
     src/Verbs/Fio/GetVerbDescription.h
     src/Verbs/Fio/SetCwd.cpp
+    src/Verbs/Fio/PatternMatcher.cpp
+    src/Verbs/Fio/PatternMatcher.h
+    src/Verbs/Fio/SearchResponse.cpp
+    src/Verbs/Fio/SearchResponse.h
     src/Verbs/Fio/SetCwd.h
 )
 

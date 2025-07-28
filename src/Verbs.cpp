@@ -90,7 +90,7 @@ EidResolutionResult IDb9Verb::resolveEidChain(const std::string& start_eid,
 //-----------------------------------------------------------------------------
 
 std::string IDb9Verb::extractStringParam(const ::lab::Text::Sexpr& sexpr, 
-                                        const std::string& param_name) {
+                                         const std::string& param_name) {
     // Look for :param_name value pattern in the parsed S-expression
     for (size_t i = 0; i < sexpr.expr.size() - 1; ++i) {
         const auto& elem = sexpr.expr[i];
@@ -113,6 +113,10 @@ std::string IDb9Verb::extractStringParam(const ::lab::Text::Sexpr& sexpr,
                                    valueElem.ref < static_cast<int>(sexpr.strings.size())) {
                             // Handle § delimited strings (tsSexprString tokens)
                             return sexpr.strings[valueElem.ref];
+                        }
+                        else if (valueElem.token == tsSexprInteger && valueElem.ref >= 0 &&
+                                 valueElem.ref < static_cast<int>(sexpr.ints.size())) {
+                            return std::to_string(sexpr.ints[valueElem.ref]);
                         }
                     }
                 }

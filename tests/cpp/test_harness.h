@@ -103,6 +103,51 @@ inline std::vector<TestCase> g_tests;
         } \
     } while(0)
 
+#define EXPECT_GT(expected, actual) \
+    do { \
+        g_state.assertions_run++; \
+        if ((expected) > (actual)) { \
+            g_state.assertions_passed++; \
+        } else { \
+            g_state.current_test_passed = false; \
+            std::ostringstream oss; \
+            oss << g_state.current_test << ": EXPECT_GT failed at " << __FILE__ << ":" << __LINE__ \
+                << " - Expected: " << (expected) << ", Actual: " << (actual); \
+            g_state.failures.push_back(oss.str()); \
+            std::cout << "  ❌ Expected: " << (expected) << ", Got: " << (actual) << " (line " << __LINE__ << ")" << std::endl; \
+        } \
+    } while(0)
+
+#define EXPECT_LE(expected, actual) \
+    do { \
+        g_state.assertions_run++; \
+        if ((expected) <= (actual)) { \
+            g_state.assertions_passed++; \
+        } else { \
+            g_state.current_test_passed = false; \
+            std::ostringstream oss; \
+            oss << g_state.current_test << ": EXPECT_LE failed at " << __FILE__ << ":" << __LINE__ \
+                << " - Expected: " << (expected) << ", Actual: " << (actual); \
+            g_state.failures.push_back(oss.str()); \
+            std::cout << "  ❌ Expected: " << (expected) << ", Got: " << (actual) << " (line " << __LINE__ << ")" << std::endl; \
+        } \
+    } while(0)
+
+#define EXPECT_LT(expected, actual) \
+    do { \
+        g_state.assertions_run++; \
+        if ((expected) < (actual)) { \
+            g_state.assertions_passed++; \
+        } else { \
+            g_state.current_test_passed = false; \
+            std::ostringstream oss; \
+            oss << g_state.current_test << ": EXPECT_LT failed at " << __FILE__ << ":" << __LINE__ \
+                << " - Expected: " << (expected) << ", Actual: " << (actual); \
+            g_state.failures.push_back(oss.str()); \
+            std::cout << "  ❌ Expected: " << (expected) << ", Got: " << (actual) << " (line " << __LINE__ << ")" << std::endl; \
+        } \
+    } while(0)
+
 // Test registration and execution
 #define TEST(test_name) \
     void test_##test_name(); \

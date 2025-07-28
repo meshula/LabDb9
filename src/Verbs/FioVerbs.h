@@ -7,6 +7,8 @@
 #include <vector>
 #include <filesystem>
 #include <fstream>
+#include "Fio/SearchResponse.h"
+#include "Fio/PatternMatcher.h"
 #include <memory>
 
 namespace LabDb {
@@ -14,6 +16,7 @@ namespace LabDb {
 class Db9Dispatcher;
 
 // Forward declarations for line surgery
+struct LineRange;
 struct LineRange;
 
 //-----------------------------------------------------------------------------
@@ -49,10 +52,11 @@ private:
     WriteParameters extractParameters(const lab::Text::Sexpr& sexpr);
     Db9Response performWrite(const WriteParameters& params);
     Db9Response performFullFileWrite(const std::string& path, const std::string& content, std::chrono::steady_clock::time_point start_time);
-    Db9Response performLineSurgery(const std::string& path, const std::string& content, const std::string& lines_param, const std::string& mode, std::chrono::steady_clock::time_point start_time);
+    Db9Response performLineSurgery(const std::string& path, const std::string& content, const LineRange& range, int write_mode_type, std::chrono::steady_clock::time_point start_time);
     int performLineReplacement(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range);
     int performLineInsertion(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range);
     int performLineAppend(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range);
+    int performLinePrepend(std::vector<std::string>& lines, const std::vector<std::string>& new_content);
     std::string createBackupPath(const std::string& original_path);
     bool validatePath(const std::string& path);
     std::string generateTimestamp();
@@ -244,6 +248,41 @@ namespace FioUtils {
     
     /// Add awareness fairy guidance for empty directory listings
     std::string addEmptyDirectoryAwareness(const std::string& json_result, size_t file_count);
+
 }
 
+/// Enhanced file search with recursive directory support, Unicode normalization, and contextual validation
+class FioSearchExtVerb : public IDb9Verb {
+public:
+	std::string getVerbName() const override { return "fio-search-ext"; }
+	std::string getDescription() const override;
+	Db9Response execute(const lab::Text::Sexpr& sexpr) override;
+	
+	// Public for testing
+	struct SearchConfig {
+		std::string path;
+		std::vector<std::string> patterns;
+		int recursive_depth = 0;
+		std::vector<std::string> extensions;
+		std::vector<std::string> require_context;
+		int context_distance = 10;
+		std::string context_logic = "any";
+		bool case_fold = false;
+		bool ascii_fold = false;
+		int context_lines = 2;
+		int max_results = 50;
+		int max_file_size = 10 * 1024 * 1024; // 10MB
+		std::vector<std::string> exclude_dirs;
+		std::string output_file;
+		std::string format = "json";
+	};
+	
+	// Public for testing
+	SearchConfig extractSearchConfig(const lab::Text::Sexpr& sexpr);
+
+private:
+	std::vector<std::string> extractStringArray(const lab::Text::Sexpr& sexpr, const std::string& param_name);
+	int extractIntParam(const lab::Text::Sexpr& sexpr, const std::string& param_name, int default_value);
+	bool extractBoolParam(const lab::Text::Sexpr& sexpr, const std::string& param_name, bool default_value);
+};
 } // namespace LabDb

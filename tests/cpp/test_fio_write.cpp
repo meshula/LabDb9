@@ -389,8 +389,11 @@ public:
         // Test 9c: Replace entire file content
         {
             FioWriteTest test("/tmp/fio_test_edge_all.txt");
-            std::string cmd = R"((fio-write :path "/tmp/fio_test_edge_all.txt" :lines "@1:100" :content "REPLACED ALL"))";
+            std::string cmd = R"((fio-write :path "/tmp/fio_test_edge_all.txt" :lines "@1:100" :mode "replace" :content "REPLACED ALL"))";
             auto response = db9_execute(cmd);
+            if (response.status != LabDb::Db9Response::Success) {
+                std::cerr << "Error replacing entire file content: " << response.error_message << std::endl;
+            }
             assert(response.status == LabDb::Db9Response::Success);
             assert(test.verify_line_count(1));
             assert(test.verify_line_content(1, "REPLACED ALL"));
@@ -405,7 +408,7 @@ public:
         FioWriteTest test("/tmp/fio_test_complex.txt");
 
         // Test 10a: Replace middle section with more lines than original
-        std::string cmd1 = R"((fio-write :path "/tmp/fio_test_complex.txt" :lines "@45:55" :content "NEW LINE 1
+        std::string cmd1 = R"((fio-write :path "/tmp/fio_test_complex.txt" :lines "@45:55" :mode "replace" :content "NEW LINE 1
 NEW LINE 2
 NEW LINE 3
 NEW LINE 4
@@ -421,7 +424,14 @@ NEW LINE 13
 NEW LINE 14
 NEW LINE 15"))";
         auto response1 = db9_execute(cmd1);
+        if (response1.status != LabDb::Db9Response::Success) {
+            std::cerr << "Error replacing middle section: " << response1.error_message << std::endl;
+        }
         assert(response1.status == LabDb::Db9Response::Success);
+        if (!test.verify_line_count(104)) {
+            std::cerr << "Line count mismatch after complex multiline replace: expected 104, got " 
+                      << test.read_current_lines().size() << std::endl;
+        }
         assert(test.verify_line_count(104)); // Removed 11, added 15 = 100-11+15 = 104
         assert(test.verify_line_content(45, "NEW LINE 1"));
         assert(test.verify_line_content(59, "NEW LINE 15"));
@@ -430,7 +440,7 @@ NEW LINE 15"))";
         test.restore_original();
 
         // Test 10b: Replace section with fewer lines
-        std::string cmd2 = R"((fio-write :path "/tmp/fio_test_complex.txt" :lines "@20:30" :content "SHORT 1
+        std::string cmd2 = R"((fio-write :path "/tmp/fio_test_complex.txt" :mode "replace" :lines "@20:30" :content "SHORT 1
 SHORT 2
 SHORT 3"))";
         auto response2 = db9_execute(cmd2);
@@ -449,7 +459,7 @@ SHORT 3"))";
         FioWriteTest test("/tmp/fio_test_boundary.txt");
 
         // Test 11a: Operations near file boundaries
-        std::string cmd1 = R"((fio-write :path "/tmp/fio_test_boundary.txt" :lines "@98:100" :content "LAST THREE"))";
+        std::string cmd1 = R"((fio-write :path "/tmp/fio_test_boundary.txt" :mode "replace" :lines "@98:100" :content "LAST THREE"))";
         auto response1 = db9_execute(cmd1);
         assert(response1.status == LabDb::Db9Response::Success);
         assert(test.verify_line_count(98)); // Removed 3, added 1
@@ -690,6 +700,50 @@ static void test12_error_conditions() {
         auto response = db9_execute(cmd);
         // Should fall back to full file write
         assert(response.status == LabDb::Db9Response::Success);
+    }
+
+    // Test 12d: Invalid mode validation
+    {
+        std::cout << "  🧪 Testing invalid mode 'turnip'..." << std::endl;
+        std::string cmd = R"((fio-write :path "/tmp/fio_test_invalid_mode.txt" :mode "turnip" :content "This should fail"))";
+        auto response = db9_execute(cmd);
+        
+        // Should return error for unrecognized mode
+        assert(response.status == LabDb::Db9Response::Error);
+        assert(response.error_code == "invalid_mode");
+        
+        // Error message should mention the invalid mode
+        assert(response.error_message.find("turnip") != std::string::npos);
+        assert(response.error_message.find("Invalid mode") != std::string::npos);
+        
+        std::cout << "    ✅ Invalid mode correctly rejected: " << response.error_message << std::endl;
+    }
+    
+    // Test 12e: Empty mode should default to append (safe behavior)
+    {
+        std::cout << "  🧪 Testing unspecified mode defaults to append..." << std::endl;
+        std::string test_path = "/tmp/fio_test_default_mode.txt";
+        
+        // Remove file if exists
+        if (std::filesystem::exists(test_path)) {
+            std::filesystem::remove(test_path);
+        }
+        
+        // Test with no mode specified - should create file (append behavior)
+        std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"Default mode test\")";
+        auto response = db9_execute(cmd);
+        
+        assert(response.status == LabDb::Db9Response::Success);
+        assert(std::filesystem::exists(test_path));
+        
+        // Verify content was written
+        std::ifstream file(test_path);
+        std::string content((std::istreambuf_iterator<char>(file)),
+                           std::istreambuf_iterator<char>());
+        assert(content == "Default mode test");
+        
+        std::filesystem::remove(test_path);
+        std::cout << "    ✅ Unspecified mode correctly defaults to safe append behavior" << std::endl;
     }
 
     std::cout << "✅ Error handling test passed\n" << std::endl;
@@ -1394,6 +1448,7 @@ public:
         test_end_relative_operations();
         test_insert_operations();
         test_append_operations();
+        // test_prepend_operations();  // TODO: Add comprehensive prepend tests later
         test_fromstart_operations();
         test_unicode_escape_performance();
 
@@ -1477,8 +1532,7 @@ private:
         FioWriteTest test("/tmp/fio_test_full.txt");
 
         // Write new content using raw string with actual newlines
-        // Since fio-write escaping is currently broken, use actual newlines
-        std::string cmd = R"((fio-write :path "/tmp/fio_test_full.txt" :content "New line 1
+        std::string cmd = R"((fio-write :path "/tmp/fio_test_full.txt" :mode "replace" :content "New line 1
 New line 2
 New line 3"))";
         auto response = db9_execute(cmd);
@@ -1499,7 +1553,7 @@ New line 3"))";
         test.debug_print_file("before single line replace");
         
         // Replace line 50
-        std::string cmd = "(fio-write :path \"/tmp/fio_test_single.txt\" :lines \"@50\" :content \"REPLACED LINE 50\")";
+        std::string cmd = "(fio-write :path \"/tmp/fio_test_single.txt\" :mode \"replace\" :lines \"@50\" :content \"REPLACED LINE 50\")";
         auto response = db9_execute(cmd);
         
         assert(response.status == LabDb::Db9Response::Success);
@@ -1525,7 +1579,7 @@ New line 3"))";
         test.debug_print_file("before range replace");
 
         // Replace lines 10-12 with 2 lines using raw string with actual newlines
-        std::string cmd = R"((fio-write :path "/tmp/fio_test_range.txt" :lines "@10:12" :content "REPLACED LINE A
+        std::string cmd = R"((fio-write :path "/tmp/fio_test_range.txt" :mode "replace" :lines "@10:12" :content "REPLACED LINE A
 REPLACED LINE B"))";
         auto response = db9_execute(cmd);
 
@@ -1554,7 +1608,7 @@ REPLACED LINE B"))";
         test.debug_print_file("before end-relative");
 
         // Replace last 3 lines using raw string with actual newlines
-        std::string cmd = R"((fio-write :path "/tmp/fio_test_end.txt" :lines "@e:-3" :content "LAST LINE A
+        std::string cmd = R"((fio-write :path "/tmp/fio_test_end.txt" :mode "replace" :lines "@e:-3" :content "LAST LINE A
 LAST LINE B"))";
         auto response = db9_execute(cmd);
 
@@ -1967,7 +2021,7 @@ static void test_unicode_escaping() {
         test.debug_print_file("before fromstart");
 
         // Replace first 5 lines
-        std::string cmd = R"((fio-write :path "/tmp/fio_test_fromstart.txt" :lines "@0:5" :content "FIRST LINE A
+        std::string cmd = R"((fio-write :path "/tmp/fio_test_fromstart.txt" :mode "replace" :lines "@0:5" :content "FIRST LINE A
 FIRST LINE B
 FIRST LINE C"))";
         auto response = db9_execute(cmd);
