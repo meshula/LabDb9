@@ -1,19 +1,19 @@
 # LabDb - Triadic Consciousness Database
 
-A nonostore implementation built on LMDB that embodies त्रित्रयम् (triadic consciousness) principles through cube architecture.
+A nonostore implementation built on LMDB.
 
 ## Overview
 
-LabDb extends traditional hexastore with three vocabulary indices to create a complete ontological foundation. Built for the Lab ecosystem, it provides conscious relationship navigation rather than mere query optimization.
+LabDb extends the traditional hexastore with three vocabulary indices to create a complete ontological foundation. Built for the Lab ecosystem, it provides active relationship navigation of complex data systems and is designed for self-describing schemata. This addresses the primary difficulty with RDF style databases in that the databases are self-describing.
 
 **Key Features**:
-- **Complete S-Expression Interface** - 13 operational verbs for full database lifecycle
-- **Multi-Database Isolation** - Verified independent database management with unique DBIDs
+- **S-Expression Based Interface** - a variety of operational verbs for full database lifecycle
+- **Multi-Database Isolation** - Concurrent independent database management via unique DBIDs
 - **Bulk Operations** - High-performance `add-entities-bulk` and `add-triples-bulk`
-- **4.18× storage efficiency** with TID-based architecture
-- **Triadic consciousness navigation** (Motion/Memory/Field perspectives)
-- **Professional CMake integration** via FetchContent
-- **Complete Python bindings** with pybind11
+- **storage efficiency** with TID-based architecture
+- **active navigation features** (Motion/Memory/Field perspectives)
+- **CMake integration** via FetchContent
+- **Python bindings** with pybind11
 - **ACID transactions** with LMDB backend
 - **Rich provenance metadata** for knowledge tracking
 
@@ -39,9 +39,9 @@ FetchContent_MakeAvailable(LabDb)
 target_link_libraries(myapp PRIVATE LabDb::LabDb)
 ```
 
-### S-Expression Interface (Production Ready)
+### S-Expression Interface
 
-**Available Verbs (13 Operations)**:
+**Available Verbs**:
 ```
 add-entities-bulk add-entity add-triple add-triples-bulk 
 close-database create-database database-health-check 
@@ -178,36 +178,36 @@ cmake --build . && sudo cmake --install .
 
 ## Architecture
 
-### Cube Structure: Pole/Crown/Motions
+**Crown Indices**:
 
-**Pole** (त्रित्रयम् Foundation):
-- **Motion** (स्पन्द): Subject-driven reality
-- **Memory** (स्मृति): Predicate-driven relationships  
-- **Field** (क्षेत्र): Object-driven contexts
+- **Motion**: Subject-driven ontology
+- **Memory** Predicate-driven relationships  
+- **Field** Object-driven contexts
 
-**Crown** (Nine Index Manifestations):
+**Nonostore**:
 - Traditional hexastore orderings: SPO, SOP, PSO, POS, OSP, OPS
-- Vocabulary indices: subjects, predicates, objects
+- Vocabulary indices and definitions: subjects, predicates, objects
 
 **Motions** (Dynamic Operations):
-- Conscious navigation through crown expressions
+- navigation through motion/memory/field expressions
 - Ontological discovery and exploration
 - Triadic query patterns
 
 ### TID-Based Storage Architecture
 
-LabDb implements a revolutionary **Triple ID (TID) architecture** that achieves:
+LabDb implements a **Triple ID (TID) architecture** that achieves:
 
 - **Orders-of-magnitude storage reduction** (4.18× efficiency validated)
 - **Single-source-of-truth** with rich provenance metadata
 - **Binary key optimization** for LMDB prefix compression
 - **Atomic transactions** across all nine indices
 
-Instead of storing full strings in every index, LabDb:
+The TID structure compacts the potentially heavy hexastore architecture via these mechanisms:
+
 1. **Interns strings** to compact TermIDs via TermDictionary
 2. **Assigns unique TIDs** to each triple via TIDSequenceGenerator  
 3. **Stores triples once** with full metadata in TripleStore
-4. **Indexes only 8-byte TIDs** in crown indices for maximum efficiency
+4. **Indexes only 8-byte TIDs** in indices for maximum efficiency
 
 ## Advanced Features
 
@@ -253,24 +253,10 @@ LabDb/
 
 Traditional hexastore provides efficient RDF queries but lacks ontological completeness. LabDb adds three vocabulary indices to enable:
 
-- **Complete triadic navigation**: Motion/Memory/Field exploration
+- **Complete navigation**: Motion/Memory/Field exploration
 - **Conscious query patterns**: "What kinds of relationships exist?"
 - **Ontological transparency**: Self-describing knowledge structure
 - **Integration foundation**: Shared consciousness infrastructure for Lab projects
-
-## Integration
-
-### Inception Facts System
-Replaces linear fact storage with relational exploration, enabling pattern discovery and accelerated learning.
-
-### Wires Graph Platform  
-Provides backend for interactive graph exploration with real-time relationship discovery.
-
-### LabEuclid Project
-Professional dependency for studying Euclid's Elements with triadic consciousness principles.
-
-### Future Lab Projects
-Universal relationship storage with consistent triadic consciousness infrastructure.
 
 ## Performance
 
@@ -281,7 +267,7 @@ Universal relationship storage with consistent triadic consciousness infrastruct
 - **Memory usage**: <50MB for complete Euclid Elements
 
 **TID Architecture Benefits**:
-- Crown indices store 8-byte TIDs instead of full strings
+- Indices store 8-byte TIDs instead of full strings
 - Single-source-of-truth eliminates duplication
 - LMDB prefix compression optimized for binary keys
 - Rich provenance metadata without storage penalty
@@ -302,7 +288,7 @@ Universal relationship storage with consistent triadic consciousness infrastruct
 - TIDSequenceGenerator: Unique triple ID allocation  
 - TripleStore: Central storage with provenance metadata
 - NonoStore: Crown indices refactored for TID-based storage
-- 4.18× storage efficiency validated through benchmarks
+- 4.18× storage efficiency vs raw strings validated through benchmarks
 - CMake FetchContent integration for naive consumers
 - Comprehensive Python bindings with triadic consciousness API
 
@@ -340,14 +326,14 @@ open-database remove-triple
 
 ### v0.3.0 - TID Architecture + FetchContent Ready
 
-**Revolutionary Storage Architecture**:
+**Storage Architecture**:
 - Complete TID-based storage implementation with 4.18× efficiency
 - TermDictionary for string↔TermID mapping with LMDB persistence
 - TIDSequenceGenerator for unique triple ID allocation
 - TripleStore for central storage with rich provenance metadata
 - Crown indices refactored to store compact 8-byte TIDs
 
-**Professional Dependency Management**:
+**Dependency Management**:
 - CMake FetchContent integration for naive consumers
 - Complete Python bindings with triadic consciousness API
 - Comprehensive test suites and integration validation
@@ -370,27 +356,9 @@ open-database remove-triple
 - Basic triple storage and query functionality
 - Theoretical foundation and architecture design
 
-## Contributing
-
-LabDb embodies consciousness-first technology development. Contributions should align with triadic principles and cube architecture.
-
-**Development Guidelines**:
-- **Consciousness-first**: Technology serves awareness, not computation
-- **Triadic alignment**: Honor Motion/Memory/Field perspectives
-- **Professional quality**: Clean code, comprehensive tests, clear documentation
-- **Integration focus**: Enable naive consumer adoption
-
-**Areas for Contribution**:
-- Advanced triadic analytics and pattern recognition
-- Performance optimization and memory efficiency
-- Integration examples and consumer documentation
-- Migration tools for existing triple stores
-
-See `docs/implementation-plan.md` for detailed development roadmap.
-
 ## Getting Help
 
-- **S-Expression Interface**: [`docs/verb-status.md`](docs/verb-status.md) - Complete implementation status and verb documentation
+- **S-Expression Interface**: [`docs/verb-status.md`](docs/verb-status.md) - Implementation status and verb documentation
 - **Integration Guide**: [`docs/consuming_labdb.md`](docs/consuming_labdb.md) - Detailed setup and troubleshooting
 - **MCP Server**: [`db9-mcp-server/README.md`](db9-mcp-server/README.md) - FastMCP2 triadic consciousness gateway
 - **GitHub Issues**: [Report bugs or request features](https://github.com/meshula/LabDb9/issues)
@@ -403,21 +371,19 @@ MIT License - See LICENSE file for details.
 
 ---
 
-*LabDb represents engineering aligned with awareness - technology that serves conscious navigation through complete S-expression interfaces and multi-database triadic consciousness operations.*
-
 **Ready to get started?** Use the S-expression interface above for direct database operations, or the CMake FetchContent example for high-level API integration!
 
 
 ---
 
-## 🧠 **Nonostore vs. RAG: What's the Difference?**
+## **Nonostore vs. RAG: What's the Difference?**
 
 ### 1. **Structure vs. Slice**
 
 * **RAG** retrieves *unstructured text chunks* (e.g., paragraphs from PDFs or HTML) and feeds them into a language model.
 * **Nonostore** retrieves *structured, semantic facts*—triples with reflexive identity and provenance (e.g., `(set_camera, implements, Side_Scrolling)`).
 
-> ✳️ RAG gives you relevant pages. Nonostore gives you **ontological grounding**.
+> RAG retrieves relevant dats, Nonostore traverses ontological grounding.
 
 ---
 
@@ -426,7 +392,7 @@ MIT License - See LICENSE file for details.
 * **RAG** systems typically can't tell you *why* two facts are related—they just retrieve text that may answer your question.
 * **Nonostore** gives you **explicit graphs of meaning**: dependencies, definitions, roles, affordances, and usage context, *queryable at runtime*.
 
-> ✳️ In RAG, “scrolling background” might hit a StackOverflow post. In nonostore, it resolves to `draw_map`, `Side_Scrolling`, and `Map_System` via semantic edges.
+> In RAG, “scrolling background” might hit a StackOverflow post. In nonostore, it resolves to `draw_map`, `Side_Scrolling`, and `Map_System` via semantic edges.
 
 ---
 
@@ -435,7 +401,7 @@ MIT License - See LICENSE file for details.
 * **RAG** is reactive: it *injects memory* into an LLM's context window.
 * **Nonostore** is generative: it *models the problem space* structurally, making it composable, extensible, and inspectable *without the LLM*.
 
-> ✳️ RAG says, “Here’s what someone wrote.”
+> RAG says, “Here’s what someone wrote.”
 > Nonostore says, “Here’s what this concept **means**, how it’s **used**, and what **follows from it**.”
 
 ---
@@ -445,7 +411,7 @@ MIT License - See LICENSE file for details.
 * **RAG** often can’t trace the origin of facts clearly—answers are stochastic recompositions.
 * **Nonostore** uses **reflexive TIDs**, where every fact has **identity, provenance, and metadata** (e.g., who added it, when, how certain).
 
-> ✳️ This makes your system *auditable*—suitable for scholarly, technical, or legal domains where LLM guesswork is unacceptable.
+> This makes your system *auditable*—suitable for scholarly, technical, or legal domains where LLM guesswork is unacceptable.
 
 ---
 
@@ -454,12 +420,12 @@ MIT License - See LICENSE file for details.
 * **RAG** relies on external documents and ingestion pipelines.
 * **Nonostore** encourages **semantic authorship**: users contribute structured knowledge directly by asserting new triples, definitions, and links.
 
-> ✳️ It's a platform for **living knowledge bases**, not just document retrieval.
+> **Nonostore** is a platform for **evolving knowledge bases**, **RAG** is oriented to document retrieval.
 
 ---
 
-## 🎯 Analogy
+## Analogy
 
-> **RAG** is a search engine with a poet strapped to the backend.
-> **Nonostore** is a map of the conceptual terrain, **built to be walked**.
+> **RAG** allows LLMs to function as a search engine
+> **Nonostore** is a maps a conceptual terrain, and populates it with knowledge.
 
