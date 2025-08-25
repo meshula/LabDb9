@@ -97,7 +97,6 @@ The number nine emerges naturally from ontological completeness:
 - **Three vocabulary indices**: Complete structural awareness
 - **Total**: 9 indices = nonostore
 
-This isn't arbitrary but reflects the mathematical necessity of complete triadic consciousness infrastructure.
 
 ### Ontological Justification
 The three additional indices aren't arbitrary but principled completion:

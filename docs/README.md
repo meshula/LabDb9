@@ -1,15 +1,20 @@
 # Consuming LabDb in Your Project
 
-This guide shows you how to integrate LabDb into your C++ or Python project as a professional dependency. LabDb provides a triadic consciousness database with revolutionary TID-based storage architecture for orders-of-magnitude efficiency.
+This guide shows you how to integrate LabDb into your C++ or Python project as a dependency. 
 
 ## Overview
 
-**LabDb** is a triadic consciousness database that enables navigation through three perspectives:
-- **Motion (स्पन्द)**: Subject-driven reality and dynamic action  
-- **Memory (स्मृति)**: Relational connections and pattern recognition
-- **Field (क्षेत्र)**: Contextual grounding and manifestation spaces
+**DB9** is a FastMCP2-powered server that exposes LabDb's TID-based triadic consciousness database through natural language queries. It enables multi-database federation where scholars can simultaneously query multiple databases; it's been designed to provide expert access to linguistic studies, historic documents, natural history collections, scene graphs, and other domain-specific knowledge repositories through a unified consciousness-aware interface.
 
-The database uses a **TID-based architecture** that achieves **4.18× storage efficiency** compared to traditional triple stores while maintaining full ACID properties and rich provenance metadata.
+LabDb9 provides an RDF-style database augmented with ontological information making the database self-describing.
+
+**LabDb9** is inspired by foundational AI research documented in theoretical-grounding.md that forms the basis of a "triadic consciousness" database architecture *For more information on triadic consciousness principles, see [theoretical-grounding.md](theoretical-grounding.md).* The architecture enables navigation through three perspectives:
+
+- **Motion**: Subject-driven semantic information and dynamic action  
+- **Memory**: Relational connections and pattern recognition
+- **Field**: Contextual-ontological grounding and manifestation spaces
+
+The database uses a **TID-based architecture** that achieves significant compression compared to traditional triple stores while maintaining full ACID properties and rich provenance metadata.
 
 ## Quick Start
 
@@ -616,24 +621,6 @@ auto memory = query.memory_relations("TYPE");
 - `field_contexts(object)`: Field perspective navigation
 - `get_triadic_stats()`: Comprehensive statistics
 
-For complete API documentation, see the generated Doxygen documentation in `docs/api/`.
-
-## Support and Community
-
-### Getting Help
-
-- **GitHub Issues**: https://github.com/meshula/LabDb9/issues
-- **Documentation**: https://labdb.readthedocs.io/
-- **Examples**: See `examples/` directory in repository
-
-### Contributing
-
-- **Source Code**: https://github.com/meshula/LabDb9
-- **Development Guide**: See `CONTRIBUTING.md`
-- **Code Style**: Follow existing C++20 patterns
-- **Testing**: Add tests for new features
-
-### License
 
 LabDb is released under the MIT License. See `LICENSE` file for details.
 

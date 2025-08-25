@@ -249,7 +249,7 @@ results.as_dataframe()                # Pandas DataFrame (if available)
 - Maps to object-centric queries
 
 ### Perspective Shifting
-Move fluidly between Motion/Memory/Field viewpoints on the same knowledge, enabling **conscious navigation** rather than mechanical search.
+Move fluidly between Motion/Memory/Field viewpoints on the same knowledge, enabling **conscious navigation**.
 
 ---
 
@@ -277,18 +277,3 @@ export PYTHONPATH="/path/to/LabDb/python:$PYTHONPATH"
 # Check: Close all store instances before creating new ones
 # LMDB uses single-writer, multiple-reader model
 ```
-
----
-
-## 🎆 **Next Steps**
-
-1. **Start Simple**: Replace one fact storage pattern with triadic
-2. **Explore Gradually**: Add triadic exploration to existing queries  
-3. **Discover Patterns**: Use vocabulary discovery for "What can I explore?"
-4. **Enhance Incrementally**: Build richer relationship models over time
-
-**Remember**: The goal is conscious navigation of relationship space, not just faster queries!
-
----
-
-*Ready to revolutionize how Lab projects understand and explore knowledge relationships.*
