@@ -4,10 +4,13 @@
 #include "LabDb/EnhancedDatabaseVerbs.h"
 #include "Verbs/VocabularyStatsVerb.h"
 #include "Verbs/FioVerbs.h"
+#include "Verbs/RopeVerbs.h"
 
 #include <sstream>
 #include <iomanip>
 #include <mutex>
+#include <fstream>
+#include <regex>
 
 namespace LabDb {
 
@@ -45,7 +48,7 @@ namespace {
 //-----------------------------------------------------------------------------
 // Db9Response implementation
 //-----------------------------------------------------------------------------
-std::string Db9Response::toJson() const {
+std::string Db9Response::toJsonString() const {
     std::ostringstream json;
     json << "{\n";
 
@@ -298,7 +301,7 @@ Db9Response Db9Dispatcher::executeCommands(const std::vector<std::string>& sexpr
         if (i > 0) resultArray << ",\n";
 
         Db9Response response = m_impl->parseSexprAndExecute(sexprCommands[i]);
-        resultArray << "  " << response.toJson();
+        resultArray << "  " << response.toJsonString();
 
         // Aggregate metrics
         totalTime += response.auto_reflexive.operation_time_ms;
@@ -331,6 +334,86 @@ Db9Response Db9Dispatcher::executeCommands(const std::vector<std::string>& sexpr
     aggregatedResponse.auto_reflexive.memory_usage_kb = totalMemoryUsage;
 
     return aggregatedResponse;
+}
+
+Db9Response Db9Dispatcher::executeCommands(const std::string& filePath, const std::string& dbid) {
+    Db9Response response;
+    
+    // Read file contents
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        response.status = Db9Response::Error;
+        response.error_code = "FILE_NOT_FOUND";
+        response.error_message = "Could not open file: " + filePath;
+        return response;
+    }
+    
+    std::vector<std::string> commands;
+    std::string line;
+    int lineNumber = 0;
+    
+    // Read file line by line, filtering and processing commands
+    while (std::getline(file, line)) {
+        lineNumber++;
+        
+        // Skip empty lines and comments
+        std::string trimmed = line;
+        trimmed.erase(0, trimmed.find_first_not_of(" \t"));
+        trimmed.erase(trimmed.find_last_not_of(" \t") + 1);
+        
+        if (trimmed.empty() || trimmed[0] == '#' || trimmed[0] == ';') {
+            continue;
+        }
+        
+        // Substitute dbid macros
+        // Look for patterns like §dbid§, ${dbid}, or {dbid}
+        std::string processedLine = line;
+        
+        // Pattern 1: §dbid§ (section symbol delimiter)
+        processedLine = std::regex_replace(processedLine, std::regex("§dbid§"), dbid);
+        
+        // Pattern 2: ${dbid} (shell-style variable)
+        processedLine = std::regex_replace(processedLine, std::regex("\\$\\{dbid\\}"), dbid);
+        
+        // Pattern 3: {dbid} (simple brace)
+        processedLine = std::regex_replace(processedLine, std::regex("\\{dbid\\}"), dbid);
+        
+        // Pattern 4: :dbid placeholder in s-expressions
+        processedLine = std::regex_replace(processedLine, std::regex(":dbid\\s+[^\\s)]+"), ":dbid " + dbid);
+        
+        commands.push_back(processedLine);
+    }
+    
+    file.close();
+    
+    if (commands.empty()) {
+        response.status = Db9Response::Warning;
+        response.error_code = "NO_VALID_COMMANDS";
+        response.error_message = "No valid S-expression commands found in file: " + filePath;
+        response.result = "{\"commands_found\": 0, \"lines_processed\": " + std::to_string(lineNumber) + "}";
+        return response;
+    }
+    
+    // Execute commands using existing vector-based method
+    response = executeCommands(commands);
+    
+    // Enhance response with file processing metadata
+    if (response.status == Db9Response::Success || response.status == Db9Response::Warning) {
+        // Parse existing result to add file metadata
+        std::ostringstream enhancedResult;
+        enhancedResult << "{\n";
+        enhancedResult << "  \"file_path\": \"" << escapeJson(filePath) << "\",\n";
+        enhancedResult << "  \"dbid_substituted\": \"" << escapeJson(dbid) << "\",\n";
+        enhancedResult << "  \"commands_executed\": " << commands.size() << ",\n";
+        enhancedResult << "  \"lines_processed\": " << lineNumber << ",\n";
+        enhancedResult << "  \"status\": \"" << (response.status == Db9Response::Success ? "success" : "partial_success") << "\",\n";
+        enhancedResult << "  \"command_results\": " << response.result << "\n";
+        enhancedResult << "}";
+        
+        response.result = enhancedResult.str();
+    }
+    
+    return response;
 }
 
 void Db9Dispatcher::registerVerb(std::unique_ptr<IDb9Verb> verb) {
@@ -574,8 +657,9 @@ Db9Dispatcher& getGlobalDb9Dispatcher() {
         // Automatically initialize all verb registrations
         initDatabaseVerbRegistration(dispatcher);
         initEnhancedDatabaseVerbRegistration(dispatcher);
-        LabDb::VocabularyStatsVerb::registerVerb(dispatcher);
+        VocabularyStatsVerb::registerVerb(dispatcher);
         initFioVerbRegistration(dispatcher);
+        initRopeVerbRegistration(dispatcher);
         initialized = true;
     }
     

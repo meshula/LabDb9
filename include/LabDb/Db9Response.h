@@ -10,13 +10,13 @@ namespace LabDb {
 //-----------------------------------------------------------------------------
 struct Db9Response {
     enum Status { Success, Error, Warning } status{Success};
-    std::string result;                    // Primary return data
+    std::string result;                   // Primary return data
     std::string error_code;               // Optional error identifier
     std::string error_message;            // Human-readable error description
     AutoReflexiveMetrics auto_reflexive;  // Performance metrics
     
     // Convert to JSON for MCP return
-    std::string toJson() const;
+    std::string toJsonString() const;
 };
 
 } // namespace LabDb

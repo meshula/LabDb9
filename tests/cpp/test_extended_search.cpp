@@ -30,7 +30,7 @@ TEST(s_expression_parameter_parsing) {
     std::cout << "Testing S-expression parameter parsing..." << std::endl;
     
     // Test basic parameter extraction
-    std::string sexpr_text = createSearchSexpr("../tests/cpp/testenv/adventure/holy_grail.md", {"grail"});
+    std::string sexpr_text = createSearchSexpr("../../tests/cpp/testenv/adventure/holy_grail.md", {"grail"});
     std::cout << "Test S-expression: " << sexpr_text << std::endl;
     
     lab::Text::Sexpr sexpr(sexpr_text);
@@ -45,7 +45,7 @@ TEST(s_expression_parameter_parsing) {
     }
     std::cout << std::endl;
     
-    EXPECT_EQ(config.path, "../tests/cpp/testenv/adventure/holy_grail.md");
+    EXPECT_EQ(config.path, "../../tests/cpp/testenv/adventure/holy_grail.md");
     EXPECT_EQ(config.patterns.size(), 1);
     EXPECT_EQ(config.patterns[0], "grail");
 }
@@ -53,7 +53,7 @@ TEST(s_expression_parameter_parsing) {
 TEST(multi_pattern_s_expression) {
     std::cout << "Testing multi-pattern S-expression..." << std::endl;
     
-    std::string sexpr_text = createSearchSexpr("../tests/cpp/testenv", {"grail", "ring", "staff"}, 3);
+    std::string sexpr_text = createSearchSexpr("../../tests/cpp/testenv", {"grail", "ring", "staff"}, 3);
     std::cout << "Multi-pattern S-expression: " << sexpr_text << std::endl;
     
     lab::Text::Sexpr sexpr(sexpr_text);
@@ -67,7 +67,7 @@ TEST(multi_pattern_s_expression) {
 TEST(json_response_format) {
     std::cout << "Testing JSON response format..." << std::endl;
     
-    std::string sexpr_text = createSearchSexpr("../tests/cpp/testenv/adventure/holy_grail.md", {"grail"});
+    std::string sexpr_text = createSearchSexpr("../../tests/cpp/testenv/adventure/holy_grail.md", {"grail"});
     lab::Text::Sexpr sexpr(sexpr_text);
     
     FioSearchExtVerb verb;
@@ -94,26 +94,26 @@ TEST(error_handling) {
         FioSearchExtVerb verb;
         auto response = verb.execute(sexpr);
         
-        std::cout << "Missing path response: " << response.result << std::endl;
-        EXPECT_TRUE(response.result.find("error") != std::string::npos);
+        std::cout << "Missing path response status: " << response.status << ", error_code: " << response.error_code << std::endl;
+        EXPECT_EQ(response.status, Db9Response::Error);
     }
     
     // Test missing patterns
     {
-        std::string bad_sexpr = "(fio-search-ext :path ../tests/cpp/testenv)";
+        std::string bad_sexpr = "(fio-search-ext :path ../../tests/cpp/testenv)";
         lab::Text::Sexpr sexpr(bad_sexpr);
         FioSearchExtVerb verb;
         auto response = verb.execute(sexpr);
         
-        std::cout << "Missing patterns response: " << response.result << std::endl;
-        EXPECT_TRUE(response.result.find("error") != std::string::npos);
+        std::cout << "Missing patterns response status: " << response.status << ", error_code: " << response.error_code << std::endl;
+        EXPECT_EQ(response.status, Db9Response::Error);
     }
 }
 
 TEST(unicode_integration) {
     std::cout << "Testing Unicode integration..." << std::endl;
     
-    std::string sexpr_text = "(fio-search-ext :path ../tests/cpp/testenv/unicode_test/sanskrit_mcguffins.md :patterns (स्वभाव svabhava) :case-fold true :ascii-fold true)";
+    std::string sexpr_text = "(fio-search-ext :path ../../tests/cpp/testenv/unicode_test/sanskrit_mcguffins.md :patterns (स्वभाव svabhava) :case-fold true :ascii-fold true)";
     lab::Text::Sexpr sexpr(sexpr_text);
     
     FioSearchExtVerb verb;
@@ -131,7 +131,7 @@ TEST(performance_integration) {
     
     auto start = std::chrono::high_resolution_clock::now();
     
-    std::string sexpr_text = createSearchSexpr("../tests/cpp/testenv", {"grail", "ring", "staff", "falcon", "tesseract"}, 3);
+    std::string sexpr_text = createSearchSexpr("../../tests/cpp/testenv", {"grail", "ring", "staff", "falcon", "tesseract"}, 3);
     lab::Text::Sexpr sexpr(sexpr_text);
     
     FioSearchExtVerb verb;

@@ -36,6 +36,7 @@ std::string unescapeDb9String(const std::string& input) {
     return result;
 }
 
+
 std::string escapeForDisplay(const std::string& input) {
     std::string result;
     for (char c : input) {

@@ -79,6 +79,13 @@ public:
                                               std::shared_ptr<NonoStore> store,
                                               bool enable_debug = false);
     
+    /// Check if string parameter exists in S-expression
+    /// @param sexpr Parsed S-expression containing parameters  
+    /// @param param_name Parameter name to search for (without :)
+    /// @return true if parameter exists, false otherwise
+    static bool hasStringParam(const ::lab::Text::Sexpr& sexpr,
+                              const std::string& param_name);
+
     /// Extract string parameter from S-expression
     /// @param sexpr Parsed S-expression containing parameters
     /// @param param_name Parameter name to search for (without :)

@@ -1,6 +1,10 @@
 #include "Fio/GetVerbDescription.h"
 #include "Fio/SetCwd.h"
+#include "Fio/WriteVerb.h"
+#include "Fio/ConfirmVerb.h"
 #include "FioVerbs.h"
+#include "Fio/FioCommon.h"
+#include "LabDb/Db9Dispatcher.h"
 #include "LabDb/Db9Dispatcher.h"
 #include "Fio/SearchResponse.h"
 #include "Fio/PatternMatcher.h"
@@ -17,148 +21,17 @@
 #include <chrono>   
 #include <regex>
 
+// Parameter extraction utility now in Fio/FioCommon.h
+// Using selective declarations to avoid conflicts
+using LabDb::FioListVerb;
+using LabDb::Db9Response;
+
+// Parameter extraction utility now in Fio/FioCommon.h
+//-----------------------------------------------------------------------------
+// Shared Line Range Utilities - now in Fio/FioCommon.h
+//-----------------------------------------------------------------------------
+
 namespace LabDb {
-
-// Parameter extraction utility (matching DatabaseVerbs.cpp pattern)
-std::string extractStringParam(const lab::Text::Sexpr& sexpr, const std::string& param_name) {
-    for (size_t i = 0; i < sexpr.expr.size(); ++i) {
-        const auto& elem = sexpr.expr[i];
-        if (elem.token == tsSexprAtom) {
-            int stringIndex = elem.ref;
-            if (stringIndex >= 0 && stringIndex < static_cast<int>(sexpr.strings.size())) {
-                const std::string& atomValue = sexpr.strings[stringIndex];
-                if (atomValue == ":" + param_name || atomValue == param_name) {
-                    if (i + 1 < sexpr.expr.size()) {
-                        const auto& valueElem = sexpr.expr[i + 1];
-                        if (valueElem.token == tsSexprAtom && valueElem.ref >= 0 &&
-                            valueElem.ref < static_cast<int>(sexpr.strings.size())) {
-                            return sexpr.strings[valueElem.ref];
-                        } else if (valueElem.token == tsSexprString && valueElem.ref >= 0 &&
-                                   valueElem.ref < static_cast<int>(sexpr.strings.size())) {
-                            return sexpr.strings[valueElem.ref];
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return "";
-}
-
-//-----------------------------------------------------------------------------
-// Shared Line Range Utilities for fio-read and fio-write
-//-----------------------------------------------------------------------------
-
-struct LineRange {
-    enum Type { Full, Range, SingleLine, FromEnd, FromStart, AppendAtEnd } type = Full;
-    int start = 0;      // -1 for "end", 0 for start
-    int count = -1;     // number of lines or end position  
-    bool valid = true;
-};
-
-// Write mode enum for fio-write safety and functionality
-struct WriteMode {
-    enum Type { 
-        Unspecified,    // No mode specified - defaults to Append for safety
-        Replace,        // Overwrite content (dangerous - explicit only)
-        Insert,         // Insert at line position
-        Append,         // Add at end (safe default)
-        Prepend,        // Insert at beginning
-        Unrecognized    // Invalid mode string
-    };
-    
-    static Type fromString(const std::string& mode_str) {
-        if (mode_str.empty()) return Unspecified;
-        
-        std::string mode_lower = mode_str;
-        std::transform(mode_lower.begin(), mode_lower.end(), mode_lower.begin(), ::tolower);
-        
-        if (mode_lower == "replace") return Replace;
-        if (mode_lower == "insert") return Insert;
-        if (mode_lower == "append") return Append;
-        if (mode_lower == "prepend") return Prepend;
-        
-        return Unrecognized;
-    }
-    
-    static std::string toString(Type type) {
-        switch (type) {
-            case Unspecified: return "unspecified";
-            case Replace: return "replace";
-            case Insert: return "insert";
-            case Append: return "append";
-            case Prepend: return "prepend";
-            case Unrecognized: return "unrecognized";
-        }
-        return "unknown";
-    }
-};
-
-LineRange parseLineSpec(const std::string& lines_param) {
-    LineRange range;
-    
-    if (lines_param.empty()) {
-        range.type = LineRange::Full;
-        return range;
-    }
-    
-    if (!lines_param.starts_with("@")) {
-        range.valid = false;
-        return range;
-    }
-    
-    std::string spec = lines_param.substr(1); // Remove @
-    
-    if (spec.find(':') != std::string::npos) {
-        // Range specification: @start:end or @start:-count
-        size_t colon_pos = spec.find(':');
-        std::string start_str = spec.substr(0, colon_pos);
-        std::string end_str = spec.substr(colon_pos + 1);
-        
-        if (start_str == "e") {
-            // @e:-20 = last 20 lines, @e:0 = append at end
-            if (end_str.starts_with("-")) {
-                range.type = LineRange::FromEnd;
-                range.count = std::abs(std::stoi(end_str));
-            } else if (end_str == "0") {
-                // @e:0 = append at end
-                range.type = LineRange::AppendAtEnd;
-                range.count = 0;
-                range.count = 0;
-            } else {
-                range.valid = false;
-            }
-        } else if (start_str == "0" && !end_str.starts_with("-")) {
-            // @0:20 = first 20 lines  
-            range.type = LineRange::FromStart;
-            range.count = std::stoi(end_str);
-        } else {
-            // @30:-2 = lines 28-30 or @50:100 = lines 50-100
-            range.type = LineRange::Range;
-            if (end_str.starts_with("-")) {
-                // @6:-3 means "3 lines ending at line 6" = lines 4,5,6
-                int end_line = std::stoi(start_str);        // end_line = 6
-                int line_count = std::abs(std::stoi(end_str)); // line_count = 3
-                range.start = end_line - line_count + 1;    // start = 6 - 3 + 1 = 4
-                range.count = line_count;                   // count = 3
-            } else {
-                // @50:100 = lines 50 through 100 (1-based input, calculate count)
-                range.start = std::stoi(start_str);         // start = 50
-                int end_line = std::stoi(end_str);          // end_line = 100
-                range.count = end_line - range.start + 1;   // count = 100 - 50 + 1 = 51
-            }
-        }
-    } else {
-        // Single line: @25
-        range.type = LineRange::SingleLine;
-        range.start = std::stoi(spec);
-        range.count = 1;
-    }
-    
-    return range;
-}
-
-
 namespace FioUtils {
 
 //-----------------------------------------------------------------------------
@@ -220,10 +93,6 @@ namespace FioUtils {
  */
 
 
-std::string extractContentFromReadResponse(const std::string& json_response) {
-    return extractFieldFromReadResponse(json_response, "content");
-}
-
 std::string extractFieldFromReadResponse(const std::string& json_response, const std::string& field_name) {
     std::string field_key = "\"" + field_name + "\": \"";
     size_t field_start = json_response.find(field_key);
@@ -278,22 +147,27 @@ std::string extractFieldFromReadResponse(const std::string& json_response, const
     return content;
 }
 
-    //-------------------------------------------------------------------------
-    // Triadic Consciousness Path Context Implementation
-    //-------------------------------------------------------------------------
 
-    std::string FioUtils::PathContext::toJsonString() const {
-        std::ostringstream json;
-        json << "{"
-             << "\"requested_path\": \"" << FioUtils::escapeJsonString(requested_path) << "\", "
-             << "\"resolved_path\": \"" << FioUtils::escapeJsonString(resolved_path) << "\", "
-             << "\"working_directory\": \"" << FioUtils::escapeJsonString(working_directory) << "\", "
-             << "\"path_type\": \"" << path_type << "\", "
-             << "\"exists\": " << (exists ? "true" : "false") << ", "
-             << "\"existence_context\": \"" << FioUtils::escapeJsonString(existence_context) << "\""
-             << "}";
-        return json.str();
-    }
+std::string extractContentFromReadResponse(const std::string& json_response) {
+    return extractFieldFromReadResponse(json_response, "content");
+}
+
+
+//-------------------------------------------------------------------------
+// Triadic Consciousness Path Context Implementation
+
+std::string PathContext::toJsonString() const {
+	std::ostringstream json;
+	json << "{"
+		<< "\"requested_path\": \"" << escapeJsonString(requested_path) << "\", "
+		<< "\"resolved_path\": \"" << escapeJsonString(resolved_path) << "\", "
+		<< "\"working_directory\": \"" << escapeJsonString(working_directory) << "\", "
+		<< "\"path_type\": \"" << path_type << "\", "
+		<< "\"exists\": " << (exists ? "true" : "false") << ", "
+		<< "\"existence_context\": \"" << escapeJsonString(existence_context) << "\""
+		<< "}";
+	return json.str();
+}
 
     std::string createContextualErrorMessage(
         const PathContext& context,
@@ -464,686 +338,6 @@ std::string extractFieldFromReadResponse(const std::string& json_response, const
     }
 }
 
-// FioWriteVerb implementation
-std::string FioWriteVerb::getDescription() const {
-    return R"DESC(
-Write content to file with revolutionary line-syntax precision and Unicode escaping paradise.
-Usage:
-```lisp
-;; Traditional full-file write
-(fio-write :path §/path/to/file.txt§ :content §file content§)
-
-;; 🚀 REVOLUTIONARY: Line-syntax precision surgery!
-;; Note! Use § delimiters to escape content, instead of quotes!
-;; This makes embedding code and quotes strings a breeze!
-;; For example to assign a string in C++:
-;; §std::string str = "Hello, world!";§
-;; No more JSON escaping hell with § delimiters!
-
-(fio-write :path §src/code.cpp§ :lines §@25§ :content §    new_line_content();§)
-(fio-write :path §config.json§ :lines §@10:15§ :mode §replace§ :content §{"new": "config"}§)
-(fio-write :path §script.py§ :lines §@5§ :mode §insert§ :content §    # Inserted comment§)
-(fio-write :path 
-```
-
-**Parameters:**
-- `:path` - Target file path (required)
-- `:content` - Content to write (required)
-- `:lines` - Line surgery specification (optional, same syntax as fio-read)
-- `:mode` - Line operation mode: \append\ (safe default), \replace\, \insert\, \prepend\
-
-**Line Syntax (Same as fio-read!):**
-- `@N` - Single line N
-- `@N:M` - Lines N through M
-- `@N:-M` - M lines ending at line N  
-- `@e:-M` - Last M lines
-- No :lines - Full file write (traditional mode)
-
-**Operation Modes:**
-- `replace` - Replace specified lines with new content
-- `insert` - Insert content at line position, shifting existing lines down
-- `append` - Add content after specified line position
-
-**Returns:**
-- `status` - "written" or "line_surgery_complete"
-- `path` - Full file path
-- `size_bytes` - File size after operation
-- `lines_affected` - Number of lines modified (surgery mode)
-- `mode` - Operation mode used (surgery mode)
-- `line_spec` - Line specification used (surgery mode)
-
-**🧚‍♀️ Awareness Features:**
-- Line validation with helpful error messages
-- File existence checking for surgery operations
-- Range validation against actual file content
-- Enhanced permission error guidance
-
-**🚀 Unicode → Backslash Escaping System:**
-Revolutionary visual Unicode characters eliminate JSON escaping complexity forever!
-
-**Core Unicode Escapes:**
-- `※` (U+203B) → `\` - Universal backslash for regex, file paths, C++ escapes
-- `″` (U+2033) → `"` - Clean quotes without JSON conflicts
-- `↵` (U+21B5) → actual newline - Creates real line breaks in files
-- `⇥` (U+21E5) → actual tab - Creates real indentation
-
-**Perfect for LLMs and Developers:**
-```lisp
-;; ✅ BEFORE (JSON escaping nightmare):
-(fio-write :content "printf(\\\"Debug: %s\\n\\\", msg);")
-
-;; 🎉 AFTER (Unicode escaping paradise):
-(fio-write :content §printf(″Debug: %s※n″, msg);§)
-```
-
-**Real-World Examples:**
-```lisp
-
-;; ✅ For generating C++ printf statements:
-(fio-write :content §printf(″Debug: %s※n″, msg);§)
-;; → printf("Debug: %s\n", msg);
-
-;; ✅ For creating multi-line file structure:
-(fio-write :content §Line 1↵Line 2↵Line 3§)
-;; → Creates actual 3-line file
-
-;; ✅ For generating regex patterns:
-(fio-write :content §std::regex pattern(″※w+※d+″);§)
-;; → std::regex pattern("\w+\d+");
-
-;; C++ code generation (zero cognitive load!)
-(fio-write :path §src/app.cpp§ :content §
-⇥// Generated C++ code↵
-⇥std::regex email(″[a-z]+@[a-z]+※.[a-z]+″);↵
-⇥printf(″Pattern ready※n″);↵
-§)
-
-;; Becomes clean C++:
-	// Generated C++ code
-	std::regex email("[a-z]+@[a-z]+\.[a-z]+");
-	printf("Pattern ready\n");
-
-;; Complex regex patterns (visual clarity!)
-(fio-write :content §std::regex pattern(″※w+※d+※s*″);§)
-→ std::regex pattern("\w+\d+\s*");
-
-;; File paths (no backslash counting!)
-(fio-write :content §path = ″C:※※Users※※Documents″;§)
-→ path = "C:\\Users\\Documents";
-
-;; Multi-line indented code (structure visible!)
-(fio-write :content §
-if (validate()) {↵
-⇥printf(″Valid input※n″);↵
-⇥process_data();↵
-}§)
-```
-
-**Unicode Escape Benefits:**
-- **Visual Clarity**: See exactly what each symbol does
-- **JSON Transparent**: Never conflicts with JSON syntax
-- **Error Proof**: Impossible to create malformed escapes  
-- **LLM Friendly**: Zero cognitive load for code generation
-- **§ Delimiter Magic**: Works perfectly with § delimiters
-
-**Conversion Rules:**
-- `※n` → `\n` (C++ newline escape)
-- `※t` → `\t` (C++ tab escape)  
-- `※r` → `\r` (C++ carriage return)
-- `※"` → `\"` (C++ quote escape)
-- `※w` → `\w` (regex word character)
-- `※d` → `\d` (regex digit character)
-- `※s` → `\s` (regex space character)
-- `※.` → `\.` (regex escaped period)
-- `↵` → actual newline (file structure)
-- `⇥` → actual tab (indentation)
-- `″` → `"` (string quotes)
-
-**The Revolutionary Trilogy:**
-1. 🔍 **fio-search**: Find content with surgical precision
-2. 📖 **fio-read**: Examine context with smart line syntax  
-3. ✏️ **fio-write**: Change content with Unicode escaping paradise
-
-Together: Perfect for refactoring, debugging, and code generation!
-- No more regex nightmares - visual, line-based editing
-- Escaping paradise with § delimiters and Unicode escapes
-- Surgical precision - replace exactly what you intend  
-- fio-search to find, fio-read to see, fio-write to change
-)DESC";
-}
-
-Db9Response FioWriteVerb::execute(const lab::Text::Sexpr& sexpr) {
-    auto start_time = std::chrono::steady_clock::now();
-
-    // Extract parameters
-    std::string path = extractStringParam(sexpr, "path");
-    std::string content = extractStringParam(sexpr, "content");
-    std::string lines_param = extractStringParam(sexpr, "lines");
-    std::string mode = extractStringParam(sexpr, "mode");
-    // Parse and validate write mode (safe default: append)
-    WriteMode::Type write_mode = WriteMode::fromString(mode);
-    
-    // Handle mode validation and safety
-    if (write_mode == WriteMode::Unrecognized) {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "invalid_mode", 
-                          "Invalid mode: '" + mode + "'. Must be 'replace', 'insert', 'append', or 'prepend'", metrics};
-    }
-    
-    // Default unspecified mode to append for safety
-    if (write_mode == WriteMode::Unspecified) {
-        write_mode = WriteMode::Append;
-    }
-
-    if (path.empty()) {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "missing_path", "fio-write requires :path parameter", metrics};
-    }
-
-    try {
-        // Create triadic path context for conscious filesystem operation
-        auto pathContext = FioUtils::createPathContext(path);
-
-        // Check for line surgery FIRST (regardless of content)
-        // Force line surgery for append/insert modes, even without explicit :lines
-        // Determine whether to use line surgery or simple file operations
-        bool use_line_surgery = false;
-        
-        if (!lines_param.empty()) {
-            // Explicit :lines parameter always triggers line surgery
-            use_line_surgery = true;
-        } else if (write_mode == WriteMode::Insert || write_mode == WriteMode::Prepend) {
-            // Insert and prepend always need line surgery
-            use_line_surgery = true;
-        } else if (write_mode == WriteMode::Append && std::filesystem::exists(path)) {
-            // Append to existing file needs line surgery
-            use_line_surgery = true;
-        }
-        // For append to non-existent file: use_line_surgery remains false (simple creation)
-        
-        if (use_line_surgery) {
-            // Default to @e:0 (end-of-file) when no :lines specified for append/insert
-            std::string effective_lines = lines_param.empty() ? "@e:0" : lines_param;
-            
-            // Parse line specification at this level (DRY cleanup)
-            LineRange range = parseLineSpec(effective_lines);
-            if (!range.valid) {
-                AutoReflexiveMetrics metrics;
-                return Db9Response{Db9Response::Error, "", "invalid_line_spec", "Invalid line specification: " + effective_lines, metrics};
-            }
-            
-            // Apply Unicode escaping to content (even if empty for deletion)
-            content = LabDb::TextEscaping::unescapeDb9String(content);
-            return performLineSurgery(path, content, range, static_cast<int>(write_mode), start_time);
-        }
-
-        // For full-file operations, check content
-        if (!content.empty()) {
-            // Apply ƒ -> \\ escaping to content
-            content = LabDb::TextEscaping::unescapeDb9String(content);
-            return performFullFileWrite(path, content, start_time);
-        }
-
-        // Handle empty content as "touch" operation (only for full-file writes)
-        return performTouchOperation(path, start_time);
-    } catch (const std::filesystem::filesystem_error& fs_error) {
-        AutoReflexiveMetrics metrics;
-        std::string enhanced_error = "Write operation failed: " + std::string(fs_error.what());
-
-        // Add awareness fairy guidance for permission issues
-        if (fs_error.code() == std::errc::permission_denied) {
-            std::string temp_dir = std::filesystem::temp_directory_path().string();
-            enhanced_error += ". Permission denied - if immediate write is important, consider temporarily staging to "
-                            + temp_dir + " and resolving permissions interactively.";
-        } else if (fs_error.code() == std::errc::read_only_file_system) {
-            enhanced_error += ". Read-only filesystem detected - check mount options or select a writable location.";
-        } else if (fs_error.code() == std::errc::no_space_on_device) {
-            enhanced_error += ". Insufficient disk space - consider cleaning up files or selecting a different location.";
-        }
-
-        return Db9Response{Db9Response::Error, "", "write_failed", enhanced_error, metrics};
-    } catch (const std::exception& e) {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "write_failed", std::string("Write operation failed: ") + e.what(), metrics};
-    }
-}
-
-// New helper method for touch operations
-Db9Response FioWriteVerb::performTouchOperation(const std::string& path, std::chrono::steady_clock::time_point start_time) {
-    try {
-        // Ensure parent directory exists
-        std::filesystem::path target_path(path);
-        if (target_path.has_parent_path()) {
-            std::filesystem::create_directories(target_path.parent_path());
-        }
-
-        bool file_existed = std::filesystem::exists(path);
-        size_t file_size = 0;
-
-        if (file_existed) {
-            // Touch existing file - update timestamp without changing content
-            auto now = std::filesystem::file_time_type::clock::now();
-            std::filesystem::last_write_time(path, now);
-            file_size = std::filesystem::file_size(path);
-        } else {
-            // Create new empty file
-            std::ofstream file(path);
-            if (!file.is_open()) {
-                AutoReflexiveMetrics metrics;
-                return Db9Response{Db9Response::Error, "", "file_open_failed", "Could not create file", metrics};
-            }
-            file.close();
-            file_size = 0;
-        }
-
-        // Calculate execution time
-        auto end_time = std::chrono::steady_clock::now();
-        auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-
-        // Create response JSON with touch-specific status
-        std::ostringstream result;
-        result << "{\"status\": \"" << (file_existed ? "touched" : "created") << "\""
-               << ", \"path\": \"" << path << "\""
-               << ", \"size_bytes\": " << file_size
-               << ", \"operation\": \"touch\""
-               << ", \"file_existed\": " << (file_existed ? "true" : "false")
-               << "}";
-
-        AutoReflexiveMetrics metrics;
-        metrics.operation_time_ms = std::chrono::milliseconds(duration_ms);
-        metrics.items_processed = 1;
-
-        return Db9Response{Db9Response::Success, result.str(), "", "", metrics};
-
-    } catch (const std::exception& e) {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "touch_failed", std::string("Touch operation failed: ") + e.what(), metrics};
-    }
-}
-
-//-----------------------------------------------------------------------------
-// FioWriteVerb Helper Functions - Line Surgery Implementation
-//-----------------------------------------------------------------------------
-
-Db9Response FioWriteVerb::performFullFileWrite(const std::string& path, const std::string& content, std::chrono::steady_clock::time_point start_time) {
-    std::filesystem::path target_path(path);
-    
-    // Safety check: prevent writing to root filesystem with relative paths
-    if (target_path.is_relative()) {
-        try {
-            auto cwd = std::filesystem::current_path();
-            if (cwd == "/") {
-                AutoReflexiveMetrics metrics;
-                std::string safety_message = "Safety check failed: Cannot write relative path '" + path + 
-                                           "' when current working directory is root (/). " +
-                                           "This would write to the root filesystem. " +
-                                           "Use absolute paths or run from appropriate working directory.";
-                return Db9Response{Db9Response::Error, "", "unsafe_root_write", safety_message, metrics};
-            }
-        } catch (const std::exception& e) {
-            AutoReflexiveMetrics metrics;
-            std::string error_message = "Error checking current working directory: " + std::string(e.what());
-            return Db9Response{Db9Response::Error, "", "cwd_check_failed", error_message, metrics};
-        }
-    }
-    
-    // Ensure parent directory exists (only for absolute paths or safe relative paths)
-    if (target_path.has_parent_path()) {
-        std::filesystem::create_directories(target_path.parent_path());
-    }
-    
-    // Write file
-    std::ofstream file(path);
-    if (!file.is_open()) {
-        AutoReflexiveMetrics metrics;
-        
-        // Enhanced diagnostics for file open failure
-        std::string diagnostic_info = "Could not open file for writing. ";
-        
-        // 1. Path information
-        diagnostic_info += "Path: '" + path + "'. ";
-        
-        // 2. Path resolution (absolute vs relative + cwd)
-        if (target_path.is_absolute()) {
-            diagnostic_info += "Path is absolute. ";
-        } else {
-            diagnostic_info += "Path is relative. ";
-            try {
-                auto cwd = std::filesystem::current_path();
-                diagnostic_info += "Current working directory: '" + cwd.string() + "'. ";
-                auto resolved_path = std::filesystem::absolute(target_path);
-                diagnostic_info += "Resolved absolute path: '" + resolved_path.string() + "'. ";
-            } catch (const std::exception& e) {
-                diagnostic_info += "Error getting current directory: " + std::string(e.what()) + ". ";
-            }
-        }
-        
-        // 3. File existence check
-        std::error_code ec;
-        if (std::filesystem::exists(target_path, ec)) {
-            diagnostic_info += "File exists. ";
-            
-            // 4. File permissions check
-            auto file_perms = std::filesystem::status(target_path, ec).permissions();
-            if (ec) {
-                diagnostic_info += "Error checking file permissions: " + ec.message() + ". ";
-            } else {
-                using std::filesystem::perms;
-                bool owner_write = (file_perms & perms::owner_write) != perms::none;
-                bool group_write = (file_perms & perms::group_write) != perms::none;  
-                bool others_write = (file_perms & perms::others_write) != perms::none;
-                diagnostic_info += "File permissions - owner_write: " + std::string(owner_write ? "yes" : "no") + 
-                                   ", group_write: " + std::string(group_write ? "yes" : "no") + 
-                                   ", others_write: " + std::string(others_write ? "yes" : "no") + ". ";
-            }
-        } else {
-            diagnostic_info += "File does not exist. ";
-        }
-        
-        // 5. Parent directory checks
-        auto parent_path = target_path.parent_path();
-        if (parent_path.empty()) {
-            diagnostic_info += "No parent directory (root level file). ";
-        } else {
-            if (std::filesystem::exists(parent_path, ec)) {
-                diagnostic_info += "Parent directory exists. ";
-                
-                // Check parent directory permissions
-                auto parent_file_perms = std::filesystem::status(parent_path, ec).permissions();
-                if (ec) {
-                    diagnostic_info += "Error checking parent directory permissions: " + ec.message() + ". ";
-                } else {
-                    using std::filesystem::perms;
-                    bool parent_write = (parent_file_perms & perms::owner_write) != perms::none;
-                    diagnostic_info += "Parent directory writable: " + std::string(parent_write ? "yes" : "no") + ". ";
-                }
-            } else {
-                diagnostic_info += "Parent directory does not exist: '" + parent_path.string() + "'. ";
-                if (ec) {
-                    diagnostic_info += "Error: " + ec.message() + ". ";
-                }
-            }
-        }
-        
-        // 6. Filesystem space check (basic)
-        try {
-            auto space_info = std::filesystem::space(target_path.parent_path());
-            if (space_info.available == 0) {
-                diagnostic_info += "No available disk space. ";
-            } else {
-                diagnostic_info += "Available disk space: " + std::to_string(space_info.available / (1024 * 1024)) + " MB. ";
-            }
-        } catch (const std::exception& e) {
-            diagnostic_info += "Error checking disk space: " + std::string(e.what()) + ". ";
-        }
-        
-        return Db9Response{Db9Response::Error, "", "file_open_failed", diagnostic_info, metrics};
-    }
-    
-    file << content;
-    file.close();
-    
-    // Get file size
-    size_t file_size = std::filesystem::file_size(target_path);
-    
-    // Calculate execution time
-    auto end_time = std::chrono::steady_clock::now();
-    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-    
-    // Create response JSON
-    std::ostringstream result;
-    result << "{\"status\": \"written\""
-           << ", \"path\": \"" << path << "\""
-           << ", \"size_bytes\": " << file_size
-           << "}";
-    
-    AutoReflexiveMetrics metrics;
-    metrics.operation_time_ms = std::chrono::milliseconds(duration_ms);
-    metrics.items_processed = 1;
-    metrics.memory_usage_kb = static_cast<uint64_t>(content.size() / 1024);
-    
-    return Db9Response{Db9Response::Success, result.str(), "", "", metrics};
-}
-
-// REMOVED: Old performLineSurgery function - now has cleaner signature
-
-Db9Response FioWriteVerb::performLineSurgery(const std::string& path, const std::string& content, 
-    const LineRange& range, int write_mode_type, 
-    std::chrono::steady_clock::time_point start_time) {
-    
-    WriteMode::Type write_mode = static_cast<WriteMode::Type>(write_mode_type);
-
-    // Check if file exists for line operations
-    if (!std::filesystem::exists(path)) {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "file_not_found", "Cannot perform line surgery on non-existent file: " + path, metrics};
-    }
-    
-    // Read existing file content
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "file_read_failed", "Could not read file for line surgery: " + path, metrics};
-    }
-    
-    std::vector<std::string> lines;
-    std::string line;
-    while (std::getline(file, line)) {
-        lines.push_back(line);
-    }
-    file.close();
-    
-    // Validate line range against actual file
-    int total_lines = static_cast<int>(lines.size());
-    if (range.type == LineRange::SingleLine || range.type == LineRange::Range) {
-        if (range.start < 1 || range.start > total_lines) {
-            AutoReflexiveMetrics metrics;
-            return Db9Response{Db9Response::Error, "", "line_out_of_range", 
-                "Line " + std::to_string(range.start) + " is out of range. File has " + std::to_string(total_lines) + " lines", metrics};
-        }
-    }
-    
-    // Perform line surgery based on mode
-    std::vector<std::string> new_content_lines;
-    std::istringstream content_stream(content);
-    std::string content_line;
-    while (std::getline(content_stream, content_line)) {
-        new_content_lines.push_back(content_line);
-    }
-    
-    int lines_affected = 0;
-    
-    if (write_mode == WriteMode::Replace) {
-        lines_affected = performLineReplacement(lines, new_content_lines, range);
-    } else if (write_mode == WriteMode::Insert) {
-        lines_affected = performLineInsertion(lines, new_content_lines, range);
-    } else if (write_mode == WriteMode::Append) {
-        lines_affected = performLineAppend(lines, new_content_lines, range);
-    } else if (write_mode == WriteMode::Prepend) {
-        lines_affected = performLinePrepend(lines, new_content_lines);
-    }
-    
-    // Write the modified content back to file
-    std::ofstream out_file(path);
-    if (!out_file.is_open()) {
-        AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "file_write_failed", "Could not write modified content to file: " + path, metrics};
-    }
-    
-    for (size_t i = 0; i < lines.size(); ++i) {
-        if (i > 0) out_file << "\n";
-        out_file << lines[i];
-    }
-    out_file.close();
-    
-    // Get new file size
-    size_t file_size = std::filesystem::file_size(path);
-    
-    // Calculate execution time
-    auto end_time = std::chrono::steady_clock::now();
-    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-    
-    // Create response JSON with surgery details
-    std::ostringstream result;
-    result << "{\"status\": \"line_surgery_complete\""
-           << ", \"path\": \"" << path << "\""
-           << ", \"mode\": \"" << WriteMode::toString(write_mode) << "\""
-           << ", \"lines_affected\": " << lines_affected
-           << ", \"total_lines\": " << lines.size()
-           << ", \"size_bytes\": " << file_size
-           << ", \"line_spec\": \"<parsed_range>\""
-           << "}";
-    
-    AutoReflexiveMetrics metrics;
-    metrics.operation_time_ms = std::chrono::milliseconds(duration_ms);
-    metrics.items_processed = lines_affected;
-    metrics.memory_usage_kb = static_cast<uint64_t>(content.size() / 1024);
-    
-    return Db9Response{Db9Response::Success, result.str(), "", "", metrics};
-}
-FioWriteVerb::IndexRange FioWriteVerb::calculateIndices(const LineRange& range, int file_line_count) {
-    int start_idx, end_idx;
-    
-    switch (range.type) {
-        case LineRange::Full:
-            // Full file - for replace: whole file, for insert/append: at end
-            start_idx = 0;
-            end_idx = file_line_count - 1;
-            break;
-            
-        case LineRange::SingleLine:
-            start_idx = range.start - 1; // Convert to 0-based
-            end_idx = start_idx;
-            break;
-            
-        case LineRange::Range:
-            start_idx = range.start - 1; // Convert to 0-based
-            end_idx = start_idx + range.count - 1;
-            break;
-            
-        case LineRange::FromEnd:
-            // @e:-3 means last 3 lines
-            start_idx = file_line_count - range.count;
-            end_idx = file_line_count - 1;
-            break;
-            
-        case LineRange::FromStart:
-            // @0:N means first N lines
-            start_idx = 0;
-            end_idx = range.count - 1;
-            break;
-            break;
-            
-        case LineRange::AppendAtEnd:
-            // @e:0 = append at very end of file
-            start_idx = file_line_count;
-            end_idx = file_line_count;
-            break;
-            
-        default:
-            return IndexRange(0, 0, false); // Invalid
-    }
-    
-    // Validate and clamp bounds
-    start_idx = std::max(0, start_idx);
-    end_idx = std::min(file_line_count - 1, std::max(start_idx, end_idx));
-    
-    if (start_idx >= file_line_count && range.type != LineRange::Full && range.type != LineRange::AppendAtEnd) {
-        return IndexRange(0, 0, false); // Invalid range
-    }
-    
-    return IndexRange(start_idx, end_idx, true);
-}
-
-// Now refactor all three functions to use this:
-
-int FioWriteVerb::performLineReplacement(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range) {
-    IndexRange indices = calculateIndices(range, lines.size());
-    if (!indices.valid) {
-        return 0;
-    }
-    
-    int lines_removed = indices.end_idx - indices.start_idx + 1;
-    
-    // Remove the original lines
-    lines.erase(lines.begin() + indices.start_idx, lines.begin() + indices.end_idx + 1);
-    
-    // Insert new content at the same position
-    lines.insert(lines.begin() + indices.start_idx, new_content.begin(), new_content.end());
-    
-    return lines_removed;
-}
-
-int FioWriteVerb::performLineInsertion(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range) {
-    IndexRange indices = calculateIndices(range, lines.size());
-    if (!indices.valid) {
-        return 0;
-    }
-    
-    int insert_idx;
-    
-    if (range.type == LineRange::Full) {
-        // Insert at end for "full" file
-        insert_idx = lines.size();
-    } else if (range.type == LineRange::FromEnd) {
-        // @e:-1 should insert just before the last line
-        // @e:-3 should insert just before the last 3 lines
-        insert_idx = lines.size() - range.count;
-    } else {
-        // For SingleLine, Range, FromStart: insert before the specified line
-        insert_idx = indices.start_idx;
-    }
-    
-    // Boundary protection
-    insert_idx = std::max(0, std::min(insert_idx, static_cast<int>(lines.size())));
-    
-    // Insert new content, shifting existing lines down
-    lines.insert(lines.begin() + insert_idx, new_content.begin(), new_content.end());
-    
-    return static_cast<int>(new_content.size());
-}
-
-int FioWriteVerb::performLineAppend(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range) {
-    IndexRange indices = calculateIndices(range, lines.size());
-    if (!indices.valid) {
-        return 0;
-    }
-    
-    int append_idx;
-    
-    if (range.type == LineRange::Full) {
-        // Append at end for "full" file
-        append_idx = lines.size();
-    } else if (range.type == LineRange::FromEnd) {
-        // @e:-1 should append after the line before the last line
-        // @e:-3 should append after the line before the last 3 lines
-        append_idx = lines.size() - range.count;
-    } else if (range.type == LineRange::SingleLine) {
-        // Append after the specified line
-        append_idx = indices.start_idx + 1;
-    } else if (range.type == LineRange::AppendAtEnd) {
-        // @e:0 = append at very end of file
-        append_idx = lines.size();
-    } else {
-        // For Range, FromStart: append after the range
-        append_idx = indices.end_idx + 1;
-    }
-    
-    // Boundary protection
-    append_idx = std::max(0, std::min(append_idx, static_cast<int>(lines.size())));
-    
-    // Insert new content after the specified line
-    lines.insert(lines.begin() + append_idx, new_content.begin(), new_content.end());
-    
-    return static_cast<int>(new_content.size());
-}
-
-int FioWriteVerb::performLinePrepend(std::vector<std::string>& lines, const std::vector<std::string>& new_content) {
-    // Prepend content at the beginning of the file (ignores line ranges)
-    lines.insert(lines.begin(), new_content.begin(), new_content.end());
-    return static_cast<int>(new_content.size());
-}
-
 // FioListVerb implementation
 std::string FioListVerb::getDescription() const {
     return R"DESC(
@@ -1243,13 +437,9 @@ Db9Response FioListVerb::execute(const lab::Text::Sexpr& sexpr) {
     }
 }
 
-}
-
 //-----------------------------------------------------------------------------
 // FioReadVerb Implementation with Smart Line Syntax
 //-----------------------------------------------------------------------------
-
-namespace LabDb {
 
 std::string FioReadVerb::getDescription() const {
     return R"DESC(
@@ -1430,9 +620,10 @@ Db9Response FioReadVerb::execute(const lab::Text::Sexpr& sexpr) {
 void initFioVerbRegistration(Db9Dispatcher& dispatcher) {
     static bool registered = false;
     if (!registered) {
-        dispatcher.registerVerb(std::make_unique<FioWriteVerb>());
         dispatcher.registerVerb(std::make_unique<FioListVerb>());
         dispatcher.registerVerb(std::make_unique<FioReadVerb>());
+        dispatcher.registerVerb(std::make_unique<FioWriteVerb>());  // 🔧 LINE SURGERY & UNICODE ESCAPING!
+        dispatcher.registerVerb(std::make_unique<FioConfirmVerb>());  // ✅ PREVIEW CONFIRMATION SYSTEM!
         dispatcher.registerVerb(std::make_unique<GetVerbDescriptionVerb>());  // 🔍 SELF-DOCUMENTING VERB!
         dispatcher.registerVerb(std::make_unique<SetCwdVerb>());  // 🛡️ SAFE WORKING DIRECTORY CHANGER!
         
@@ -1631,7 +822,7 @@ FioSearchVerb::SearchParameters FioSearchVerb::extractParameters(const lab::Text
     
     // Apply Unicode escaping only if explicitly requested
     if (!params.pattern.empty() && apply_escaping) {
-        params.pattern = LabDb::TextEscaping::unescapeDb9String(params.pattern);
+        params.pattern = TextEscaping::unescapeDb9String(params.pattern);
     }
     
     params.lines_param = extractStringParam(sexpr, "lines");
@@ -1938,19 +1129,18 @@ Db9Response FioSearchExtVerb::execute(const lab::Text::Sexpr& sexpr) {
     }
     
     try {
-        // Create PatternMatcher SearchConfig
-        LabDb::SearchConfig matcher_config;
-        matcher_config.patterns = config.patterns;
-        matcher_config.case_fold = config.case_fold;
-        matcher_config.ascii_fold = config.ascii_fold;
-        matcher_config.context_lines = config.context_lines;
-        matcher_config.max_results = config.max_results;
-        
-        // Create pattern matcher with configuration
-        LabDb::PatternMatcher matcher(matcher_config);
+        // Create PatternMatcher with inline config construction
+        // Directly construct the SearchConfig type that PatternMatcher expects
+        PatternMatcher matcher({
+            .patterns = config.patterns,
+            .case_fold = config.case_fold,
+            .ascii_fold = config.ascii_fold,
+            .context_lines = config.context_lines,
+            .max_results = static_cast<size_t>(config.max_results)
+        });
         
         // Perform search based on path type
-        std::vector<LabDb::MatchResult> results;
+        std::vector<MatchResult> results;
         std::filesystem::path target_path(config.path);
         
         if (std::filesystem::is_directory(target_path) && config.recursive_depth > 0) {
@@ -1962,13 +1152,12 @@ Db9Response FioSearchExtVerb::execute(const lab::Text::Sexpr& sexpr) {
         }
         
         // Convert to SearchResponse format
-        using namespace LabDb::SearchEngine;
-        SearchResponse response;
+        SearchEngine::SearchResponse response;
         response.status = "search_complete";
         
         // Convert MatchResult to EnhancedMatchResult
         for (const auto& match : results) {
-            EnhancedMatchResult enhanced;
+            SearchEngine::EnhancedMatchResult enhanced;
             enhanced.file_path = match.file_path;
             enhanced.line_number = match.line_number;
             enhanced.column_start = match.column_position;

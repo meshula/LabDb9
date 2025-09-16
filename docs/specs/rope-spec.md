@@ -6,7 +6,7 @@
 
 ## Overview
 
-The **Rope System** extends LabDb9's triadic consciousness framework with ordered sequences of entities that support efficient navigation, insertion, and thematic organization. Ropes enable scholars to create contemplative pathways through knowledge graphs, maintaining semantic relationships while providing linear navigation.
+The **Rope System** extends LabDb9's triadic self-reflection and awareness framework with ordered sequences of entities that support efficient navigation, insertion, and thematic organization. Ropes enable scholars to create contemplative pathways through knowledge graphs, maintaining semantic relationships while providing linear navigation.
 
 ## Motivation
 
@@ -311,7 +311,7 @@ private:
 - **Inconsistent Adjacency**: Rebuild from rope storage
 - **Transaction Failures**: Automatic rollback with detailed logging
 
-## Integration with Triadic Consciousness
+## Integration with Triadic Self-Reflection and Awareness
 
 Ropes enhance the Motion/Memory/Field framework:
 
@@ -426,7 +426,7 @@ public:
 
 ## Conclusion
 
-The Rope System transforms LabDb9 from a static knowledge graph into a **dynamic contemplative environment**. By providing ordered sequences with efficient navigation, scholars can create personalized pathways through complex domains while maintaining the triadic consciousness principles that make LabDb9 unique.
+The Rope System transforms LabDb9 from a static knowledge graph into a **dynamic contemplative environment**. By providing ordered sequences with efficient navigation, scholars can create personalized pathways through complex domains while maintaining the triadic self-reflection and awareness principles that make LabDb9 unique.
 
 The system's emphasis on **relative insertion**, **O(1) navigation**, and **persistent storage** ensures that contemplative study flows are never interrupted by technical limitations. Integration with the existing S-expression interface maintains consistency with LabDb9's philosophical foundations while adding powerful new capabilities for knowledge exploration.
 

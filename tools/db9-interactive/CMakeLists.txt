@@ -40,9 +40,6 @@ find_library(LMDB_LIBRARY
     PATHS
         ${LABDB_ROOT}/build
         ${LABDB_ROOT}/build/_deps/lmdb-build
-        /usr/local/lib
-        /opt/homebrew/lib
-        /usr/lib
 )
 
 if(NOT LMDB_INCLUDE_DIR OR NOT LMDB_LIBRARY)

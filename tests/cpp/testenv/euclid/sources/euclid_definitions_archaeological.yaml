@@ -1,0 +1,1089 @@
+- volume: 1
+  title: Book 1 Definitions
+  xml-line: 133
+  definitions:
+  - book: 1
+    num: 1
+    num_display: '1'
+    xml-line: 134
+    text: σημεῖόν ἐστιν, οὗ μέρος οὐθέν.
+    betacode: shmei=o/n e)stin, ou(= me/ros ou)qe/n.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']
+  - book: 1
+    num: 2
+    num_display: '2'
+    xml-line: 135
+    text: γραμμὴ δὲ μῆκος ἀπλατές.
+    betacode: grammh\ de\ mh=kos a)plate/s.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='2']
+  - book: 1
+    num: 3
+    num_display: '3'
+    xml-line: 136
+    text: γραμμῆς δὲ πέρατα σημεῖα.
+    betacode: grammh=s de\ pe/rata shmei=a.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='3']
+  - book: 1
+    num: 4
+    num_display: '4'
+    xml-line: 137
+    text: εὐθεῖα γραμμή ἐστιν, ἥτις ἐξ ἴσου τοῖς ἐφ’ ἑαυτῆς σημείοις κεῖται.
+    betacode: "eu)qei=a grammh/ e)stin, h(/tis e)c i)/sou toi=s e)f' e(auth=s \nshmei/ois\
+      \ kei=tai."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='4']
+  - book: 1
+    num: 5
+    num_display: '5'
+    xml-line: 139
+    text: ἐπιφάνεια δέ ἐστιν, ὃ μῆκος καὶ πλάτος μόνον ἔχει.
+    betacode: e)pifa/neia de/ e)stin, o(\ mh=kos kai\ pla/tos mo/non e)/xei.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='5']
+  - book: 1
+    num: 6
+    num_display: '6'
+    xml-line: 140
+    text: ἐπιφανείας δὲ πέρατα γραμμαί.
+    betacode: e)pifanei/as de\ pe/rata grammai/.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='6']
+  - book: 1
+    num: 7
+    num_display: '7'
+    xml-line: 141
+    text: ἐπίπεδος ἐπιφάνειά ἐστιν, ἥτις ἐξ ἴσου ταῖς ἐφ’ ἑαυτῆς εὐθείαις κεῖται.
+    betacode: "e)pi/pedos e)pifa/neia/ e)stin, h(/tis e)c i)/sou tai=s e)f' \ne(auth=s\
+      \ eu)qei/ais kei=tai."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='7']
+  - book: 1
+    num: 8
+    num_display: '8'
+    xml-line: 143
+    text: ἐπίπεδος δὲ γωνία ἐστὶν ἡ ἐν ἐπιπέδῳ δύο γραμμῶν ἁπτομένων ἀλλήλων καὶ μὴ
+      ἐπ’ εὐθείας κειμένων πρὸς ἀλλήλας τῶν γραμμῶν κλίσις.
+    betacode: "e)pi/pedos de\\ gwni/a e)sti\\n h( e)n e)pipe/dw| du/o grammw=n \n\
+      a(ptome/nwn a)llh/lwn kai\\ mh\\ e)p' eu)qei/as keime/nwn pro\\s \na)llh/las\
+      \ tw=n grammw=n kli/sis."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='8']
+  - book: 1
+    num: 9
+    num_display: '9'
+    xml-line: 146
+    text: ὅταν δὲ αἱ περιέχουσαι τὴν γωνίαν γραμμαὶ εὐθεῖαι ὦσιν, εὐθύγραμμος καλεῖται
+      ἡ γωνία.
+    betacode: "o(/tan de\\ ai( perie/xousai th\\n gwni/an grammai\\ eu)qei=ai \nw)=sin,\
+      \ eu)qu/grammos kalei=tai h( gwni/a."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='9']
+  - book: 1
+    num: 10
+    num_display: '10'
+    xml-line: 148
+    text: ὅταν δὲ εὐθεῖα ἐπ’ εὐθεῖαν σταθεῖσα τὰς ἐφεξῆς γωνίας ἴσας ἀλλήλαις ποιῇ,
+      ὀρθὴ ἑκατέρα τῶν ἴσων γωνιῶν ἐστι, καὶ ἡ ἐφεστηκυῖα εὐθεῖα κάθετος καλεῖται,
+      ἐφ’ ἣν ἐφέστηκεν.
+    betacode: "o(/tan de\\ eu)qei=a e)p' eu)qei=an staqei=sa ta\\s e)fech=s \ngwni/as\
+      \ i)/sas a)llh/lais poih=|, o)rqh\\ e(kate/ra tw=n i)/swn gwniw=n \ne)sti, kai\\\
+      \ h( e)festhkui=a eu)qei=a ka/qetos kalei=tai, \ne)f' h(\\n e)fe/sthken."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='10']
+  - book: 1
+    num: 11
+    num_display: '11'
+    xml-line: 152
+    text: ἀμβλεῖα γωνία ἐστὶν ἡ μείζων ὀρθῆς.
+    betacode: a)mblei=a gwni/a e)sti\n h( mei/zwn o)rqh=s.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='11']
+  - book: 1
+    num: 12
+    num_display: '12'
+    xml-line: 153
+    text: ὀξεῖα δὲ ἡ ἐλάσσων ὀρθῆς.
+    betacode: o)cei=a de\ h( e)la/sswn o)rqh=s.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='12']
+  - book: 1
+    num: 13
+    num_display: '13'
+    xml-line: 154
+    text: ὅρος ἐστίν, ὅ τινός ἐστι πέρας.
+    betacode: o(/ros e)sti/n, o(/ tino/s e)sti pe/ras.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='13']
+  - book: 1
+    num: 14
+    num_display: '14'
+    xml-line: 155
+    text: σχῆμά ἐστι τὸ ὑπό τινος ἤ τινων ὅρων περιεχόμενον.
+    betacode: sxh=ma/ e)sti to\ u(po/ tinos h)/ tinwn o(/rwn periexo/menon.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='14']
+  - book: 1
+    num: 15
+    num_display: '15'
+    xml-line: 156
+    text: κύκλος ἐστὶ σχῆμα ἐπίπεδον ὑπὸ μιᾶς γραμμῆς περιεχόμενον ἣ καλεῖται περιφέρεια,
+      πρὸς ἣν ἀφ’ ἑνὸς σημείου τῶν ἐντὸς τοῦ σχήματος κειμένων πᾶσαι αἱ προσπίπτουσαι
+      εὐθεῖαι πρὸς τὴν τοῦ κύκλου περιφέρειαν ἴσαι ἀλλήλαις εἰσίν.
+    betacode: "ku/klos e)sti\\ sxh=ma e)pi/pedon u(po\\ mia=s grammh=s \nperiexo/menon\
+      \ h(\\ kalei=tai perife/reia, pro\\s h(\\n a)f' e(no\\s \nshmei/ou tw=n e)nto\\\
+      s tou= sxh/matos keime/nwn pa=sai ai( \nprospi/ptousai eu)qei=ai pro\\s th\\\
+      n tou= ku/klou perife/reian \ni)/sai a)llh/lais ei)si/n."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='15']
+  - book: 1
+    num: 16
+    num_display: '16'
+    xml-line: 161
+    text: κέντρον δὲ τοῦ κύκλου τὸ σημεῖον καλεῖται.
+    betacode: ke/ntron de\ tou= ku/klou to\ shmei=on kalei=tai.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='16']
+  - book: 1
+    num: 17
+    num_display: '17'
+    xml-line: 162
+    text: διάμετρος δὲ τοῦ κύκλου ἐστὶν εὐθεῖά τις διὰ τοῦ κέντρου ἠγμένη καὶ περατουμένη
+      ἐφ’ ἑκάτερα τὰ μέρη ὑπὸ τῆς τοῦ κύκλου περιφερείας, ἥτις καὶ δίχα τέμνει τὸν
+      κύκλον.
+    betacode: "dia/metros de\\ tou= ku/klou e)sti\\n eu)qei=a/ tis dia\\ tou= \nke/ntrou\
+      \ h)gme/nh kai\\ peratoume/nh e)f' e(ka/tera ta\\ me/rh \nu(po\\ th=s tou= ku/klou\
+      \ periferei/as, h(/tis kai\\ di/xa te/mnei to\\n \nku/klon."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='17']
+  - book: 1
+    num: 18
+    num_display: '18'
+    xml-line: 166
+    text: ἡμικύκλιον δέ ἐστι τὸ περιεχόμενον σχῆμα ὑπό τε τῆς διαμέτρου καὶ τῆς ἀπολαμβανομένης
+      ὑπ’ αὐτῆς περιφερείας. κέντρον δὲ τοῦ ἡμικυκλίου τὸ αὐτό, ὃ καὶ τοῦ κύκλου ἐστίν.
+    betacode: "h(miku/klion de/ e)sti to\\ periexo/menon sxh=ma u(po/ te \nth=s diame/trou\
+      \ kai\\ th=s a)polambanome/nhs u(p' au)th=s periferei/as. \nke/ntron de\\ tou=\
+      \ h(mikukli/ou to\\ au)to/, o(\\ kai\\ tou= \nku/klou e)sti/n."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='18']
+  - book: 1
+    num: 19
+    num_display: '19'
+    xml-line: 170
+    text: σχήματα εὐθύγραμμά ἐστι τὰ ὑπὸ εὐθειῶν περιεχόμενα, τρίπλευρα μὲν τὰ ὑπὸ
+      τριῶν, τετράπλευρα δὲ τὰ ὑπὸ τεσσάρων, πολύπλευρα δὲ τὰ ὑπὸ πλειόνων ἢ τεσσάρων
+      εὐθειῶν περιεχόμενα.
+    betacode: "sxh/mata eu)qu/gramma/ e)sti ta\\ u(po\\ eu)qeiw=n periexo/mena, \n\
+      tri/pleura me\\n ta\\ u(po\\ triw=n, tetra/pleura de\\ ta\\ \nu(po\\ tessa/rwn,\
+      \ polu/pleura de\\ ta\\ u(po\\ pleio/nwn h)\\ tessa/rwn \neu)qeiw=n periexo/mena."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='19']
+  - book: 1
+    num: 20
+    num_display: '20'
+    xml-line: 174
+    text: τῶν δὲ τριπλεύρων σχημάτων ἰσόπλευρον μὲν τρίγωνόν ἐστι τὸ τὰς τρεῖς ἴσας
+      ἔχον πλευράς, ἰσοσκελὲς δὲ τὸ τὰς δύο μόνας ἴσας ἔχον πλευράς, σκαληνὸν δὲ τὸ
+      τὰς τρεῖς ἀνίσους ἔχον πλευράς.
+    betacode: "tw=n de\\ tripleu/rwn sxhma/twn i)so/pleuron me\\n tri/gwno/n \ne)sti\
+      \ to\\ ta\\s trei=s i)/sas e)/xon pleura/s, i)soskele\\s de\\ \nto\\ ta\\s du/o\
+      \ mo/nas i)/sas e)/xon pleura/s, skalhno\\n de\\ to\\ ta\\s \ntrei=s a)ni/sous\
+      \ e)/xon pleura/s."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='20']
+  - book: 1
+    num: 21
+    num_display: '21'
+    xml-line: 178
+    text: ἔτι δὲ τῶν τριπλεύρων σχημάτων ὀρθογώνιον μὲν τρίγωνόν ἐστι τὸ ἔχον ὀρθὴν
+      γωνίαν, ἀμβλυγώνιον δὲ τὸ ἔχον ἀμβλεῖαν γωνίαν, ὀξυγώνιον δὲ τὸ τὰς τρεῖς ὀξείας
+      ἔχον γωνίας.
+    betacode: "e)/ti de\\ tw=n tripleu/rwn sxhma/twn o)rqogw/nion me\\n \ntri/gwno/n\
+      \ e)sti to\\ e)/xon o)rqh\\n gwni/an, a)mblugw/nion de\\ to\\  \ne)/xon a)mblei=an\
+      \ gwni/an, o)cugw/nion de\\ to\\ ta\\s trei=s o)cei/as \ne)/xon gwni/as."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='21']
+  - book: 1
+    num: 22
+    num_display: '22'
+    xml-line: 182
+    text: τῶν δὲ τετραπλεύρων σχημάτων τετράγωνον μέν ἐστιν, ὃ ἰσόπλευρόν τέ ἐστι
+      καὶ ὀρθογώνιον, ἑτερόμηκες δέ, ὃ ὀρθογώνιον μέν, οὐκ ἰσόπλευρον δέ, ῥόμβος δέ,
+      ὃ ἰσόπλευρον μέν, οὐκ ὀρθογώνιον δέ, ῥομβοειδὲς δὲ τὸ τὰς ἀπεναντίον πλευράς
+      τε καὶ γωνίας ἴσας ἀλλήλαις ἔχον, ὃ οὔτε ἰσόπλευρόν ἐστιν οὔτε ὀρθογώνιον· τὰ
+      δὲ παρὰ ταῦτα τετράπλευρα τραπέζια καλείσθω.
+    betacode: "tw=n de\\ tetrapleu/rwn sxhma/twn tetra/gwnon me/n \ne)stin, o(\\ i)so/pleuro/n\
+      \ te/ e)sti kai\\ o)rqogw/nion, e(tero/mhkes \nde/, o(\\ o)rqogw/nion me/n,\
+      \ ou)k i)so/pleuron de/, r(o/mbos de/, o(\\ \ni)so/pleuron me/n, ou)k o)rqogw/nion\
+      \ de/, r(omboeide\\s de\\ to\\ ta\\s \na)penanti/on pleura/s te kai\\ gwni/as\
+      \ i)/sas a)llh/lais e)/xon, \no(\\ ou)/te i)so/pleuro/n e)stin ou)/te o)rqogw/nion:\
+      \ ta\\ de\\ para\\ \ntau=ta tetra/pleura trape/zia kalei/sqw."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='22']
+  - book: 1
+    num: 23
+    num_display: '23'
+    xml-line: 189
+    text: παράλληλοί εἰσιν εὐθεῖαι, αἵτινες ἐν τῷ αὐτῷ ἐπιπέδῳ οὖσαι καὶ ἐκβαλλόμεναι
+      εἰς ἄπειρον ἐφ’ ἑκάτερα τὰ μέρη ἐπὶ μηδέτερα συμπίπτουσιν ἀλλήλαις.
+    betacode: "para/llhloi/ ei)sin eu)qei=ai, ai(/tines e)n tw=| au)tw=| e)pipe/dw|\
+      \ \nou)=sai kai\\ e)kballo/menai ei)s a)/peiron e)f' e(ka/tera ta\\ \nme/rh\
+      \ e)pi\\ mhde/tera sumpi/ptousin a)llh/lais."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='23']
+- volume: 2
+  title: Book 2 Definitions
+  xml-line: 1477
+  definitions:
+  - book: 2
+    num: 1
+    num_display: '1'
+    xml-line: 1478
+    text: πᾶν παραλληλόγραμμον ὀρθογώνιον περιέχεσθαι λέγεται ὑπὸ δύο τῶν τὴν ὀρθὴν
+      γωνίαν περιεχουσῶν εὐθειῶν.
+    betacode: "pa=n parallhlo/grammon o)rqogw/nion perie/xesqai \nle/getai u(po\\\
+      \ du/o tw=n th\\n o)rqh\\n gwni/an periexousw=n \neu)qeiw=n."
+    context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']
+  - book: 2
+    num: 2
+    num_display: '2'
+    xml-line: 1481
+    text: παντὸς δὲ παραλληλογράμμου χωρίου τῶν περὶ τὴν διάμετρον αὐτοῦ παραλληλογράμμων
+      ἓν ὁποιονοῦν σὺν τοῖς δυσὶ παραπληρώμασι γνώμων καλείσθω.
+    betacode: "panto\\s de\\ parallhlogra/mmou xwri/ou tw=n peri\\ \nth\\n dia/metron\
+      \ au)tou= parallhlogra/mmwn e(\\n o(poionou=n \nsu\\n toi=s dusi\\ paraplhrw/masi\
+      \ gnw/mwn kalei/sqw."
+    context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='2']
+- volume: 3
+  title: Book 3 Definitions
+  xml-line: 2026
+  definitions:
+  - book: 3
+    num: 1
+    num_display: '1'
+    xml-line: 2027
+    text: ἴσοι κύκλοι εἰσίν, ὧν αἱ διάμετροι ἴσαι εἰσίν, ἢ ὧν αἱ ἐκ τῶν κέντρων ἴσαι
+      εἰσίν.
+    betacode: "i)/soi ku/kloi ei)si/n, w(=n ai( dia/metroi i)/sai ei)si/n, h)\\ w(=n\
+      \ \nai( e)k tw=n ke/ntrwn i)/sai ei)si/n."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']
+  - book: 3
+    num: 2
+    num_display: '2'
+    xml-line: 2029
+    text: εὐθεῖα κύκλου ἐφάπτεσθαι λέγεται, ἥτις ἁπτομένη τοῦ κύκλου καὶ ἐκβαλλομένη
+      οὐ τέμνει τὸν κύκλον.
+    betacode: "eu)qei=a ku/klou e)fa/ptesqai le/getai, h(/tis a(ptome/nh \ntou= ku/klou\
+      \ kai\\ e)kballome/nh ou) te/mnei to\\n ku/klon."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='2']
+  - book: 3
+    num: 3
+    num_display: '3'
+    xml-line: 2031
+    text: κύκλοι ἐφάπτεσθαι ἀλλήλων λέγονται οἵτινες ἁπτόμενοι ἀλλήλων οὐ τέμνουσιν
+      ἀλλήλους.
+    betacode: "ku/kloi e)fa/ptesqai a)llh/lwn le/gontai oi(/tines a(pto/menoi \na)llh/lwn\
+      \ ou) te/mnousin a)llh/lous."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='3']
+  - book: 3
+    num: 4
+    num_display: '4'
+    xml-line: 2033
+    text: ἐν κύκλῳ ἴσον ἀπέχειν ἀπὸ τοῦ κέντρου εὐθεῖαι λέγονται, ὅταν αἱ ἀπὸ τοῦ
+      κέντρου ἐπ’ αὐτὰς κάθετοι ἀγόμεναι ἴσαι ὦσιν.
+    betacode: "e)n ku/klw| i)/son a)pe/xein a)po\\ tou= ke/ntrou eu)qei=ai \nle/gontai,\
+      \ o(/tan ai( a)po\\ tou= ke/ntrou e)p' au)ta\\s ka/qetoi \na)go/menai i)/sai\
+      \ w)=sin."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='4']
+  - book: 3
+    num: 5
+    num_display: '5'
+    xml-line: 2036
+    text: μεῖζον δὲ ἀπέχειν λέγεται, ἐφ’ ἣν ἡ μείζων κάθετος πίπτει.
+    betacode: "mei=zon de\\ a)pe/xein le/getai, e)f' h(\\n h( mei/zwn ka/qetos \n\
+      pi/ptei."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='5']
+  - book: 3
+    num: 6
+    num_display: '6'
+    xml-line: 2038
+    text: τμῆμα κύκλου ἐστὶ τὸ περιεχόμενον σχῆμα ὑπό τε εὐθείας καὶ κύκλου περιφερείας.
+    betacode: "tmh=ma ku/klou e)sti\\ to\\ periexo/menon sxh=ma u(po/ te \neu)qei/as\
+      \ kai\\ ku/klou periferei/as."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='6']
+  - book: 3
+    num: 7
+    num_display: '7'
+    xml-line: 2040
+    text: τμήματος δὲ γωνία ἐστὶν ἡ περιεχομένη ὑπό τε εὐθείας καὶ κύκλου περιφερείας.
+    betacode: "tmh/matos de\\ gwni/a e)sti\\n h( periexome/nh u(po/ te \neu)qei/as\
+      \ kai\\ ku/klou periferei/as."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='7']
+  - book: 3
+    num: 8
+    num_display: '8'
+    xml-line: 2042
+    text: ἐν τμήματι δὲ γωνία ἐστίν, ὅταν ἐπὶ τῆς περιφερείας τοῦ τμήματος ληφθῇ τι
+      σημεῖον καὶ ἀπ’ αὐτοῦ ἐπὶ τὰ πέρατα τῆς εὐθείας, ἥ ἐστι βάσις τοῦ τμήματος,
+      ἐπιζευχθῶσιν εὐθεῖαι, ἡ περιεχομένη γωνία ὑπὸ τῶν ἐπιζευχθεισῶν εὐθειῶν.
+    betacode: "e)n tmh/mati de\\ gwni/a e)sti/n, o(/tan e)pi\\ th=s periferei/as \n\
+      tou= tmh/matos lhfqh=| ti shmei=on kai\\ a)p' au)tou= e)pi\\ ta\\  \npe/rata\
+      \ th=s eu)qei/as, h(/ e)sti ba/sis tou= tmh/matos, e)pizeuxqw=sin \neu)qei=ai,\
+      \ h( periexome/nh gwni/a u(po\\ tw=n e)pizeuxqeisw=n \neu)qeiw=n."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='8']
+  - book: 3
+    num: 9
+    num_display: '9'
+    xml-line: 2047
+    text: ὅταν δὲ αἱ περιέχουσαι τὴν γωνίαν εὐθεῖαι ἀπολαμβάνωσί τινα περιφέρειαν,
+      ἐπ’ ἐκείνης λέγεται βεβηκέναι ἡ γωνία.
+    betacode: "o(/tan de\\ ai( perie/xousai th\\n gwni/an eu)qei=ai a)polamba/nwsi/\
+      \ \ntina perife/reian, e)p' e)kei/nhs le/getai bebhke/nai \nh( gwni/a."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='9']
+  - book: 3
+    num: 10
+    num_display: '10'
+    xml-line: 2050
+    text: Τομεὺς δὲ κύκλου ἐστίν, ὅταν πρὸς τῷ κέντρῳ τοῦ κύκλου συσταθῇ γωνία, τὸ
+      περιεχόμενον σχῆμα ὑπό τε τῶν τὴν γωνίαν περιεχουσῶν εὐθειῶν καὶ τῆς ἀπολαμβανομένης
+      ὑπ’ αὐτῶν περιφερείας.
+    betacode: "*tomeu\\s de\\ ku/klou e)sti/n, o(/tan pro\\s tw=| ke/ntrw| tou= \n\
+      ku/klou sustaqh=| gwni/a, to\\ periexo/menon sxh=ma u(po/ te \ntw=n th\\n gwni/an\
+      \ periexousw=n eu)qeiw=n kai\\ th=s a)polambanome/nhs \nu(p' au)tw=n periferei/as."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='10']
+  - book: 3
+    num: 11
+    num_display: '11'
+    xml-line: 2054
+    text: ὅμοια τμήματα κύκλων ἐστὶ τὰ δεχόμενα γωνίας ἴσας, ἢ ἐν οἷς αἱ γωνίαι ἴσαι
+      ἀλλήλαις εἰσίν.
+    betacode: "o(/moia tmh/mata ku/klwn e)sti\\ ta\\ dexo/mena gwni/as \ni)/sas, h)\\\
+      \ e)n oi(=s ai( gwni/ai i)/sai a)llh/lais ei)si/n."
+    context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='11']
+- volume: 4
+  title: Book 4 Definitions
+  xml-line: 3244
+  definitions:
+  - book: 4
+    num: 1
+    num_display: '1'
+    xml-line: 3245
+    text: σχῆμα εὐθύγραμμον εἰς σχῆμα εὐθύγραμμον ἐγγράφεσθαι λέγεται, ὅταν ἑκάστη
+      τῶν τοῦ ἐγγραφομένου σχήματος γωνιῶν ἑκάστης πλευρᾶς τοῦ, εἰς ὃ ἐγγράφεται,
+      ἅπτηται.
+    betacode: "sxh=ma eu)qu/grammon ei)s sxh=ma eu)qu/grammon e)ggra/fesqai \nle/getai,\
+      \ o(/tan e(ka/sth tw=n tou= e)ggrafome/nou \nsxh/matos gwniw=n e(ka/sths pleura=s\
+      \ tou=, ei)s o(\\ e)ggra/fetai, \na(/pthtai."
+    context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']
+  - book: 4
+    num: 2
+    num_display: '2'
+    xml-line: 3249
+    text: σχῆμα δὲ ὁμοίως περὶ σχῆμα περιγράφεσθαι λέγεται, ὅταν ἑκάστη πλευρὰ τοῦ
+      περιγραφομένου ἑκάστης γωνίας τοῦ, περὶ ὃ περιγράφεται, ἅπτηται.
+    betacode: "sxh=ma de\\ o(moi/ws peri\\ sxh=ma perigra/fesqai le/getai, \no(/tan\
+      \ e(ka/sth pleura\\ tou= perigrafome/nou e(ka/sths \ngwni/as tou=, peri\\ o(\\\
+      \ perigra/fetai, a(/pthtai."
+    context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='2']
+  - book: 4
+    num: 3
+    num_display: '3'
+    xml-line: 3252
+    text: σχῆμα εὐθύγραμμον εἰς κύκλον ἐγγράφεσθαι λέγεται, ὅταν ἑκάστη γωνία τοῦ
+      ἐγγραφομένου ἅπτηται τῆς τοῦ κύκλου περιφερείας.
+    betacode: "sxh=ma eu)qu/grammon ei)s ku/klon e)ggra/fesqai le/getai, \no(/tan\
+      \ e(ka/sth gwni/a tou= e)ggrafome/nou a(/pthtai \nth=s tou= ku/klou periferei/as."
+    context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='3']
+  - book: 4
+    num: 4
+    num_display: '4'
+    xml-line: 3255
+    text: σχῆμα δὲ εὐθύγραμμον περὶ κύκλον περιγράφεσθαι λέγεται, ὅταν ἑκάστη πλευρὰ
+      τοῦ περιγραφομένου ἐφάπτηται τῆς τοῦ κύκλου περιφερείας.
+    betacode: "sxh=ma de\\ eu)qu/grammon peri\\ ku/klon perigra/fesqai \nle/getai,\
+      \ o(/tan e(ka/sth pleura\\ tou= perigrafome/nou e)fa/pthtai \nth=s tou= ku/klou\
+      \ periferei/as."
+    context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='4']
+  - book: 4
+    num: 5
+    num_display: '5'
+    xml-line: 3258
+    text: κύκλος δὲ εἰς σχῆμα ὁμοίως ἐγγράφεσθαι λέγεται, ὅταν ἡ τοῦ κύκλου περιφέρεια
+      ἑκάστης πλευρᾶς τοῦ, εἰς ὃ ἐγγράφεται, ἅπτηται.
+    betacode: "ku/klos de\\ ei)s sxh=ma o(moi/ws e)ggra/fesqai le/getai, \no(/tan\
+      \ h( tou= ku/klou perife/reia e(ka/sths pleura=s tou=, ei)s \no(\\ e)ggra/fetai,\
+      \ a(/pthtai."
+    context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='5']
+  - book: 4
+    num: 6
+    num_display: '6'
+    xml-line: 3261
+    text: κύκλος δὲ περὶ σχῆμα περιγράφεσθαι λέγεται, ὅταν ἡ τοῦ κύκλου περιφέρεια
+      ἑκάστης γωνίας τοῦ, περὶ ὃ περιγράφεται, ἅπτηται.
+    betacode: "ku/klos de\\ peri\\ sxh=ma perigra/fesqai le/getai, o(/tan \nh( tou=\
+      \ ku/klou perife/reia e(ka/sths gwni/as tou=, peri\\ o(\\ \nperigra/fetai, a(/pthtai."
+    context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='6']
+  - book: 4
+    num: 7
+    num_display: '7'
+    xml-line: 3264
+    text: εὐθεῖα εἰς κύκλον ἐναρμόζεσθαι λέγεται, ὅταν τὰ πέρατα αὐτῆς ἐπὶ τῆς περιφερείας
+      ᾖ τοῦ κύκλου.
+    betacode: "eu)qei=a ei)s ku/klon e)narmo/zesqai le/getai, o(/tan ta\\ \npe/rata\
+      \ au)th=s e)pi\\ th=s periferei/as h)=| tou= ku/klou."
+    context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='7']
+- volume: 5
+  title: Book 5 Definitions
+  xml-line: 3836
+  definitions:
+  - book: 5
+    num: 1
+    num_display: '1'
+    xml-line: 3837
+    text: μέρος ἐστὶ μέγεθος μεγέθους τὸ ἔλασσον τοῦ μείζονος, ὅταν καταμετρῇ τὸ μεῖζον.
+    betacode: "me/ros e)sti\\ me/geqos mege/qous to\\ e)/lasson tou= \nmei/zonos,\
+      \ o(/tan katametrh=| to\\ mei=zon."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']
+  - book: 5
+    num: 2
+    num_display: '2'
+    xml-line: 3839
+    text: πολλαπλάσιον δὲ τὸ μεῖζον τοῦ ἐλάττονος, ὅταν καταμετρῆται ὑπὸ τοῦ ἐλάττονος.
+    betacode: "pollapla/sion de\\ to\\ mei=zon tou= e)la/ttonos, o(/tan \nkatametrh=tai\
+      \ u(po\\ tou= e)la/ttonos."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='2']
+  - book: 5
+    num: 3
+    num_display: '3'
+    xml-line: 3841
+    text: λόγος ἐστὶ δύο μεγεθῶν ὁμογενῶν ἡ κατὰ πηλικότητά ποια σχέσις.
+    betacode: "lo/gos e)sti\\ du/o megeqw=n o(mogenw=n h( kata\\ phliko/thta/ \npoia\
+      \ sxe/sis."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='3']
+  - book: 5
+    num: 4
+    num_display: '4'
+    xml-line: 3843
+    text: λόγον ἔχειν πρὸς ἄλληλα μεγέθη λέγεται, ἃ δύναται πολλαπλασιαζόμενα ἀλλήλων
+      ὑπερέχειν.
+    betacode: "lo/gon e)/xein pro\\s a)/llhla mege/qh le/getai, a(\\ \ndu/natai pollaplasiazo/mena\
+      \ a)llh/lwn u(pere/xein."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='4']
+  - book: 5
+    num: 5
+    num_display: '5'
+    xml-line: 3845
+    text: ἐν τῷ αὐτῷ λόγῳ μεγέθη λέγεται εἶναι πρῶτον πρὸς δεύτερον καὶ τρίτον πρὸς
+      τέταρτον, ὅταν τὰ τοῦ πρώτου καὶ τρίτου ἰσάκις πολλαπλάσια τῶν τοῦ δευτέρου
+      καὶ τετάρτου ἰσάκις πολλαπλασίων καθ’ ὁποιονοῦν πολλαπλασιασμὸν ἑκάτερον ἑκατέρου
+      ἢ ἅμα ὑπερέχῃ ἢ ἅμα ἴσα ᾖ ἢ ἅμα ἐλλείπῃ ληφθέντα κατάλληλα.
+    betacode: "e)n tw=| au)tw=| lo/gw| mege/qh le/getai ei)=nai prw=ton \npro\\s deu/teron\
+      \ kai\\ tri/ton pro\\s te/tarton, o(/tan ta\\ tou= \nprw/tou kai\\ tri/tou i)sa/kis\
+      \ pollapla/sia tw=n tou= deute/rou \nkai\\ teta/rtou i)sa/kis pollaplasi/wn\
+      \ kaq' o(poionou=n \npollaplasiasmo\\n e(ka/teron e(kate/rou h)\\ a(/ma u(pere/xh|\
+      \ h)\\ \na(/ma i)/sa h)=| h)\\ a(/ma e)llei/ph| lhfqe/nta kata/llhla."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='5']
+  - book: 5
+    num: 6
+    num_display: '6'
+    xml-line: 3851
+    text: τὰ δὲ τὸν αὐτὸν ἔχοντα λόγον μεγέθη ἀνάλογον καλείσθω.
+    betacode: "ta\\ de\\ to\\n au)to\\n e)/xonta lo/gon mege/qh a)na/logon \nkalei/sqw."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='6']
+  - book: 5
+    num: 7
+    num_display: '7'
+    xml-line: 3853
+    text: ὅταν δὲ τῶν ἰσάκις πολλαπλασίων τὸ μὲν τοῦ πρώτου πολλαπλάσιον ὑπερέχῃ τοῦ
+      τοῦ δευτέρου πολλαπλασίου, τὸ δὲ τοῦ τρίτου πολλαπλάσιον μὴ ὑπερέχῃ τοῦ τοῦ
+      τετάρτου πολλαπλασίου, τότε τὸ πρῶτον πρὸς τὸ δεύτερον μείζονα λόγον ἔχειν λέγεται,
+      ἤπερ τὸ τρίτον πρὸς τὸ τέταρτον.
+    betacode: "o(/tan de\\ tw=n i)sa/kis pollaplasi/wn to\\ me\\n tou= \nprw/tou pollapla/sion\
+      \ u(pere/xh| tou= tou= deute/rou pollaplasi/ou, \nto\\ de\\ tou= tri/tou pollapla/sion\
+      \ mh\\ u(pere/xh| tou= \ntou= teta/rtou pollaplasi/ou, to/te to\\ prw=ton pro\\\
+      s to\\ \ndeu/teron mei/zona lo/gon e)/xein le/getai, h)/per to\\ tri/ton \n\
+      pro\\s to\\ te/tarton."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='7']
+  - book: 5
+    num: 8
+    num_display: '8'
+    xml-line: 3859
+    text: ἀναλογία δὲ ἐν τρισὶν ὅροις ἐλαχίστη ἐστίν.
+    betacode: a)nalogi/a de\ e)n trisi\n o(/rois e)laxi/sth e)sti/n.
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='8']
+  - book: 5
+    num: 9
+    num_display: '9'
+    xml-line: 3860
+    text: ὅταν δὲ τρία μεγέθη ἀνάλογον ᾖ, τὸ πρῶτον πρὸς τὸ τρίτον διπλασίονα λόγον
+      ἔχειν λέγεται ἤπερ πρὸς τὸ δεύτερον.
+    betacode: "o(/tan de\\ tri/a mege/qh a)na/logon h)=|, to\\ prw=ton pro\\s \nto\\\
+      \ tri/ton diplasi/ona lo/gon e)/xein le/getai h)/per pro\\s to\\ \ndeu/teron."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='9']
+  - book: 5
+    num: 10
+    num_display: '10'
+    xml-line: 3863
+    text: ὅταν δὲ τέσσαρα μεγέθη ἀνάλογον ᾖ, τὸ πρῶτον πρὸς τὸ τέταρτον τριπλασίονα
+      λόγον ἔχειν λέγεται ἤπερ πρὸς τὸ δεύτερον, καὶ ἀεὶ ἑξῆς ὁμοίως, ὡς ἂν ἡ ἀναλογία
+      ὑπάρχῃ.
+    betacode: "o(/tan de\\ te/ssara mege/qh a)na/logon h)=|, to\\ prw=ton \npro\\\
+      s to\\ te/tarton triplasi/ona lo/gon e)/xein le/getai h)/per \npro\\s to\\ deu/teron,\
+      \ kai\\ a)ei\\ e(ch=s o(moi/ws, w(s a)\\n h( a)nalogi/a \nu(pa/rxh|."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='10']
+  - book: 5
+    num: 11
+    num_display: '11'
+    xml-line: 3867
+    text: ὁμόλογα μεγέθη λέγεται τὰ μὲν ἡγούμενα τοῖς ἡγουμένοις τὰ δὲ ἑπόμενα τοῖς
+      ἑπομένοις.
+    betacode: "o(mo/loga mege/qh le/getai ta\\ me\\n h(gou/mena toi=s \nh(goume/nois\
+      \ ta\\ de\\ e(po/mena toi=s e(pome/nois."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='11']
+  - book: 5
+    num: 12
+    num_display: '12'
+    xml-line: 3869
+    text: ἐναλλὰξ λόγος ἐστὶ λῆψις τοῦ ἡγουμένου πρὸς τὸ ἡγούμενον καὶ τοῦ ἑπομένου
+      πρὸς τὸ ἑπόμενον.
+    betacode: "e)nalla\\c lo/gos e)sti\\ lh=yis tou= h(goume/nou pro\\s to\\ \nh(gou/menon\
+      \ kai\\ tou= e(pome/nou pro\\s to\\ e(po/menon."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='12']
+  - book: 5
+    num: 13
+    num_display: '13'
+    xml-line: 3871
+    text: ἀνάπαλιν λόγος ἐστὶ λῆψις τοῦ ἑπομένου ὡς ἡγουμένου πρὸς τὸ ἡγούμενον ὡς
+      ἑπόμενον.
+    betacode: "a)na/palin lo/gos e)sti\\ lh=yis tou= e(pome/nou w(s \nh(goume/nou\
+      \ pro\\s to\\ h(gou/menon w(s e(po/menon."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='13']
+  - book: 5
+    num: 14
+    num_display: '14'
+    xml-line: 3873
+    text: σύνθεσις λόγου ἐστὶ λῆψις τοῦ ἡγουμένου μετὰ τοῦ ἑπομένου ὡς ἑνὸς πρὸς αὐτὸ
+      τὸ ἑπόμενον.
+    betacode: "su/nqesis lo/gou e)sti\\ lh=yis tou= h(goume/nou meta\\ \ntou= e(pome/nou\
+      \ w(s e(no\\s pro\\s au)to\\ to\\ e(po/menon."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='14']
+  - book: 5
+    num: 15
+    num_display: '15'
+    xml-line: 3875
+    text: διαίρεσις λόγου ἐστὶ λῆψις τῆς ὑπεροχῆς, ᾗ ὑπερέχει τὸ ἡγούμενον τοῦ ἑπομένου,
+      πρὸς αὐτὸ τὸ ἑπόμενον.
+    betacode: "diai/resis lo/gou e)sti\\ lh=yis th=s u(peroxh=s, h(=| \nu(pere/xei\
+      \ to\\ h(gou/menon tou= e(pome/nou, pro\\s au)to\\ to\\ \ne(po/menon."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='15']
+  - book: 5
+    num: 16
+    num_display: '16'
+    xml-line: 3878
+    text: ἀναστροφὴ λόγου ἐστὶ λῆψις τοῦ ἡγουμένου πρὸς τὴν ὑπεροχήν, ᾗ ὑπερέχει τὸ
+      ἡγούμενον τοῦ ἑπομένου.
+    betacode: "a)nastrofh\\ lo/gou e)sti\\ lh=yis tou= h(goume/nou pro\\s \nth\\n\
+      \ u(peroxh/n, h(=| u(pere/xei to\\ h(gou/menon tou= e(pome/nou."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='16']
+  - book: 5
+    num: 17
+    num_display: '17'
+    xml-line: 3880
+    text: δῑ ἴσου λόγος ἐστὶ πλειόνων ὄντων μεγεθῶν καὶ ἄλλων αὐτοῖς ἴσων τὸ πλῆθος
+      σύνδυο λαμβανομένων καὶ ἐν τῷ αὐτῷ λόγῳ, ὅταν ᾖ ὡς ἐν τοῖς πρώτοις μεγέθεσι
+      τὸ πρῶτον πρὸς τὸ ἔσχατον, οὕτως ἐν τοῖς δευτέροις μεγέθεσι τὸ πρῶτον πρὸς τὸ
+      ἔσχατον· ἢ ἄλλως· λῆψις τῶν ἄκρων καθ’ ὑπεξαίρεσιν τῶν μέσων.
+    betacode: "di' i)/sou lo/gos e)sti\\ pleio/nwn o)/ntwn megeqw=n kai\\ \na)/llwn\
+      \ au)toi=s i)/swn to\\ plh=qos su/nduo lambanome/nwn kai\\ \ne)n tw=| au)tw=|\
+      \ lo/gw|, o(/tan h)=| w(s e)n toi=s prw/tois mege/qesi \nto\\ prw=ton pro\\\
+      s to\\ e)/sxaton, ou(/tws e)n toi=s deute/rois mege/qesi \nto\\ prw=ton pro\\\
+      s to\\ e)/sxaton: h)\\ a)/llws: lh=yis tw=n \na)/krwn kaq' u(pecai/resin tw=n\
+      \ me/swn."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='17']
+  - book: 5
+    num: 18
+    num_display: '18'
+    xml-line: 3886
+    text: τεταραγμένη δὲ ἀναλογία ἐστίν, ὅταν τριῶν ὄντων μεγεθῶν καὶ ἄλλων αὐτοῖς
+      ἴσων τὸ πλῆθος γίνηται ὡς μὲν ἐν τοῖς πρώτοις μεγέθεσιν ἡγούμενον πρὸς ἑπόμενον,
+      οὕτως ἐν τοῖς δευτέροις μεγέθεσιν ἡγούμενον πρὸς ἑπόμενον, ὡς δὲ ἐν τοῖς πρώτοις
+      μεγέθεσιν ἑπόμενον πρὸς ἄλλο τι, οὕτως ἐν τοῖς δευτέροις ἄλλο τι πρὸς ἡγούμενον.
+    betacode: "tetaragme/nh de\\ a)nalogi/a e)sti/n, o(/tan triw=n o)/ntwn \nmegeqw=n\
+      \ kai\\ a)/llwn au)toi=s i)/swn to\\ plh=qos gi/nhtai w(s me\\n \ne)n toi=s\
+      \ prw/tois mege/qesin h(gou/menon pro\\s e(po/menon, \nou(/tws e)n toi=s deute/rois\
+      \ mege/qesin h(gou/menon pro\\s \ne(po/menon, w(s de\\ e)n toi=s prw/tois mege/qesin\
+      \ e(po/menon pro\\s \na)/llo ti, ou(/tws e)n toi=s deute/rois a)/llo ti pro\\\
+      s h(gou/menon."
+    context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='18']
+- volume: 6
+  title: Book 6 Definitions
+  xml-line: 4682
+  definitions:
+  - book: 6
+    num: 1
+    num_display: '1'
+    xml-line: 4683
+    text: ὅμοια σχήματα εὐθύγραμμά ἐστιν, ὅσα τάς τε γωνίας ἴσας ἔχει κατὰ μίαν καὶ
+      τὰς περὶ τὰς ἴσας γωνίας πλευρὰς ἀνάλογον. &`2* 1$
+    betacode: "o(/moia sxh/mata eu)qu/gramma/ e)stin, o(/sa ta/s te \ngwni/as i)/sas\
+      \ e)/xei kata\\ mi/an kai\\ ta\\s peri\\ ta\\s i)/sas gwni/as \npleura\\s a)na/logon.\
+      \ \n&`2* 1$"
+    context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']
+  - book: 6
+    num: 3
+    num_display: '3'
+    xml-line: 4690
+    text: ἄκρον καὶ μέσον λόγον εὐθεῖα τετμῆσθαι λέγεται, ὅταν ᾖ ὡς ἡ ὅλη πρὸς τὸ
+      μεῖζον τμῆμα, οὕτως τὸ μεῖζον πρὸς τὸ ἔλαττον.
+    betacode: "a)/kron kai\\ me/son lo/gon eu)qei=a tetmh=sqai le/getai, \no(/tan\
+      \ h)=| w(s h( o(/lh pro\\s to\\ mei=zon tmh=ma, ou(/tws to\\ mei=zon \npro\\\
+      s to\\ e)/latton."
+    context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='3']
+  - book: 6
+    num: 4
+    num_display: '4'
+    xml-line: 4693
+    text: ὕψος ἐστὶ παντὸς σχήματος ἡ ἀπὸ τῆς κορυφῆς ἐπὶ τὴν βάσιν κάθετος ἀγομένη.
+    betacode: "u(/yos e)sti\\ panto\\s sxh/matos h( a)po\\ th=s korufh=s \ne)pi\\\
+      \ th\\n ba/sin ka/qetos a)gome/nh."
+    context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='4']
+  - book: 6
+    num: 5
+    num_display: 5*
+    xml-line: 4695
+    text: Λόγος ἐκ λόγων συγκεῖσθαι λέγεται, ὅταν αἱ τῶν λόγων πηλικότητες ἐφ’ ἑαυτὰς
+      πολλαπλασιασθεῖσαι ποιῶσί τινα.
+    betacode: "*lo/gos e)k lo/gwn sugkei=sqai le/getai, o(/tan ai( tw=n \nlo/gwn phliko/thtes\
+      \ e)f' e(auta\\s pollaplasiasqei=sai \npoiw=si/ tina."
+    context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='5*']
+- volume: 7
+  title: Book 7 Definitions
+  xml-line: 5997
+  definitions:
+  - book: 7
+    num: 1
+    num_display: '1'
+    xml-line: 5998
+    text: μονάς ἐστιν, καθ’ ἣν ἕκαστον τῶν ὄντων ἓν λέγεται.
+    betacode: "mona/s e)stin, kaq' h(\\n e(/kaston tw=n o)/ntwn e(\\n \nle/getai."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']
+  - book: 7
+    num: 2
+    num_display: '2'
+    xml-line: 6000
+    text: ἀριθμὸς δὲ τὸ ἐκ μονάδων συγκείμενον πλῆθος.
+    betacode: a)riqmo\s de\ to\ e)k mona/dwn sugkei/menon plh=qos.
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='2']
+  - book: 7
+    num: 3
+    num_display: '3'
+    xml-line: 6001
+    text: μέρος ἐστὶν ἀριθμὸς ἀριθμοῦ ὁ ἐλάσσων τοῦ μείζονος, ὅταν καταμετρῇ τὸν μείζονα.
+    betacode: "me/ros e)sti\\n a)riqmo\\s a)riqmou= o( e)la/sswn tou= mei/zonos, \n\
+      o(/tan katametrh=| to\\n mei/zona."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='3']
+  - book: 7
+    num: 4
+    num_display: '4'
+    xml-line: 6003
+    text: μέρη δέ, ὅταν μὴ καταμετρῇ.
+    betacode: me/rh de/, o(/tan mh\ katametrh=|.
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='4']
+  - book: 7
+    num: 5
+    num_display: '5'
+    xml-line: 6004
+    text: πολλαπλάσιος δὲ ὁ μείζων τοῦ ἐλάσσονος, ὅταν καταμετρῆται ὑπὸ τοῦ ἐλάσσονος.
+    betacode: "pollapla/sios de\\ o( mei/zwn tou= e)la/ssonos, o(/tan \nkatametrh=tai\
+      \ u(po\\ tou= e)la/ssonos."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='5']
+  - book: 7
+    num: 6
+    num_display: '6'
+    xml-line: 6006
+    text: ἄρτιος ἀριθμός ἐστιν ὁ δίχα διαιρούμενος.
+    betacode: a)/rtios a)riqmo/s e)stin o( di/xa diairou/menos.
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='6']
+  - book: 7
+    num: 7
+    num_display: '7'
+    xml-line: 6007
+    text: περισσὸς δὲ ὁ μὴ διαιρούμενος δίχα ἢ ὁ μονάδι διαφέρων ἀρτίου ἀριθμοῦ.
+    betacode: "perisso\\s de\\ o( mh\\ diairou/menos di/xa h)\\ o( mona/di \ndiafe/rwn\
+      \ a)rti/ou a)riqmou=."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='7']
+  - book: 7
+    num: 8
+    num_display: '8'
+    xml-line: 6009
+    text: ἀρτιάκις ἄρτιος ἀριθμός ἐστιν ὁ ὑπὸ ἀρτίου ἀριθμοῦ μετρούμενος κατὰ ἄρτιον
+      ἀριθμόν.
+    betacode: "a)rtia/kis a)/rtios a)riqmo/s e)stin o( u(po\\ a)rti/ou a)riqmou= \n\
+      metrou/menos kata\\ a)/rtion a)riqmo/n."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='8']
+  - book: 7
+    num: 9
+    num_display: '9'
+    xml-line: 6011
+    text: ἀρτιάκις δὲ περισσός ἐστιν ὁ ὑπὸ ἀρτίου ἀριθμοῦ μετρούμενος κατὰ περισσὸν
+      ἀριθμόν.
+    betacode: "a)rtia/kis de\\ perisso/s e)stin o( u(po\\ a)rti/ou a)riqmou= \nmetrou/menos\
+      \ kata\\ perisso\\n a)riqmo/n."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='9']
+  - book: 7
+    num: 10
+    num_display: '10'
+    xml-line: 6015
+    text: περισσάκις δὲ περισσὸς ἀριθμός ἐστιν ὁ ὑπὸ περισσοῦ ἀριθμοῦ μετρούμενος
+      κατὰ περισσὸν ἀριθμόν.
+    betacode: "perissa/kis de\\ perisso\\s a)riqmo/s e)stin o( u(po\\ \nperissou=\
+      \ a)riqmou= metrou/menos kata\\ perisso\\n a)riqmo/n."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='10']
+  - book: 7
+    num: 11
+    num_display: '11'
+    xml-line: 6017
+    text: πρῶτος ἀριθμός ἐστιν ὁ μονάδι μόνῃ μετρούμενος.
+    betacode: prw=tos a)riqmo/s e)stin o( mona/di mo/nh| metrou/menos.
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='11']
+  - book: 7
+    num: 12
+    num_display: '12'
+    xml-line: 6018
+    text: πρῶτοι πρὸς ἀλλήλους ἀριθμοί εἰσιν οἱ μονάδι μόνῃ μετρούμενοι κοινῷ μέτρῳ.
+    betacode: "prw=toi pro\\s a)llh/lous a)riqmoi/ ei)sin oi( mona/di \nmo/nh| metrou/menoi\
+      \ koinw=| me/trw|."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='12']
+  - book: 7
+    num: 13
+    num_display: '13'
+    xml-line: 6020
+    text: σύνθετος ἀριθμός ἐστιν ὁ ἀριθμῷ τινι μετρούμενος.
+    betacode: su/nqetos a)riqmo/s e)stin o( a)riqmw=| tini metrou/menos.
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='13']
+  - book: 7
+    num: 14
+    num_display: '14'
+    xml-line: 6021
+    text: σύνθετοι δὲ πρὸς ἀλλήλους ἀριθμοί εἰσιν οἱ ἀριθμῷ τινι μετρούμενοι κοινῷ
+      μέτρῳ.
+    betacode: "su/nqetoi de\\ pro\\s a)llh/lous a)riqmoi/ ei)sin oi( a)riqmw=| \n\
+      tini metrou/menoi koinw=| me/trw|."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='14']
+  - book: 7
+    num: 15
+    num_display: '15'
+    xml-line: 6023
+    text: ἀριθμὸς ἀριθμὸν πολλαπλασιάζειν λέγεται, ὅταν, ὅσαι εἰσὶν ἐν αὐτῷ μονάδες,
+      τοσαυτάκις συντεθῇ ὁ πολλαπλασιαζόμενος, καὶ γένηταί τις.
+    betacode: "a)riqmo\\s a)riqmo\\n pollaplasia/zein le/getai, o(/tan, \no(/sai ei)si\\\
+      n e)n au)tw=| mona/des, tosauta/kis sunteqh=| o( \npollaplasiazo/menos, kai\\\
+      \ ge/nhtai/ tis."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='15']
+  - book: 7
+    num: 16
+    num_display: '16'
+    xml-line: 6026
+    text: ὅταν δὲ δύο ἀριθμοὶ πολλαπλασιάσαντες ἀλλήλους ποιῶσί τινα, ὁ γενόμενος
+      ἐπίπεδος καλεῖται, πλευραὶ δὲ αὐτοῦ οἱ πολλαπλασιάσαντες ἀλλήλους ἀριθμοί.
+    betacode: "o(/tan de\\ du/o a)riqmoi\\ pollaplasia/santes a)llh/lous \npoiw=si/\
+      \ tina, o( geno/menos e)pi/pedos kalei=tai, pleurai\\ de\\ \nau)tou= oi( pollaplasia/santes\
+      \ a)llh/lous a)riqmoi/."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='16']
+  - book: 7
+    num: 17
+    num_display: '17'
+    xml-line: 6029
+    text: ὅταν δὲ τρεῖς ἀριθμοὶ πολλαπλασιάσαντες ἀλλήλους ποιῶσί τινα, ὁ γενόμενος
+      στερεός ἐστιν, πλευραὶ δὲ αὐτοῦ οἱ πολλαπλασιάσαντες ἀλλήλους ἀριθμοί.
+    betacode: "o(/tan de\\ trei=s a)riqmoi\\ pollaplasia/santes a)llh/lous \npoiw=si/\
+      \ tina, o( geno/menos stereo/s e)stin, pleurai\\ de\\ \nau)tou= oi( pollaplasia/santes\
+      \ a)llh/lous a)riqmoi/."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='17']
+  - book: 7
+    num: 18
+    num_display: '18'
+    xml-line: 6032
+    text: τετράγωνος ἀριθμός ἐστιν ὁ ἰσάκις ἴσος ἢ ὁ ὑπὸ δύο ἴσων ἀριθμῶν περιεχόμενος.
+    betacode: "tetra/gwnos a)riqmo/s e)stin o( i)sa/kis i)/sos h)\\ o( u(po\\ \ndu/o\
+      \ i)/swn a)riqmw=n periexo/menos."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='18']
+  - book: 7
+    num: 19
+    num_display: '19'
+    xml-line: 6034
+    text: κύβος δὲ ὁ ἰσάκις ἴσος ἰσάκις ἢ ὁ ὑπὸ τριῶν ἴσων ἀριθμῶν περιεχόμενος.
+    betacode: "ku/bos de\\ o( i)sa/kis i)/sos i)sa/kis h)\\ o( u(po\\ triw=n i)/swn\
+      \ \na)riqmw=n periexo/menos."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='19']
+  - book: 7
+    num: 20
+    num_display: '20'
+    xml-line: 6036
+    text: ἀριθμοὶ ἀνάλογόν εἰσιν, ὅταν ὁ πρῶτος τοῦ δευτέρου καὶ ὁ τρίτος τοῦ τετάρτου
+      ἰσάκις ᾖ πολλαπλάσιος ἢ τὸ αὐτὸ μέρος ἢ τὰ αὐτὰ μέρη ὦσιν.
+    betacode: "a)riqmoi\\ a)na/logo/n ei)sin, o(/tan o( prw=tos tou=  \ndeute/rou\
+      \ kai\\ o( tri/tos tou= teta/rtou i)sa/kis h)=| pollapla/sios \nh)\\ to\\ au)to\\\
+      \ me/ros h)\\ ta\\ au)ta\\ me/rh w)=sin."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='20']
+  - book: 7
+    num: 21
+    num_display: '21'
+    xml-line: 6039
+    text: ὅμοιοι ἐπίπεδοι καὶ στερεοὶ ἀριθμοί εἰσιν οἱ ἀνάλογον ἔχοντες τὰς πλευράς.
+    betacode: "o(/moioi e)pi/pedoi kai\\ stereoi\\ a)riqmoi/ ei)sin oi( a)na/logon\
+      \ \ne)/xontes ta\\s pleura/s."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='21']
+  - book: 7
+    num: 22
+    num_display: '22'
+    xml-line: 6041
+    text: τέλειος ἀριθμός ἐστιν ὁ τοῖς ἑαυτοῦ μέρεσιν ἴσος ὤν.
+    betacode: "te/leios a)riqmo/s e)stin o( toi=s e(autou= me/resin \ni)/sos w)/n."
+    context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='22']
+- volume: 11
+  title: Book 11 Definitions
+  xml-line: 13035
+  definitions:
+  - book: 11
+    num: 1
+    num_display: '1'
+    xml-line: 13036
+    text: στερεόν ἐστι τὸ μῆκος καὶ πλάτος καὶ βάθος ἔχον.
+    betacode: stereo/n e)sti to\ mh=kos kai\ pla/tos kai\ ba/qos e)/xon.
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']
+  - book: 11
+    num: 2
+    num_display: '2'
+    xml-line: 13037
+    text: στερεοῦ δὲ πέρας ἐπιφάνεια.
+    betacode: stereou= de\ pe/ras e)pifa/neia.
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='2']
+  - book: 11
+    num: 3
+    num_display: '3'
+    xml-line: 13038
+    text: εὐθεῖα πρὸς ἐπίπεδον ὀρθή ἐστιν, ὅταν πρὸς πάσας τὰς ἁπτομένας αὐτῆς εὐθείας
+      καὶ οὔσας ἐν τῷ ὑποκειμένῳ ἐπιπέδῳ ὀρθὰς ποιῇ γωνίας.
+    betacode: "eu)qei=a pro\\s e)pi/pedon o)rqh/ e)stin, o(/tan pro\\s pa/sas \nta\\\
+      s a(ptome/nas au)th=s eu)qei/as kai\\ ou)/sas e)n tw=| u(pokeime/nw| \ne)pipe/dw|\
+      \ o)rqa\\s poih=| gwni/as."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='3']
+  - book: 11
+    num: 4
+    num_display: '4'
+    xml-line: 13041
+    text: ἐπίπεδον πρὸς ἐπίπεδον ὀρθόν ἐστιν, ὅταν αἱ τῇ κοινῇ τομῇ τῶν ἐπιπέδων πρὸς
+      ὀρθὰς ἀγόμεναι εὐθεῖαι ἐν ἑνὶ τῶν ἐπιπέδων τῷ λοιπῷ ἐπιπέδῳ πρὸς ὀρθὰς ὦσιν.
+    betacode: "e)pi/pedon pro\\s e)pi/pedon o)rqo/n e)stin, o(/tan ai( th=| koinh=|\
+      \ \ntomh=| tw=n e)pipe/dwn pro\\s o)rqa\\s a)go/menai eu)qei=ai e)n e(ni\\ \n\
+      tw=n e)pipe/dwn tw=| loipw=| e)pipe/dw| pro\\s o)rqa\\s w)=sin."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='4']
+  - book: 11
+    num: 5
+    num_display: '5'
+    xml-line: 13044
+    text: εὐθείας πρὸς ἐπίπεδον κλίσις ἐστίν, ὅταν ἀπὸ τοῦ μετεώρου πέρατος τῆς εὐθείας
+      ἐπὶ τὸ ἐπίπεδον κάθετος ἀχθῇ, καὶ ἀπὸ τοῦ γενομένου σημείου ἐπὶ τὸ ἐν τῷ ἐπιπέδῳ
+      πέρας τῆς εὐθείας εὐθεῖα ἐπιζευχθῇ, ἡ περιεχομένη γωνία ὑπὸ τῆς ἀχθείσης καὶ
+      τῆς ἐφεστώσης.
+    betacode: "eu)qei/as pro\\s e)pi/pedon kli/sis e)sti/n, o(/tan a)po\\ tou= \n\
+      metew/rou pe/ratos th=s eu)qei/as e)pi\\ to\\ e)pi/pedon ka/qetos \na)xqh=|,\
+      \ kai\\ a)po\\ tou= genome/nou shmei/ou e)pi\\ to\\ e)n tw=| e)pipe/dw| \npe/ras\
+      \ th=s eu)qei/as eu)qei=a e)pizeuxqh=|, h( periexome/nh gwni/a \nu(po\\ th=s\
+      \ a)xqei/shs kai\\ th=s e)festw/shs."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='5']
+  - book: 11
+    num: 6
+    num_display: '6'
+    xml-line: 13049
+    text: ἐπιπέδου πρὸς ἐπίπεδον κλίσις ἐστὶν ἡ περιεχομένη ὀξεῖα γωνία ὑπὸ τῶν πρὸς
+      ὀρθὰς τῇ κοινῇ τομῇ ἀγομένων πρὸς τῷ αὐτῷ σημείῳ ἐν ἑκατέρῳ τῶν ἐπιπέδων.
+    betacode: "e)pipe/dou pro\\s e)pi/pedon kli/sis e)sti\\n h( periexome/nh \no)cei=a\
+      \ gwni/a u(po\\ tw=n pro\\s o)rqa\\s th=| koinh=| tomh=| a)gome/nwn \npro\\\
+      s tw=| au)tw=| shmei/w| e)n e(kate/rw| tw=n e)pipe/dwn."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='6']
+  - book: 11
+    num: 7
+    num_display: '7'
+    xml-line: 13052
+    text: ἐπίπεδον πρὸς ἐπίπεδον ὁμοίως κεκλίσθαι λέγεται καὶ ἕτερον πρὸς ἕτερον,
+      ὅταν αἱ εἰρημέναι τῶν κλίσεων γωνίαι ἴσαι ἀλλήλαις ὦσιν.
+    betacode: "e)pi/pedon pro\\s e)pi/pedon o(moi/ws kekli/sqai le/getai \nkai\\ e(/teron\
+      \ pro\\s e(/teron, o(/tan ai( ei)rhme/nai tw=n kli/sewn gwni/ai \ni)/sai a)llh/lais\
+      \ w)=sin."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='7']
+  - book: 11
+    num: 8
+    num_display: '8'
+    xml-line: 13055
+    text: παράλληλα ἐπίπεδά ἐστι τὰ ἀσύμπτωτα.
+    betacode: para/llhla e)pi/peda/ e)sti ta\ a)su/mptwta.
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='8']
+  - book: 11
+    num: 9
+    num_display: '9'
+    xml-line: 13056
+    text: ὅμοια στερεὰ σχήματά ἐστι τὰ ὑπὸ ὁμοίων ἐπιπέδων περιεχόμενα ἴσων τὸ πλῆθος.
+    betacode: "o(/moia sterea\\ sxh/mata/ e)sti ta\\ u(po\\ o(moi/wn e)pipe/dwn \n\
+      periexo/mena i)/swn to\\ plh=qos."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='9']
+  - book: 11
+    num: 10
+    num_display: '10'
+    xml-line: 13058
+    text: ἴσα δὲ καὶ ὅμοια στερεὰ σχήματά ἐστι τὰ ὑπὸ ὁμοίων ἐπιπέδων περιεχόμενα
+      ἴσων τῷ πλήθει καὶ τῷ μεγέθει.
+    betacode: "i)/sa de\\ kai\\ o(/moia sterea\\ sxh/mata/ e)sti ta\\ u(po\\ o(moi/wn\
+      \ \ne)pipe/dwn periexo/mena i)/swn tw=| plh/qei kai\\ tw=| mege/qei."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='10']
+  - book: 11
+    num: 11
+    num_display: '11'
+    xml-line: 13060
+    text: στερεὰ γωνία ἐστὶν ἡ ὑπὸ πλειόνων ἢ δύο γραμμῶν ἁπτομένων ἀλλήλων καὶ μὴ
+      ἐν τῇ αὐτῇ ἐπιφανείᾳ οὐσῶν πρὸς πάσαις ταῖς γραμμαῖς κλίσις. ἄλλως· στερεὰ γωνία
+      ἐστὶν ἡ ὑπὸ πλειόνων ἢ δύο γωνιῶν ἐπιπέδων περιεχομένη μὴ οὐσῶν ἐν τῷ αὐτῷ ἐπιπέδῳ
+      πρὸς ἑνὶ σημείῳ συνισταμένων.
+    betacode: "sterea\\ gwni/a e)sti\\n h( u(po\\ pleio/nwn h)\\ du/o grammw=n \n\
+      a(ptome/nwn a)llh/lwn kai\\ mh\\ e)n th=| au)th=| e)pifanei/a| \nou)sw=n pro\\\
+      s pa/sais tai=s grammai=s kli/sis. a)/llws: sterea\\ \ngwni/a e)sti\\n h( u(po\\\
+      \ pleio/nwn h)\\ du/o gwniw=n e)pipe/dwn periexome/nh \nmh\\ ou)sw=n e)n tw=|\
+      \ au)tw=| e)pipe/dw| pro\\s e(ni\\ shmei/w| \nsunistame/nwn."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='11']
+  - book: 11
+    num: 12
+    num_display: '12'
+    xml-line: 13066
+    text: πυραμίς ἐστι σχῆμα στερεὸν ἐπιπέδοις περιεχόμενον ἀπὸ ἑνὸς ἐπιπέδου πρὸς
+      ἑνὶ σημείῳ συνεστώς.
+    betacode: "purami/s e)sti sxh=ma stereo\\n e)pipe/dois periexo/menon \na)po\\\
+      \ e(no\\s e)pipe/dou pro\\s e(ni\\ shmei/w| sunestw/s."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='12']
+  - book: 11
+    num: 13
+    num_display: '13'
+    xml-line: 13068
+    text: πρίσμα ἐστὶ σχῆμα στερεὸν ἐπιπέδοις περιεχόμενον, ὧν δύο τὰ ἀπεναντίον ἴσα
+      τε καὶ ὅμοιά ἐστι καὶ παράλληλα, τὰ δὲ λοιπὰ παραλληλόγραμμα.
+    betacode: "pri/sma e)sti\\ sxh=ma stereo\\n e)pipe/dois periexo/menon, \nw(=n\
+      \ du/o ta\\ a)penanti/on i)/sa te kai\\ o(/moia/ e)sti kai\\ para/llhla, \n\
+      ta\\ de\\ loipa\\ parallhlo/gramma."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='13']
+  - book: 11
+    num: 14
+    num_display: '14'
+    xml-line: 13071
+    text: σφαῖρά ἐστιν, ὅταν ἡμικυκλίου μενούσης τῆς διαμέτρου περιενεχθὲν τὸ ἡμικύκλιον
+      εἰς τὸ αὐτὸ πάλιν ἀποκατασταθῇ, ὅθεν ἤρξατο φέρεσθαι, τὸ περιληφθὲν σχῆμα.
+    betacode: "sfai=ra/ e)stin, o(/tan h(mikukli/ou menou/shs th=s diame/trou \nperienexqe\\\
+      n to\\ h(miku/klion ei)s to\\ au)to\\ pa/lin a)pokatastaqh=|, \no(/qen h)/rcato\
+      \ fe/resqai, to\\ perilhfqe\\n sxh=ma."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='14']
+  - book: 11
+    num: 15
+    num_display: '15'
+    xml-line: 13074
+    text: ἄξων δὲ τῆς σφαίρας ἐστὶν ἡ μένουσα εὐθεῖα, περὶ ἣν τὸ ἡμικύκλιον στρέφεται.
+    betacode: "a)/cwn de\\ th=s sfai/ras e)sti\\n h( me/nousa eu)qei=a, peri\\ \n\
+      h(\\n to\\ h(miku/klion stre/fetai."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='15']
+  - book: 11
+    num: 16
+    num_display: '16'
+    xml-line: 13076
+    text: κέντρον δὲ τῆς σφαίρας ἐστὶ τὸ αὐτό, ὃ καὶ τοῦ ἡμικυκλίου.
+    betacode: "ke/ntron de\\ th=s sfai/ras e)sti\\ to\\ au)to/, o(\\ kai\\ tou= \n\
+      h(mikukli/ou."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='16']
+  - book: 11
+    num: 17
+    num_display: '17'
+    xml-line: 13078
+    text: διάμετρος δὲ τῆς σφαίρας ἐστὶν εὐθεῖά τις διὰ τοῦ κέντρου ἠγμένη καὶ περατουμένη
+      ἐφ’ ἑκάτερα τὰ μέρη ὑπὸ τῆς ἐπιφανείας τῆς σφαίρας.
+    betacode: "dia/metros de\\ th=s sfai/ras e)sti\\n eu)qei=a/ tis dia\\ tou= \n\
+      ke/ntrou h)gme/nh kai\\ peratoume/nh e)f' e(ka/tera ta\\ me/rh \nu(po\\ th=s\
+      \ e)pifanei/as th=s sfai/ras."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='17']
+  - book: 11
+    num: 18
+    num_display: '18'
+    xml-line: 13081
+    text: κῶνός ἐστιν, ὅταν ὀρθογωνίου τριγώνου μενούσης μιᾶς πλευρᾶς τῶν περὶ τὴν
+      ὀρθὴν γωνίαν περιενεχθὲν τὸ τρίγωνον εἰς τὸ αὐτὸ πάλιν ἀποκατασταθῇ, ὅθεν ἤρξατο
+      φέρεσθαι, τὸ περιληφθὲν σχῆμα. κἂν μὲν ἡ μένουσα εὐθεῖα ἴση ᾖ τῇ λοιπῇ τῇ περὶ
+      τὴν ὀρθὴν περιφερομένῃ, ὀρθογώνιος ἔσται ὁ κῶνος, ἐὰν δὲ ἐλάττων, ἀμβλυγώνιος,
+      ἐὰν δὲ μείζων, ὀξυγώνιος.
+    betacode: "kw=no/s e)stin, o(/tan o)rqogwni/ou trigw/nou menou/shs \nmia=s pleura=s\
+      \ tw=n peri\\ th\\n o)rqh\\n gwni/an perienexqe\\n to\\ \ntri/gwnon ei)s to\\\
+      \ au)to\\ pa/lin a)pokatastaqh=|, o(/qen h)/rcato \nfe/resqai, to\\ perilhfqe\\\
+      n sxh=ma. ka)\\n me\\n h( me/nousa eu)qei=a \ni)/sh h)=| th=| loiph=| th=| peri\\\
+      \ th\\n o)rqh\\n periferome/nh|, o)rqogw/nios \ne)/stai o( kw=nos, e)a\\n de\\\
+      \ e)la/ttwn, a)mblugw/nios, e)a\\n \nde\\ mei/zwn, o)cugw/nios."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='18']
+  - book: 11
+    num: 19
+    num_display: '19'
+    xml-line: 13088
+    text: ἄξων δὲ τοῦ κώνου ἐστὶν ἡ μένουσα εὐθεῖα, περὶ ἣν τὸ τρίγωνον στρέφεται.
+    betacode: "a)/cwn de\\ tou= kw/nou e)sti\\n h( me/nousa eu)qei=a, peri\\ \nh(\\\
+      n to\\ tri/gwnon stre/fetai."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='19']
+  - book: 11
+    num: 20
+    num_display: '20'
+    xml-line: 13090
+    text: βάσις δὲ ὁ κύκλος ὁ ὑπὸ τῆς περιφερομένης εὐθείας γραφόμενος.
+    betacode: "ba/sis de\\ o( ku/klos o( u(po\\ th=s periferome/nhs eu)qei/as \ngrafo/menos."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='20']
+  - book: 11
+    num: 21
+    num_display: '21'
+    xml-line: 13092
+    text: κύλινδρός ἐστιν, ὅταν ὀρθογωνίου παραλληλογράμμου μενούσης μιᾶς πλευρᾶς
+      τῶν περὶ τὴν ὀρθὴν γωνίαν περιενεχθὲν τὸ παραλληλόγραμμον εἰς τὸ αὐτὸ πάλιν
+      ἀποκατασταθῇ, ὅθεν ἤρξατο φέρεσθαι, τὸ περιληφθὲν σχῆμα.
+    betacode: "ku/lindro/s e)stin, o(/tan o)rqogwni/ou parallhlogra/mmou \nmenou/shs\
+      \ mia=s pleura=s tw=n peri\\ th\\n o)rqh\\n \ngwni/an perienexqe\\n to\\ parallhlo/grammon\
+      \ ei)s to\\ au)to\\ \npa/lin a)pokatastaqh=|, o(/qen h)/rcato fe/resqai, to\\\
+      \ perilhfqe\\n \nsxh=ma."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='21']
+  - book: 11
+    num: 22
+    num_display: '22'
+    xml-line: 13097
+    text: ἄξων δὲ τοῦ κυλίνδρου ἐστὶν ἡ μένουσα εὐθεῖα, περὶ ἣν τὸ παραλληλόγραμμον
+      στρέφεται.
+    betacode: "a)/cwn de\\ tou= kuli/ndrou e)sti\\n h( me/nousa eu)qei=a, \nperi\\\
+      \ h(\\n to\\ parallhlo/grammon stre/fetai."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='22']
+  - book: 11
+    num: 23
+    num_display: '23'
+    xml-line: 13099
+    text: βάσεις δὲ οἱ κύκλοι οἱ ὑπὸ τῶν ἀπεναντίον περιαγομένων δύο πλευρῶν γραφόμενοι.
+    betacode: "ba/seis de\\ oi( ku/kloi oi( u(po\\ tw=n a)penanti/on periagome/nwn\
+      \ \ndu/o pleurw=n grafo/menoi."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='23']
+  - book: 11
+    num: 24
+    num_display: '24'
+    xml-line: 13101
+    text: ὅμοιοι κῶνοι καὶ κύλινδροί εἰσιν, ὧν οἵ τε ἄξονες καὶ αἱ διάμετροι τῶν βάσεων
+      ἀνάλογόν εἰσιν.
+    betacode: "o(/moioi kw=noi kai\\ ku/lindroi/ ei)sin, w(=n oi(/ te a)/cones \n\
+      kai\\ ai( dia/metroi tw=n ba/sewn a)na/logo/n ei)sin."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='24']
+  - book: 11
+    num: 25
+    num_display: '25'
+    xml-line: 13103
+    text: κύβος ἐστὶ σχῆμα στερεὸν ὑπὸ ἓξ τετραγώνων ἴσων περιεχόμενον.
+    betacode: "ku/bos e)sti\\ sxh=ma stereo\\n u(po\\ e(\\c tetragw/nwn \ni)/swn periexo/menon."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='25']
+  - book: 11
+    num: 26
+    num_display: '26'
+    xml-line: 13105
+    text: ὀκτάεδρόν ἐστι σχῆμα στερεὸν ὑπὸ ὀκτὼ τριγώνων ἴσων καὶ ἰσοπλεύρων περιεχόμενον.
+    betacode: "o)kta/edro/n e)sti sxh=ma stereo\\n u(po\\ o)ktw\\ trigw/nwn \ni)/swn\
+      \ kai\\ i)sopleu/rwn periexo/menon."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='26']
+  - book: 11
+    num: 27
+    num_display: '27'
+    xml-line: 13107
+    text: εἰκοσάεδρόν ἐστι σχῆμα στερεὸν ὑπὸ εἴκοσι τριγώνων ἴσων καὶ ἰσοπλεύρων περιεχόμενον.
+    betacode: "ei)kosa/edro/n e)sti sxh=ma stereo\\n u(po\\ ei)/kosi trigw/nwn \n\
+      i)/swn kai\\ i)sopleu/rwn periexo/menon."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='27']
+  - book: 11
+    num: 28
+    num_display: '28'
+    xml-line: 13109
+    text: δωδεκάεδρόν ἐστι σχῆμα στερεὸν ὑπὸ δώδεκα πενταγώνων ἴσων καὶ ἰσοπλεύρων
+      καὶ ἰσογωνίων περιεχόμενον.
+    betacode: "dwdeka/edro/n e)sti sxh=ma stereo\\n u(po\\ dw/deka \npentagw/nwn i)/swn\
+      \ kai\\ i)sopleu/rwn kai\\ i)sogwni/wn periexo/menon."
+    context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='28']

@@ -1,0 +1,33 @@
+- title: Marginal Content and Annotations
+  description: Line break annotations and geometric references
+  marginal_content:
+    line_breaks: []
+    numbers:
+    - xml-line: 219
+      text: ΒΓΔ
+      betacode: '*b*g*d'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/num
+    - xml-line: 220
+      text: ΑΓΕ
+      betacode: '*a*g*e'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/num
+    - xml-line: 226
+      text: ΓΔΒ
+      betacode: '*g*d*b'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/num
+    - xml-line: 229
+      text: ΓΑΕ
+      betacode: '*g*a*e'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/num
+    - xml-line: 234
+      text: ΑΒΓ
+      betacode: '*a*b*g'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/num
+    - xml-line: 245
+      text: ΔΑΒ
+      betacode: '*d*a*b'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/num
+    - xml-line: 247
+      text: ΓΗΘ
+      betacode: '*g*h*q'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/num

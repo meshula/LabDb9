@@ -1,0 +1,7 @@
+printf("Added: %d\n", value);
+printf("Added: %d\n", value);
+printf("Added: %d\n", value);
+Line 2
+Line 3
+Line 4
+printf("Added: %d\n", value);

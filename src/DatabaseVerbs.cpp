@@ -4,6 +4,8 @@
 #include "LabDb/LabText.hpp"
 
 #include <iostream>
+#include <string>
+#include <unistd.h>
 
 namespace LabDb {
 
@@ -49,6 +51,17 @@ Db9Response OpenDatabaseVerb::execute(const lab::Text::Sexpr& sexpr) {
     
     try {
         std::string path = extractStringParam(sexpr, "path");
+
+        // Validate path - must be absolute
+        if (path.empty() || path[0] != '/') {
+            throw std::runtime_error("Path must be absolute and non-empty: " + path 
+                + " e.g.: (/open-database :path \"/full/path/to/database.db9\")");
+        }
+
+        // test if the file exists
+        if (access(path.c_str(), F_OK) == -1) {
+            throw std::runtime_error("Database file does not exist at path: " + path);
+        }
         
         // Open database through manager
         std::string dbid = DatabaseManager::instance().openDatabase(path);
@@ -62,12 +75,13 @@ Db9Response OpenDatabaseVerb::execute(const lab::Text::Sexpr& sexpr) {
         metrics.items_processed = 1;
         
         // Build result JSON
-        std::ostringstream result;
-        result << "{\"dbid\": \"" << dbid << "\", \"path\": \"" << path << "\"}";
+        std::string result = "{\"status\": \"opened\", \"dbid\": \"" 
+                            + dbid + "\", \"path\": \"" 
+                            + path + "\", \"notes\": \"Call db9_readme for usage if this is the first time you are using db9\"}";
         
         return Db9Response{
             Db9Response::Success,
-            result.str(),
+            result.c_str(),
             "",
             "",
             metrics
@@ -1020,29 +1034,21 @@ Db9Response FindTripleVerb::execute(const lab::Text::Sexpr& sexpr) {
         std::string predicate_pattern = "*";
         std::string object_pattern = "*";
         
-        // Try to extract each pattern parameter, but don't require them
-        try {
+        // Use LBYL pattern: check if parameter exists before extracting
+        if (hasStringParam(sexpr, "subject")) {
             subject_pattern = extractStringParam(sexpr, "subject");
-        } catch (...) {
-            // Use default "*"
+            if (subject_pattern == "nil") subject_pattern = "*";
         }
         
-        try {
+        if (hasStringParam(sexpr, "predicate")) {
             predicate_pattern = extractStringParam(sexpr, "predicate");
-        } catch (...) {
-            // Use default "*"
+            if (predicate_pattern == "nil") predicate_pattern = "*";
         }
         
-        try {
+        if (hasStringParam(sexpr, "object")) {
             object_pattern = extractStringParam(sexpr, "object");
-        } catch (...) {
-            // Use default "*"
+            if (object_pattern == "nil") object_pattern = "*";
         }
-        
-        // Convert "nil" parameters to "*" for wildcard matching
-        if (subject_pattern == "nil") subject_pattern = "*";
-        if (predicate_pattern == "nil") predicate_pattern = "*";
-        if (object_pattern == "nil") object_pattern = "*";
         
         // Get database
         auto& manager = DatabaseManager::instance();

@@ -170,7 +170,7 @@ if(LABDB_MCP)
                            "Error: ${PYTHON_VERSION_ERROR}")
     endif()
     
-    if(NOT PYTHON_VERSION_OUTPUT MATCHES "Python [0-9]+\\.[0-9]+")
+    if(NOT PYTHON_VERSION_OUTPUT MATCHES "Python [0-9]+\\\\.[0-9]+")
         message(FATAL_ERROR "LABDB_PYEXE does not appear to be a Python executable: ${LABDB_PYEXE}\n"
                            "Version output: ${PYTHON_VERSION_OUTPUT}")
     endif()
@@ -234,6 +234,34 @@ add_library(labdb
     src/Verbs/Fio/SearchResponse.cpp
     src/Verbs/Fio/SearchResponse.h
     src/Verbs/Fio/SetCwd.h
+    src/Verbs/Fio/WriteVerb.cpp
+	src/Verbs/Fio/FioCommon.cpp
+	src/Verbs/Fio/FioCommon.h
+    src/Verbs/Fio/WriteVerb.h
+    src/Verbs/Fio/ConfirmVerb.cpp
+    src/Verbs/Fio/ConfirmVerb.h
+    src/Verbs/RopeVerbs.cpp
+    src/Verbs/RopeVerbs.h
+    src/Verbs/Ropes/RopeUtils.cpp
+    src/Verbs/Ropes/RopeUtils.h
+    src/Verbs/Ropes/RopeCreateVerb.cpp
+    src/Verbs/Ropes/RopeCreateVerb.h
+    src/Verbs/Ropes/RopeAppendVerb.cpp
+    src/Verbs/Ropes/RopeAppendVerb.h
+    src/Verbs/Ropes/RopeChunkVerb.cpp
+    src/Verbs/Ropes/RopeChunkVerb.h
+    src/Verbs/Ropes/RopeTraverseVerb.cpp
+    src/Verbs/Ropes/RopeTraverseVerb.h
+    src/Verbs/Ropes/RopeListVerb.cpp
+    src/Verbs/Ropes/RopeListVerb.h
+    src/Verbs/Ropes/RopeInfoVerb.cpp
+    src/Verbs/Ropes/RopeInfoVerb.h
+    src/Verbs/Ropes/RopeDeleteVerb.cpp
+    src/Verbs/Ropes/RopeDeleteVerb.h
+    src/Verbs/Ropes/RopeInsertVerb.cpp
+    src/Verbs/Ropes/RopeInsertVerb.h
+    src/Verbs/Ropes/RopeFindVerb.cpp
+    src/Verbs/Ropes/RopeFindVerb.h
 )
 
 target_include_directories(labdb

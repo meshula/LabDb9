@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Copy test environment to build directory
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cpp/testenv 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cpp/testenv
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Test executables
@@ -51,6 +51,13 @@ add_executable(test_triple_store
 target_link_libraries(test_triple_store labdb)
 add_test(NAME TripleStoreTest COMMAND test_triple_store)
 
+# debug semantic test
+add_executable(debug_semantic_test
+    cpp/debug_semantic_test.cpp
+)
+target_link_libraries(debug_semantic_test labdb)
+add_test(NAME DebugSemanticTest COMMAND debug_semantic_test)
+
 # S-Expression Unicode Robustness test
 add_executable(test_sexpr_unicode_robustness
     cpp/test_sexpr_unicode_robustness.cpp
@@ -80,6 +87,13 @@ add_executable(test_enhanced_api
 target_link_libraries(test_enhanced_api labdb)
 add_test(NAME EnhancedApiTest COMMAND test_enhanced_api)
 
+# Parameter Fix Validation Test (LBYL vs EAFP pattern)
+add_executable(test_parameter_fix
+    ../test_parameter_fix.cpp
+)
+target_link_libraries(test_parameter_fix labdb)
+add_test(NAME ParameterFixTest COMMAND test_parameter_fix)
+
 # FIO-Write TDD test (Test-driven development for fio-write functionality)
 add_executable(test_fio_write
     cpp/test_fio_write.cpp
@@ -87,6 +101,30 @@ add_executable(test_fio_write
 target_link_libraries(test_fio_write labdb)
 target_include_directories(test_fio_write PRIVATE ../include)
 add_test(NAME FioWriteTest COMMAND test_fio_write)
+
+# Line Surgery TDD test (Test-driven development for line surgery algorithms)
+add_executable(test_line_surgery
+    cpp/test_line_surgery.cpp
+)
+target_link_libraries(test_line_surgery labdb)
+target_include_directories(test_line_surgery PRIVATE ../include)
+add_test(NAME LineSurgeryTest COMMAND test_line_surgery)
+
+# Phase C2: Unicode + Line Surgery Integration Test (Consciousness-first preview with unicode transformations)
+add_executable(test_unicode_line_surgery_integration
+    cpp/test_unicode_line_surgery_integration.cpp
+)
+target_link_libraries(test_unicode_line_surgery_integration labdb)
+target_include_directories(test_unicode_line_surgery_integration PRIVATE ../include)
+add_test(NAME UnicodeLineSurgeryIntegrationTest COMMAND test_unicode_line_surgery_integration)
+
+# FIO-Confirm ping-pong test (Simple test for preview-confirm loop)
+add_executable(test_fio_confirm_simple
+    cpp/test_fio_confirm_simple.cpp
+)
+target_link_libraries(test_fio_confirm_simple labdb)
+target_include_directories(test_fio_confirm_simple PRIVATE ../include)
+add_test(NAME FioConfirmSimpleTest COMMAND test_fio_confirm_simple)
 
 # EID Chain Debug test (Debug EID resolution chains)
 add_executable(eid_debug_test
@@ -102,11 +140,19 @@ add_executable(benchmark_performance
 target_link_libraries(benchmark_performance labdb)
 
 # Rope functionality test
-add_executable(test_rope_minimal
-    cpp/test_rope_minimal.cpp
+add_executable(test_rope
+    cpp/test_rope.cpp
 )
-target_link_libraries(test_rope_minimal labdb)
-add_test(NAME RopeMinimalTest COMMAND test_rope_minimal)
+target_link_libraries(test_rope labdb)
+add_test(NAME RopeTest COMMAND test_rope)
+
+# Euclid Ontology TDD Validation Test (Memex realization through Euclid's Elements)
+add_executable(test_euclid_ontology_validation
+    cpp/test_euclid_ontology_validation.cpp
+)
+target_link_libraries(test_euclid_ontology_validation labdb)
+target_include_directories(test_euclid_ontology_validation PRIVATE ../include)
+add_test(NAME EuclidOntologyValidationTest COMMAND test_euclid_ontology_validation)
 
 # Python tests (if Python bindings are available)
 if(BUILD_PYTHON_BINDINGS)
@@ -116,21 +162,21 @@ if(BUILD_PYTHON_BINDINGS)
         COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/test_streaming_interface.py
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
-    
-    # Add comprehensive Python test  
+
+    # Add comprehensive Python test
     add_test(
         NAME ComprehensivePythonTest
         COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/test_comprehensive_python.py
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
-    
+
     # Add Python integration test
     add_test(
         NAME PythonIntegrationTest
         COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/test_python_integration.py
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
-    
+
     message(STATUS "Python test targets configured")
 else()
     message(STATUS "Python tests skipped - BUILD_PYTHON_BINDINGS=OFF")
@@ -171,3 +217,11 @@ add_executable(test_fio_search_ext
 target_link_libraries(test_fio_search_ext labdb)
 target_include_directories(test_fio_search_ext PRIVATE ../include)
 add_test(NAME FioSearchExtTest COMMAND test_fio_search_ext)
+
+# File-based executeCommands test
+add_executable(test_file_commands
+    cpp/test_file_commands.cpp
+)
+target_link_libraries(test_file_commands labdb)
+target_include_directories(test_file_commands PRIVATE ../include)
+add_test(NAME FileCommandsTest COMMAND test_file_commands)

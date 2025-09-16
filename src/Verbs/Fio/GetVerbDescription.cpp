@@ -3,8 +3,7 @@
 #include "LabDb/AutoReflexiveMetrics.h"
 
 #include <chrono>
-#include <sstream>
-#include <stdexcept>
+#include <string>
 
 namespace LabDb {
 
@@ -45,21 +44,21 @@ GetVerbDescriptionVerb::DescriptionParameters GetVerbDescriptionVerb::extractPar
 
 Db9Response GetVerbDescriptionVerb::execute(const lab::Text::Sexpr& sexpr) {
     auto start_time = std::chrono::steady_clock::now();
-    
+
     auto params = extractParameters(sexpr);
-    
+
     if (params.verb_name.empty()) {
         AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "missing_verb", 
+        return Db9Response{Db9Response::Error, "", "missing_verb",
                           "get-verb-description requires :verb parameter", metrics};
     }
-    
+
     try {
         auto& dispatcher = getGlobalDb9Dispatcher();
         IDb9Verb* verb = dispatcher.getVerbByName(params.verb_name);
-        
+
         std::ostringstream result;
-        
+
         if (verb == nullptr) {
             result << "{"
                    << "\"verb_name\": \"" << params.verb_name << "\""
@@ -70,7 +69,7 @@ Db9Response GetVerbDescriptionVerb::execute(const lab::Text::Sexpr& sexpr) {
                    << "}";
         } else {
             std::string description = verb->getDescription();
-            
+
             // Simple JSON escaping
             // Simple JSON escaping
             std::string escaped_description;
@@ -90,7 +89,7 @@ Db9Response GetVerbDescriptionVerb::execute(const lab::Text::Sexpr& sexpr) {
                     escaped_description += c;
                 }
             }
-            
+
             result << "{"
                    << "\"verb_name\": \"" << params.verb_name << "\""
                    << ", \"available\": true"
@@ -98,19 +97,19 @@ Db9Response GetVerbDescriptionVerb::execute(const lab::Text::Sexpr& sexpr) {
                    << ", \"status\": \"found\""
                    << "}";
         }
-        
+
         auto end_time = std::chrono::steady_clock::now();
         auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-        
+
         AutoReflexiveMetrics metrics;
         metrics.operation_time_ms = std::chrono::milliseconds(duration_ms);
         metrics.items_processed = 1;
-        
+
         return Db9Response{Db9Response::Success, result.str(), "", "", metrics};
-        
+
     } catch (const std::exception& e) {
         AutoReflexiveMetrics metrics;
-        return Db9Response{Db9Response::Error, "", "description_failed", 
+        return Db9Response{Db9Response::Error, "", "description_failed",
                           "Failed to get verb description: " + std::string(e.what()), metrics};
     }
 }

@@ -1,0 +1,46 @@
+- volume: 1
+  title: Book 1 Postulates
+  xml-line: 192
+  postulates:
+  - book: 1
+    num: 1
+    num_display: '1'
+    xml-line: 193
+    text: Ἠιτήσθω ἀπὸ παντὸς σημείου ἐπὶ πᾶν σημεῖον εὐθεῖαν γραμμὴν ἀγαγεῖν.
+    betacode: "*)hith/sqw a)po\\ panto\\s shmei/ou e)pi\\ pa=n shmei=on \neu)qei=an\
+      \ grammh\\n a)gagei=n."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Post']/div3[@type='number'][@n='1']
+  - book: 1
+    num: 2
+    num_display: '2'
+    xml-line: 195
+    text: καὶ πεπερασμένην εὐθεῖαν κατὰ τὸ συνεχὲς ἐπ’ εὐθείας ἐκβαλεῖν.
+    betacode: "kai\\ peperasme/nhn eu)qei=an kata\\ to\\ sunexe\\s e)p' eu)qei/as\
+      \ \ne)kbalei=n."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Post']/div3[@type='number'][@n='2']
+  - book: 1
+    num: 3
+    num_display: '3'
+    xml-line: 197
+    text: καὶ παντὶ κέντρῳ καὶ διαστήματι κύκλον γράφεσθαι.
+    betacode: kai\ panti\ ke/ntrw| kai\ diasth/mati ku/klon gra/fesqai.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Post']/div3[@type='number'][@n='3']
+  - book: 1
+    num: 4
+    num_display: '4'
+    xml-line: 198
+    text: καὶ πάσας τὰς ὀρθὰς γωνίας ἴσας ἀλλήλαις εἶναι.
+    betacode: kai\ pa/sas ta\s o)rqa\s gwni/as i)/sas a)llh/lais ei)=nai.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Post']/div3[@type='number'][@n='4']
+  - book: 1
+    num: 5
+    num_display: '5'
+    xml-line: 199
+    text: καὶ ἐὰν εἰς δύο εὐθείας εὐθεῖα ἐμπίπτουσα τὰς ἐντὸς καὶ ἐπὶ τὰ αὐτὰ μέρη
+      γωνίας δύο ὀρθῶν ἐλάσσονας ποιῇ, ἐκβαλλομένας τὰς δύο εὐθείας ἐπ’ ἄπειρον συμπίπτειν,
+      ἐφ’ ἃ μέρη εἰσὶν αἱ τῶν δύο ὀρθῶν ἐλάσσονες.
+    betacode: "kai\\ e)a\\n ei)s du/o eu)qei/as eu)qei=a e)mpi/ptousa ta\\s \ne)nto\\\
+      s kai\\ e)pi\\ ta\\ au)ta\\ me/rh gwni/as du/o o)rqw=n e)la/ssonas \npoih=|,\
+      \ e)kballome/nas ta\\s du/o eu)qei/as e)p' a)/peiron sumpi/ptein, \ne)f' a(\\\
+      \ me/rh ei)si\\n ai( tw=n du/o o)rqw=n e)la/ssones."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Post']/div3[@type='number'][@n='5']

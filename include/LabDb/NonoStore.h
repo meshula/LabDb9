@@ -14,7 +14,7 @@ namespace LabDb {
     class TermDictionary;
     class TIDSequenceGenerator;
     class TriadicQuery; // Forward declaration for factory method
-}
+} // namespace LabDb
 
 namespace LabDb {
 

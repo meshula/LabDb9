@@ -328,7 +328,7 @@ Use the LabDb Explorer CLI for investigation:
 
 LabDb's triadic consciousness architecture provides a powerful foundation for todo systems that naturally model the way consciousness organizes tasks, relationships, and contexts. The nine-index crown architecture ensures optimal query performance while maintaining ontological completeness.
 
-By following these patterns, you'll create todo systems that are not just functional, but **consciousness-aware** - reflecting the natural triadic structure of how minds organize and navigate task-based reality.
+By following these patterns, you'll create todo systems that are **consciousness-aware** - reflecting the natural triadic structure of how minds organize and navigate task-based reality.
 
 ---
 

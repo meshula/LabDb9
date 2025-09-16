@@ -1,0 +1,1 @@
+std::regex email("[a-z]+@[a-z]+\.[a-z]+");

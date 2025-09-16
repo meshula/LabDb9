@@ -1,0 +1,300 @@
+# Euclid Nonostore Minimal Seed Data
+
+# This file contains the minimal dataset for TDD validation of the Euclid ontology
+# Purpose: Establish working triadic consciousness database with essential relationships
+# Implementation: Load via S-expression commands or programmatic entity creation
+
+## Core Text Fragment Entities
+
+entities:
+  # Foundational geometric definitions
+  - id: "b1-def-1"
+    content: "σημεῖόν ἐστιν, οὗ μέρος οὐθέν."
+    metadata:
+      book: "1"
+      type: "definition"
+      number: "1"
+      xml_line: "134"
+      english: "A point is that which has no part."
+      
+  - id: "b1-def-2"  
+    content: "γραμμὴ δὲ μῆκος ἀπλατές."
+    metadata:
+      book: "1"
+      type: "definition" 
+      number: "2"
+      xml_line: "135"
+      english: "A line is breadthless length."
+
+  # Golden ratio definition (key test case)
+  - id: "b6-def-3"
+    content: "ἄκρον καὶ μέσον λόγον εὐθεῖα τετμῆσθαι λέγεται, ὅταν ᾖ ὡς ἡ ὅλη πρὸς τὸ μεῖζον τμῆμα, οὕτως τὸ μεῖζον πρὸς τὸ ἔλαττον."
+    metadata:
+      book: "6"
+      type: "definition"
+      number: "3" 
+      xml_line: "4690"
+      english: "A straight line is said to have been cut in extreme and mean ratio when, as the whole line is to the greater segment, so is the greater to the less."
+
+  # Pythagorean theorem (iconic proposition)
+  - id: "b1-p47"
+    content: "ἐν τοῖς ὀρθογωνίοις τριγώνοις τὸ ἀπὸ τῆς τὴν ὀρθὴν γωνίαν ὑποτεινούσης πλευρᾶς τετράγωνον ἴσον ἐστὶ τοῖς ἀπὸ τῶν τὴν ὀρθὴν γωνίαν περιεχουσῶν πλευρῶν τετραγώνοις."
+    metadata:
+      book: "1"
+      type: "proposition"
+      number: "47"
+      xml_line: "2847"
+      english: "In right-angled triangles the square on the side subtending the right angle is equal to the squares on the sides containing the right angle."
+
+  # Semantic concept entities
+  - id: "concept-golden-ratio"
+    content: "golden-ratio"
+    metadata:
+      type: "concept"
+      domain: "proportion-theory"
+      
+  - id: "concept-proportion"
+    content: "proportion" 
+    metadata:
+      type: "concept"
+      domain: "mathematical-relationships"
+      
+  - id: "concept-triangle"
+    content: "triangle"
+    metadata:
+      type: "concept" 
+      domain: "geometric-figures"
+
+  # Field classification entities
+  - id: "field-definition"
+    content: "definition"
+    metadata:
+      type: "field-type"
+      logical_role: "foundational"
+      
+  - id: "field-proposition" 
+    content: "proposition"
+    metadata:
+      type: "field-type"
+      logical_role: "theorem"
+
+  # Book organization entities  
+  - id: "book-1"
+    content: "book-1"
+    metadata:
+      type: "book"
+      title: "Fundamentals of plane geometry"
+      
+  - id: "book-6"
+    content: "book-6" 
+    metadata:
+      type: "book"
+      title: "Plane geometry and proportion"
+
+## Core Relationship Triples
+
+triples:
+  # Field type classification
+  - subject: "b1-def-1"
+    predicate: "field-type"
+    object: "field-definition"
+    
+  - subject: "b1-def-2"
+    predicate: "field-type" 
+    object: "field-definition"
+    
+  - subject: "b6-def-3"
+    predicate: "field-type"
+    object: "field-definition"
+    
+  - subject: "b1-p47"
+    predicate: "field-type"
+    object: "field-proposition"
+
+  # Book organization
+  - subject: "b1-def-1"
+    predicate: "part-of"
+    object: "book-1"
+    
+  - subject: "b1-def-2" 
+    predicate: "part-of"
+    object: "book-1"
+    
+  - subject: "b1-p47"
+    predicate: "part-of" 
+    object: "book-1"
+    
+  - subject: "b6-def-3"
+    predicate: "part-of"
+    object: "book-6"
+
+  # Semantic concept embodiment
+  - subject: "b6-def-3"
+    predicate: "embodies"
+    object: "concept-golden-ratio"
+    
+  - subject: "b6-def-3"
+    predicate: "relates-to"
+    object: "concept-proportion"
+    
+  - subject: "b1-p47"
+    predicate: "embodies" 
+    object: "concept-triangle"
+
+  # Sequential relationships
+  - subject: "b1-def-2"
+    predicate: "follows"
+    object: "b1-def-1"
+    
+  - subject: "b1-p47"
+    predicate: "depends-on"
+    object: "b1-def-1"
+
+  # Cross-book concept development
+  - subject: "b6-def-3"
+    predicate: "develops-concept"
+    object: "concept-golden-ratio"
+
+## Minimal Rope Structure
+
+rope:
+  name: "euclid-minimal-test"
+  description: "Minimal test rope for TDD validation"
+  fragments:
+    - entity_id: "b1-def-1"
+      position: 1
+      sequence_id: "001000"
+      
+    - entity_id: "b1-def-2" 
+      position: 2
+      sequence_id: "002000"
+      
+    - entity_id: "b6-def-3"
+      position: 3
+      sequence_id: "003000"
+      
+    - entity_id: "b1-p47"
+      position: 4  
+      sequence_id: "004000"
+
+## S-Expression Loading Commands
+
+# Database creation and initialization
+initialization_commands:
+  - "(create-database :path \"test_euclid.db9\")"
+  - "(open-database :path \"test_euclid.db9\")"
+
+# Entity creation commands
+entity_commands:
+  - "(add-entity :value \"σημεῖόν ἐστιν, οὗ μέρος οὐθέν.\" :dbid db1)"
+  - "(add-entity :value \"γραμμὴ δὲ μῆκος ἀπλατές.\" :dbid db1)" 
+  - "(add-entity :value \"ἄκρον καὶ μέσον λόγον εὐθεῖα τετμῆσθαι λέγεται, ὅταν ᾖ ὡς ἡ ὅλη πρὸς τὸ μεῖζον τμῆμα, οὕτως τὸ μεῖζον πρὸς τὸ ἔλαττον.\" :dbid db1)"
+  - "(add-entity :value \"ἐν τοῖς ὀρθογωνίοις τριγώνοις τὸ ἀπὸ τῆς τὴν ὀρθὴν γωνίαν ὑποτεινούσης πλευρᾶς τετράγωνον ἴσον ἐστὶ τοῖς ἀπὸ τῶν τὴν ὀρθὴν γωνίαν περιεχουσῶν πλευρῶν τετραγώνοις.\" :dbid db1)"
+  - "(add-entity :value \"golden-ratio\" :dbid db1)"
+  - "(add-entity :value \"proportion\" :dbid db1)"
+  - "(add-entity :value \"triangle\" :dbid db1)"
+  - "(add-entity :value \"definition\" :dbid db1)"
+  - "(add-entity :value \"proposition\" :dbid db1)"
+  - "(add-entity :value \"book-1\" :dbid db1)"
+  - "(add-entity :value \"book-6\" :dbid db1)"
+
+# Triple creation commands
+triple_commands:
+  - "(add-triple-semantic :subject \"b1-def-1\" :predicate \"field-type\" :object \"definition\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b1-def-2\" :predicate \"field-type\" :object \"definition\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b6-def-3\" :predicate \"field-type\" :object \"definition\" :dbid db1)" 
+  - "(add-triple-semantic :subject \"b1-p47\" :predicate \"field-type\" :object \"proposition\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b1-def-1\" :predicate \"part-of\" :object \"book-1\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b1-def-2\" :predicate \"part-of\" :object \"book-1\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b1-p47\" :predicate \"part-of\" :object \"book-1\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b6-def-3\" :predicate \"part-of\" :object \"book-6\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b6-def-3\" :predicate \"embodies\" :object \"golden-ratio\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b6-def-3\" :predicate \"relates-to\" :object \"proportion\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b1-p47\" :predicate \"embodies\" :object \"triangle\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b1-def-2\" :predicate \"follows\" :object \"b1-def-1\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b1-p47\" :predicate \"depends-on\" :object \"b1-def-1\" :dbid db1)"
+  - "(add-triple-semantic :subject \"b6-def-3\" :predicate \"develops-concept\" :object \"golden-ratio\" :dbid db1)"
+
+# Validation queries  
+validation_commands:
+  - "(find-triple-enhanced :subject \"*\" :predicate \"relates-to\" :object \"golden-ratio\" :dbid db1)"
+  - "(find-triple-enhanced :subject \"*\" :predicate \"field-type\" :object \"definition\" :dbid db1)"
+  - "(find-triple-enhanced :subject \"b6-def-3\" :predicate \"*\" :object \"*\" :dbid db1)"
+  - "(get-vocabulary-stats :dbid db1)"
+
+## Expected Validation Results
+
+validation_expectations:
+  golden_ratio_query:
+    description: "Find all entities relating to golden ratio concept"
+    expected_results: ["b6-def-3"]
+    
+  definition_query:
+    description: "Find all definitional fragments"  
+    expected_results: ["b1-def-1", "b1-def-2", "b6-def-3"]
+    
+  golden_mean_relationships:
+    description: "Find all relationships for golden mean definition"
+    expected_predicates: ["field-type", "part-of", "embodies", "relates-to", "develops-concept"]
+    
+  vocabulary_stats:
+    description: "Database vocabulary analysis"
+    expected_predicates: ["field-type", "part-of", "embodies", "relates-to", "follows", "depends-on", "develops-concept"]
+    expected_subjects: 11
+    expected_objects: 8
+
+## TDD Test Cases
+
+test_cases:
+  - name: "Entity Storage with Unicode"
+    description: "Store and retrieve Greek text without corruption"
+    entity: "b6-def-3"
+    expected_content: "ἄκρον καὶ μέσον λόγον εὐθεῖα τετμῆσθαι λέγεται..."
+    
+  - name: "Semantic Discovery"
+    description: "Find related content via concept relationships"
+    query: "relates-to golden-ratio"
+    expected_entities: ["b6-def-3"]
+    
+  - name: "Triadic Navigation" 
+    description: "Navigate via Motion/Memory/Field perspectives"
+    motion_query: "concept golden-ratio" 
+    memory_query: "predicate relates-to"
+    field_query: "object book-6"
+    
+  - name: "Vocabulary Discovery"
+    description: "Discover available relationship types"
+    expected_predicates: 7
+    expected_vocabulary_coherence: true
+
+## Loading Instructions
+
+To populate the test database:
+
+1. **Initialize database**:
+   ```bash
+   db9 create-database test_euclid.db9
+   db9 open-database test_euclid.db9
+   ```
+
+2. **Load entities** (run entity_commands sequentially)
+
+3. **Load relationships** (run triple_commands sequentially)  
+
+4. **Validate data** (run validation_commands)
+
+5. **Run TDD tests** against expected results
+
+## Expected Database State
+
+After loading:
+- **11 entities** stored with Unicode Greek content
+- **14 triples** establishing semantic relationships
+- **7 unique predicates** in vocabulary  
+- **Triadic navigation** functional across Motion/Memory/Field
+- **Discovery queries** return expected related content
+- **Foundation ready** for rope integration and bounded chunk testing
+
+---
+
+**Status**: Minimal seed data complete and ready for database initialization and TDD validation.

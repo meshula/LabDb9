@@ -7,14 +7,15 @@
 // Include the actual LabDb headers
 #include "LabDb/Db9Dispatcher.h"
 #include "../src/Verbs/FioVerbs.h"
+#include "../src/Verbs/Fio/WriteVerb.h"
 
-// Use the actual LabDb namespace
 using namespace LabDb;
 
 // Real db9 execution using LabDb dispatcher
 Db9Response db9_execute(const std::string& command) {
-    static Db9Dispatcher dispatcher;
+    static LabDb::Db9Dispatcher dispatcher;
     static bool initialized = false;
+    using namespace LabDb;
     
     if (!initialized) {
         // Register FIO verbs
@@ -30,6 +31,8 @@ Db9Response db9_execute(const std::string& command) {
 
 // Updated Complex Escaping Round-trip Test - Unicode Escape System
 static void test21_complex_unicode_escaping_roundtrip() {
+    using namespace LabDb;
+
     std::cout << "🧪 Test 21: Complex Unicode escaping round-trip verification" << std::endl;
     
     std::string test_path = "/tmp/fio_complex_unicode_escaping_test.cpp";
@@ -77,14 +80,14 @@ static void test21_complex_unicode_escaping_roundtrip() {
     std::string write_cmd = "(fio-write :path \"" + test_path + "\" :content \"" + content_with_unicode_escapes + "\")";
     auto write_response = db9_execute(write_cmd);
     
-    assert(write_response.status == LabDb::Db9Response::Success);
+    assert(write_response.status == Db9Response::Success);
     assert(std::filesystem::exists(test_path));
     
     // Read back using fio-read
     std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
     auto read_response = db9_execute(read_cmd);
     
-    assert(read_response.status == LabDb::Db9Response::Success);
+    assert(read_response.status == Db9Response::Success);
     
     std::cout << "📄 Read response: " << read_response.result << std::endl;
     
@@ -194,7 +197,7 @@ static void test21_complex_unicode_escaping_roundtrip() {
     std::string search_printf_cmd = "(fio-search :path \"" + test_path + "\" :literal \"printf(\\\"Col1\\t\\\")";
     auto search_printf_response = db9_execute(search_printf_cmd);
     
-    if (search_printf_response.status == LabDb::Db9Response::Success &&
+    if (search_printf_response.status == Db9Response::Success &&
         search_printf_response.result.find("\"total_matches\": 1") != std::string::npos) {
         std::cout << "    ✅ Generated printf() is searchable" << std::endl;
     } else {
@@ -206,7 +209,7 @@ static void test21_complex_unicode_escaping_roundtrip() {
     std::string search_regex_cmd = "(fio-search :path \"" + test_path + "\" :literal \"std::regex word_digits\")";
     auto search_regex_response = db9_execute(search_regex_cmd);
     
-    if (search_regex_response.status == LabDb::Db9Response::Success &&
+    if (search_regex_response.status == Db9Response::Success &&
         search_regex_response.result.find("\"total_matches\": 1") != std::string::npos) {
         std::cout << "    ✅ Generated regex is searchable" << std::endl;
     } else {
@@ -224,7 +227,7 @@ static void test21_complex_unicode_escaping_roundtrip() {
     std::cout << "📝 Sample of generated C++ code:" << std::endl;
     std::string sample_cmd = "(fio-read :path \"" + test_path + "\" :lines \"@1:10\")";
     auto sample_response = db9_execute(sample_cmd);
-    if (sample_response.status == LabDb::Db9Response::Success) {
+    if (sample_response.status == Db9Response::Success) {
         std::cout << "  " << sample_response.result << std::endl;
     }
     
@@ -369,7 +372,7 @@ public:
             FioWriteTest test("/tmp/fio_test_edge_start.txt");
             std::string cmd = R"((fio-write :path "/tmp/fio_test_edge_start.txt" :lines "@1" :mode "insert" :content "FIRST LINE"))";
             auto response = db9_execute(cmd);
-            assert(response.status == LabDb::Db9Response::Success);
+            assert(response.status == Db9Response::Success);
             assert(test.verify_line_count(101));
             assert(test.verify_line_content(1, "FIRST LINE"));
             assert(test.verify_line_content(2, "Line 1"));
@@ -380,7 +383,7 @@ public:
             FioWriteTest test("/tmp/fio_test_edge_end.txt");
             std::string cmd = R"((fio-write :path "/tmp/fio_test_edge_end.txt" :lines "@100" :mode "insert" :content "BEFORE LAST"))";
             auto response = db9_execute(cmd);
-            assert(response.status == LabDb::Db9Response::Success);
+            assert(response.status == Db9Response::Success);
             assert(test.verify_line_count(101));
             assert(test.verify_line_content(100, "BEFORE LAST"));
             assert(test.verify_line_content(101, "Line 100"));
@@ -391,10 +394,10 @@ public:
             FioWriteTest test("/tmp/fio_test_edge_all.txt");
             std::string cmd = R"((fio-write :path "/tmp/fio_test_edge_all.txt" :lines "@1:100" :mode "replace" :content "REPLACED ALL"))";
             auto response = db9_execute(cmd);
-            if (response.status != LabDb::Db9Response::Success) {
+            if (response.status != Db9Response::Success) {
                 std::cerr << "Error replacing entire file content: " << response.error_message << std::endl;
             }
-            assert(response.status == LabDb::Db9Response::Success);
+            assert(response.status == Db9Response::Success);
             assert(test.verify_line_count(1));
             assert(test.verify_line_content(1, "REPLACED ALL"));
         }
@@ -424,10 +427,10 @@ NEW LINE 13
 NEW LINE 14
 NEW LINE 15"))";
         auto response1 = db9_execute(cmd1);
-        if (response1.status != LabDb::Db9Response::Success) {
+        if (response1.status != Db9Response::Success) {
             std::cerr << "Error replacing middle section: " << response1.error_message << std::endl;
         }
-        assert(response1.status == LabDb::Db9Response::Success);
+        assert(response1.status == Db9Response::Success);
         if (!test.verify_line_count(104)) {
             std::cerr << "Line count mismatch after complex multiline replace: expected 104, got " 
                       << test.read_current_lines().size() << std::endl;
@@ -444,7 +447,7 @@ NEW LINE 15"))";
 SHORT 2
 SHORT 3"))";
         auto response2 = db9_execute(cmd2);
-        assert(response2.status == LabDb::Db9Response::Success);
+        assert(response2.status == Db9Response::Success);
         assert(test.verify_line_count(92)); // Removed 11, added 3 = 100-11+3 = 92
         assert(test.verify_line_content(20, "SHORT 1"));
         assert(test.verify_line_content(22, "SHORT 3"));
@@ -461,7 +464,7 @@ SHORT 3"))";
         // Test 11a: Operations near file boundaries
         std::string cmd1 = R"((fio-write :path "/tmp/fio_test_boundary.txt" :mode "replace" :lines "@98:100" :content "LAST THREE"))";
         auto response1 = db9_execute(cmd1);
-        assert(response1.status == LabDb::Db9Response::Success);
+        assert(response1.status == Db9Response::Success);
         assert(test.verify_line_count(98)); // Removed 3, added 1
         assert(test.verify_line_content(98, "LAST THREE"));
 
@@ -470,7 +473,7 @@ SHORT 3"))";
         // Test 11b: Large range operations
         std::string cmd2 = R"((fio-write :path "/tmp/fio_test_boundary.txt" :lines "@1:50" :mode "replace" :content "FIRST HALF REPLACED"))";
         auto response2 = db9_execute(cmd2);
-        assert(response2.status == LabDb::Db9Response::Success);
+        assert(response2.status == Db9Response::Success);
         assert(test.verify_line_count(51)); // Removed 50, added 1
         assert(test.verify_line_content(1, "FIRST HALF REPLACED"));
         assert(test.verify_line_content(2, "Line 51")); // Original line 51 is now line 2
@@ -497,7 +500,7 @@ static void test_unicode_escape_documentation_validation() {
     {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"printf(″Hello world※n″);\")";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         // Read back and verify
         std::ifstream file(test_path);
@@ -516,7 +519,7 @@ static void test_unicode_escape_documentation_validation() {
     {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"regex(″pattern※d+″)\")";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         std::ifstream file(test_path);
         std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -534,7 +537,7 @@ static void test_unicode_escape_documentation_validation() {
     {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"path(″C:※※Users※※file″)\")";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         std::ifstream file(test_path);
         std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -556,7 +559,7 @@ static void test_unicode_escape_documentation_validation() {
         // Use the § delimiter syntax with Unicode escapes
         std::string cmd = "(fio-write :path §" + test_path + "§ :content §std::cout << ″Line one※nLine two″;§)";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         std::ifstream file(test_path);
         std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -574,7 +577,7 @@ static void test_unicode_escape_documentation_validation() {
     {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"printf(″Col1※tCol2※tCol3※n″);\")";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         std::ifstream file(test_path);
         std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -592,13 +595,13 @@ static void test_unicode_escape_documentation_validation() {
     {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"line1();↵line2();\")";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         // Read with fio-read to check line count
         std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
         auto read_response = db9_execute(read_cmd);
         
-        if (read_response.status == LabDb::Db9Response::Success && 
+        if (read_response.status == Db9Response::Success && 
             read_response.result.find("\"total_lines\": 2") != std::string::npos) {
             std::cout << "    ✅ ↵ correctly converted to actual newlines (2 lines)" << std::endl;
         } else {
@@ -612,7 +615,7 @@ static void test_unicode_escape_documentation_validation() {
     {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"if (true) {↵⇥printf(″indented″);↵}\")";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         std::ifstream file(test_path);
         std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -633,7 +636,7 @@ static void test_unicode_escape_documentation_validation() {
         std::string original = "std::string normal = \\\"no escapes here\\\";";
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"" + original + "\")";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         std::ifstream file(test_path);
         std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -651,13 +654,13 @@ static void test_unicode_escape_documentation_validation() {
     {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"⇥// Complex C++ code↵⇥std::regex email(″[a-z]+@[a-z]+※.[a-z]+″);↵⇥printf(″Email pattern: %s※n″, pattern.c_str());\")";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         
         // Verify the results using fio-search
         std::string search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"std::regex email\")";
         auto search_response = db9_execute(search_cmd);
         
-        if (search_response.status == LabDb::Db9Response::Success &&
+        if (search_response.status == Db9Response::Success &&
             search_response.result.find("\"total_matches\": 1") != std::string::npos) {
             std::cout << "    ✅ Complex Unicode escapes generated searchable C++ code" << std::endl;
         } else {
@@ -691,7 +694,7 @@ static void test12_error_conditions() {
     {
         std::string cmd = R"((fio-write :path "/tmp/fio_test_error.txt" :lines "@invalid" :content "BAD SPEC"))";
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Error);
+        assert(response.status == Db9Response::Error);
     }
 
     // Test 12c: Empty line specifications with line surgery mode
@@ -699,7 +702,7 @@ static void test12_error_conditions() {
         std::string cmd = R"((fio-write :path "/tmp/fio_test_error.txt" :lines "" :content "NO LINES"))";
         auto response = db9_execute(cmd);
         // Should fall back to full file write
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
     }
 
     // Test 12d: Invalid mode validation
@@ -709,7 +712,7 @@ static void test12_error_conditions() {
         auto response = db9_execute(cmd);
         
         // Should return error for unrecognized mode
-        assert(response.status == LabDb::Db9Response::Error);
+        assert(response.status == Db9Response::Error);
         assert(response.error_code == "invalid_mode");
         
         // Error message should mention the invalid mode
@@ -733,7 +736,7 @@ static void test12_error_conditions() {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"Default mode test\")";
         auto response = db9_execute(cmd);
         
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         assert(std::filesystem::exists(test_path));
         
         // Verify content was written
@@ -762,7 +765,7 @@ static void test23_unicode_escape_search_integration() {
     std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"printf(″Debug: %s※n″, message);↵fprintf(stderr, ″Error %d※n″, code);\")";
     std::cout << "Testing: " << cmd << std::endl;
     auto write_response = db9_execute(cmd);
-    assert(write_response.status == LabDb::Db9Response::Success);
+    assert(write_response.status == Db9Response::Success);
     
     // Search for the converted content using fio-search
     std::cout << "  🔍 Searching for printf with \\n..." << std::endl;
@@ -771,7 +774,7 @@ static void test23_unicode_escape_search_integration() {
 
     std::cout << "    Search response: " << search_response.result << std::endl;
 
-    if (search_response.status == LabDb::Db9Response::Success && 
+    if (search_response.status == Db9Response::Success && 
         search_response.result.find("\"total_matches\": 2") != std::string::npos) {
         std::cout << "    ✅ fio-search can find Unicode-escaped content correctly" << std::endl;
     } else {
@@ -784,7 +787,7 @@ static void test23_unicode_escape_search_integration() {
     std::string unicode_search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"※\")";
     auto unicode_search_response = db9_execute(unicode_search_cmd);
 
-    if (unicode_search_response.status == LabDb::Db9Response::Success &&
+    if (unicode_search_response.status == Db9Response::Success &&
         unicode_search_response.result.find("\"total_matches\": 0") != std::string::npos) {
         std::cout << "    ✅ Original ※ patterns correctly converted (not found in file)" << std::endl;
     } else {
@@ -797,7 +800,7 @@ static void test23_unicode_escape_search_integration() {
     std::string escape_search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"※n\" :escape true)";
     auto escape_search_response = db9_execute(escape_search_cmd);
 
-    if (escape_search_response.status == LabDb::Db9Response::Success &&
+    if (escape_search_response.status == Db9Response::Success &&
         escape_search_response.result.find("\"total_matches\": 2") != std::string::npos) {
         std::cout << "    ✅ Escape feature working - found \\n patterns using ※n with :escape true" << std::endl;
     } else {
@@ -809,7 +812,7 @@ static void test23_unicode_escape_search_integration() {
     std::string search_fprintf_cmd = "(fio-search :path \"" + test_path + "\" :literal \"fprintf(\")";
     auto search_fprintf_response = db9_execute(search_fprintf_cmd);
     
-    if (search_fprintf_response.status == LabDb::Db9Response::Success && 
+    if (search_fprintf_response.status == Db9Response::Success && 
         search_fprintf_response.result.find("\"total_matches\": 1") != std::string::npos) {
         std::cout << "    ✅ fio-search found fprintf with converted escapes" << std::endl;
     } else {
@@ -821,7 +824,7 @@ static void test23_unicode_escape_search_integration() {
     unicode_search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"※n\")";
     unicode_search_response = db9_execute(unicode_search_cmd);
     
-    if (unicode_search_response.status == LabDb::Db9Response::Success &&
+    if (unicode_search_response.status == Db9Response::Success &&
         unicode_search_response.result.find("\"total_matches\": 0") != std::string::npos) {
         std::cout << "    ✅ Original ※ patterns correctly converted (not found in file)" << std::endl;
     } else {
@@ -834,7 +837,7 @@ static void test23_unicode_escape_search_integration() {
     std::string quote_search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"″\")";
     auto quote_search_response = db9_execute(quote_search_cmd);
     
-    if (quote_search_response.status == LabDb::Db9Response::Success &&
+    if (quote_search_response.status == Db9Response::Success &&
         quote_search_response.result.find("\"total_matches\": 0") != std::string::npos) {
         std::cout << "    ✅ Original ″ patterns correctly converted (not found in file)" << std::endl;
     } else {
@@ -846,7 +849,7 @@ static void test23_unicode_escape_search_integration() {
     std::string newline_search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"↵\")";
     auto newline_search_response = db9_execute(newline_search_cmd);
     
-    if (newline_search_response.status == LabDb::Db9Response::Success &&
+    if (newline_search_response.status == Db9Response::Success &&
         newline_search_response.result.find("\"total_matches\": 0") != std::string::npos) {
         std::cout << "    ✅ Original ↵ patterns correctly converted to actual newlines" << std::endl;
     } else {
@@ -858,7 +861,7 @@ static void test23_unicode_escape_search_integration() {
     std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
     auto read_response = db9_execute(read_cmd);
     
-    if (read_response.status == LabDb::Db9Response::Success) {
+    if (read_response.status == Db9Response::Success) {
         std::cout << "    📝 Generated content: " << read_response.result << std::endl;
         
         // Check if we got the expected 2 lines
@@ -877,6 +880,7 @@ static void test23_unicode_escape_search_integration() {
 
 // Updated FIO Trilogy Workflow Test - Unicode Escape System
 static void test24_fio_trilogy_workflow() {
+    using namespace LabDb;
     std::cout << "🧪 Test 24: FIO Trilogy Workflow (Search → Read → Write)" << std::endl;
     
     std::string test_path = "/tmp/fio_trilogy_test.cpp";
@@ -906,7 +910,7 @@ static void test24_fio_trilogy_workflow() {
             
         std::string create_cmd = "(fio-write :path \"" + test_path + "\" :content \"" + initial_content + "\")";
         auto create_response = db9_execute(create_cmd);
-        assert(create_response.status == LabDb::Db9Response::Success);
+        assert(create_response.status == Db9Response::Success);
         std::cout << "    ✅ Initial file created with Unicode escapes" << std::endl;
     }
     
@@ -916,7 +920,7 @@ static void test24_fio_trilogy_workflow() {
         std::string search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"old_function_name\")";
         auto search_response = db9_execute(search_cmd);
         
-        assert(search_response.status == LabDb::Db9Response::Success);
+        assert(search_response.status == Db9Response::Success);
         std::cout << "    Search result: " << search_response.result << std::endl;
         
         // Should find 3 matches (definition + 2 calls)
@@ -933,7 +937,7 @@ static void test24_fio_trilogy_workflow() {
         std::string read_cmd = "(fio-read :path \"" + test_path + "\" :lines \"@3:5\")";
         auto read_response = db9_execute(read_cmd);
         
-        assert(read_response.status == LabDb::Db9Response::Success);
+        assert(read_response.status == Db9Response::Success);
         std::cout << "    Context around line 4: " << read_response.result << std::endl;
     }
     
@@ -943,7 +947,7 @@ static void test24_fio_trilogy_workflow() {
         std::string write_cmd = "(fio-write :path \"" + test_path + "\" :lines \"@4\" :content \"void new_improved_function() {\")";
         auto write_response = db9_execute(write_cmd);
         
-        assert(write_response.status == LabDb::Db9Response::Success);
+        assert(write_response.status == Db9Response::Success);
         std::cout << "    ✅ Function definition renamed" << std::endl;
     }
     
@@ -953,7 +957,7 @@ static void test24_fio_trilogy_workflow() {
         std::string read_cmd = "(fio-read :path \"" + test_path + "\" :lines \"@9:11\")";
         auto read_response = db9_execute(read_cmd);
         
-        assert(read_response.status == LabDb::Db9Response::Success);
+        assert(read_response.status == Db9Response::Success);
         std::cout << "    Context around line 10: " << read_response.result << std::endl;
     }
     
@@ -963,7 +967,7 @@ static void test24_fio_trilogy_workflow() {
         std::string write_cmd = "(fio-write :path \"" + test_path + "\" :lines \"@10\" :content \"    new_improved_function();  // Call to new function\")";
         auto write_response = db9_execute(write_cmd);
         
-        assert(write_response.status == LabDb::Db9Response::Success);
+        assert(write_response.status == Db9Response::Success);
         std::cout << "    ✅ First function call updated" << std::endl;
     }
     
@@ -973,7 +977,7 @@ static void test24_fio_trilogy_workflow() {
         std::string search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"old_function_name\")";
         auto search_response = db9_execute(search_cmd);
         
-        assert(search_response.status == LabDb::Db9Response::Success);
+        assert(search_response.status == Db9Response::Success);
         std::cout << "    Remaining matches: " << search_response.result << std::endl;
         
         // Should find 1 remaining match
@@ -996,7 +1000,7 @@ static void test24_fio_trilogy_workflow() {
         std::string write_cmd = "(fio-write :path \"" + test_path + "\" :lines \"@15\" :content \"    new_improved_function();\")";
         auto write_response = db9_execute(write_cmd);
         
-        assert(write_response.status == LabDb::Db9Response::Success);
+        assert(write_response.status == Db9Response::Success);
         std::cout << "    ✅ Last function call updated" << std::endl;
     }
     
@@ -1006,7 +1010,7 @@ static void test24_fio_trilogy_workflow() {
         std::string search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"old_function_name\")";
         auto search_response = db9_execute(search_cmd);
         
-        assert(search_response.status == LabDb::Db9Response::Success);
+        assert(search_response.status == Db9Response::Success);
         std::cout << "    Final search: " << search_response.result << std::endl;
         
         if (search_response.result.find("\"total_matches\": 0") != std::string::npos) {
@@ -1022,7 +1026,7 @@ static void test24_fio_trilogy_workflow() {
         std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
         auto read_response = db9_execute(read_cmd);
         
-        assert(read_response.status == LabDb::Db9Response::Success);
+        assert(read_response.status == Db9Response::Success);
         std::cout << "    Final file content: " << read_response.result << std::endl;
     }
     
@@ -1034,14 +1038,14 @@ static void test24_fio_trilogy_workflow() {
         std::string escape_cmd = "(fio-write :path \"" + test_path + "\" :lines \"@5\" :mode \"insert\" :content \"    printf(″Function called!※n″);  // Added with Unicode escapes\")";
         auto escape_response = db9_execute(escape_cmd);
         
-        assert(escape_response.status == LabDb::Db9Response::Success);
+        assert(escape_response.status == Db9Response::Success);
         std::cout << "    ✅ Added line with Unicode escapes" << std::endl;
         
         // Read the file to verify Unicode conversion worked
         std::string verify_read_cmd = "(fio-read :path \"" + test_path + "\" :lines \"@5:6\")";
         auto verify_read_response = db9_execute(verify_read_cmd);
         
-        if (verify_read_response.status == LabDb::Db9Response::Success) {
+        if (verify_read_response.status == Db9Response::Success) {
             std::string converted_content = FioUtils::extractContentFromReadResponse(verify_read_response.result);
             
             // Verify Unicode escapes were converted properly
@@ -1063,7 +1067,7 @@ static void test24_fio_trilogy_workflow() {
         auto search_escaped_response = db9_execute(search_escaped_cmd);
         
         /// @TODO rewrite this to use the extractContentFromSearchResponse utility
-        if (search_escaped_response.status == LabDb::Db9Response::Success &&
+        if (search_escaped_response.status == Db9Response::Success &&
             search_escaped_response.result.find("\"total_matches\": 1") != std::string::npos) {
             std::cout << "    ✅ UNICODE ESCAPES + SEARCH working together perfectly!" << std::endl;
         } else {
@@ -1075,7 +1079,7 @@ static void test24_fio_trilogy_workflow() {
         std::string search_unicode_cmd = "(fio-search :path \"" + test_path + "\" :literal \"※n\")";
         auto search_unicode_response = db9_execute(search_unicode_cmd);
         
-        if (search_unicode_response.status == LabDb::Db9Response::Success &&
+        if (search_unicode_response.status == Db9Response::Success &&
             search_unicode_response.result.find("\"total_matches\": 0") != std::string::npos) {
             std::cout << "    ✅ Unicode patterns correctly converted (not found)" << std::endl;
         } else {
@@ -1086,7 +1090,7 @@ static void test24_fio_trilogy_workflow() {
         std::string search_quote_cmd = "(fio-search :path \"" + test_path + "\" :literal \"″\")";
         auto search_quote_response = db9_execute(search_quote_cmd);
         
-        if (search_quote_response.status == LabDb::Db9Response::Success &&
+        if (search_quote_response.status == Db9Response::Success &&
             search_quote_response.result.find("\"total_matches\": 0") != std::string::npos) {
             std::cout << "    ✅ Unicode quotes correctly converted (not found)" << std::endl;
         } else {
@@ -1132,7 +1136,7 @@ static void test_unicode_escape_performance() {
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
-    assert(response.status == LabDb::Db9Response::Success);
+    assert(response.status == Db9Response::Success);
     
     std::cout << "  ⏱️ Large Unicode escape processing took: " << duration.count() << "ms" << std::endl;
     
@@ -1150,7 +1154,7 @@ static void test_unicode_escape_performance() {
     std::string verify_cmd = "(fio-search :path \"" + test_path + "\" :literal \"printf(\")";
     auto verify_response = db9_execute(verify_cmd);
     
-    if (verify_response.status == LabDb::Db9Response::Success &&
+    if (verify_response.status == Db9Response::Success &&
         verify_response.result.find("\"total_matches\":") != std::string::npos) {
         std::cout << "  ✅ Unicode escapes processed correctly in large content" << std::endl;
     } else {
@@ -1162,7 +1166,7 @@ static void test_unicode_escape_performance() {
     std::string regex_verify_cmd = "(fio-search :path \"" + test_path + "\" :literal \"std::regex pattern\")";
     auto regex_verify_response = db9_execute(regex_verify_cmd);
     
-    if (regex_verify_response.status == LabDb::Db9Response::Success &&
+    if (regex_verify_response.status == Db9Response::Success &&
         regex_verify_response.result.find("\"total_matches\":") != std::string::npos) {
         std::cout << "  ✅ Unicode regex escapes processed correctly" << std::endl;
     } else {
@@ -1186,7 +1190,7 @@ static void test_unicode_escape_performance() {
     
     bool all_converted = true;
     
-    if (check_backslash_response.status == LabDb::Db9Response::Success &&
+    if (check_backslash_response.status == Db9Response::Success &&
         check_backslash_response.result.find("\"total_matches\": 0") != std::string::npos) {
         std::cout << "  ✅ All ※ characters converted to backslashes" << std::endl;
     } else {
@@ -1194,7 +1198,7 @@ static void test_unicode_escape_performance() {
         all_converted = false;
     }
     
-    if (check_quote_response.status == LabDb::Db9Response::Success &&
+    if (check_quote_response.status == Db9Response::Success &&
         check_quote_response.result.find("\"total_matches\": 0") != std::string::npos) {
         std::cout << "  ✅ All ″ characters converted to quotes" << std::endl;
     } else {
@@ -1202,7 +1206,7 @@ static void test_unicode_escape_performance() {
         all_converted = false;
     }
     
-    if (check_newline_response.status == LabDb::Db9Response::Success &&
+    if (check_newline_response.status == Db9Response::Success &&
         check_newline_response.result.find("\"total_matches\": 0") != std::string::npos) {
         std::cout << "  ✅ All ↵ characters converted to newlines" << std::endl;
     } else {
@@ -1221,7 +1225,7 @@ static void test_unicode_escape_performance() {
     std::cout << "  📖 Sample of generated content:" << std::endl;
     std::string sample_cmd = "(fio-read :path \"" + test_path + "\" :lines \"@1:3\")";
     auto sample_response = db9_execute(sample_cmd);
-    if (sample_response.status == LabDb::Db9Response::Success) {
+    if (sample_response.status == Db9Response::Success) {
         std::cout << "    " << sample_response.result << std::endl;
     }
     
@@ -1250,7 +1254,7 @@ static void test_unicode_escape_performance() {
         auto end = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         std::cout << "  Large file operation took: " << duration.count() << "ms" << std::endl;
 
         // Cleanup
@@ -1537,7 +1541,7 @@ New line 2
 New line 3"))";
         auto response = db9_execute(cmd);
 
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         assert(test.verify_line_count(3));
         assert(test.verify_line_content(1, "New line 1"));
         assert(test.verify_line_content(2, "New line 2"));
@@ -1556,7 +1560,7 @@ New line 3"))";
         std::string cmd = "(fio-write :path \"/tmp/fio_test_single.txt\" :mode \"replace\" :lines \"@50\" :content \"REPLACED LINE 50\")";
         auto response = db9_execute(cmd);
         
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         test.debug_print_file("after single line replace");
         
         // Verify total count unchanged
@@ -1583,7 +1587,7 @@ New line 3"))";
 REPLACED LINE B"))";
         auto response = db9_execute(cmd);
 
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         test.debug_print_file("after range replace");
 
         // Should now have 99 lines (removed 3, added 2)
@@ -1614,7 +1618,7 @@ LAST LINE B"))";
 
         std::cout << "🔍 End-relative operation response: " << response.result << std::endl;
 
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         test.debug_print_file("after end-relative");
 
         // Should now have 99 lines (removed 3, added 2)
@@ -1641,7 +1645,7 @@ LAST LINE B"))";
         std::string cmd = "(fio-write :path \"/tmp/fio_test_insert.txt\" :lines \"@25\" :mode \"insert\" :content \"INSERTED LINE\")";
         auto response = db9_execute(cmd);
         
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         test.debug_print_file("after insert");
         
         // Should now have 101 lines
@@ -1703,9 +1707,9 @@ static void test_line_syntax_diagnostic() {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :lines \"" + test_case.syntax + "\" :mode \"insert\" :content \"INSERTED_" + test_case.syntax + "\")";
         auto response = db9_execute(cmd);
         
-        std::cout << "      Result: " << (response.status == LabDb::Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
+        std::cout << "      Result: " << (response.status == Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
         
-        if (response.status == LabDb::Db9Response::Success) {
+        if (response.status == Db9Response::Success) {
             // Show the result
             std::ifstream file(test_path);
             std::vector<std::string> lines;
@@ -1751,7 +1755,7 @@ static void test_line_syntax_diagnostic() {
         std::string cmd = "(fio-write :path \"" + test_path + "\" :lines \"" + test_case.syntax + "\" :mode \"replace\" :content \"REPLACED_" + test_case.syntax + "\")";
         auto response = db9_execute(cmd);
         
-        if (response.status == LabDb::Db9Response::Success) {
+        if (response.status == Db9Response::Success) {
             std::ifstream file(test_path);
             std::vector<std::string> lines;
             std::string line;
@@ -1786,7 +1790,7 @@ static void test_append_operations() {
     std::string cmd = "(fio-write :path \"/tmp/fio_test_append.txt\" :lines \"@75\" :mode \"append\" :content \"APPENDED LINE\")";
     auto response = db9_execute(cmd);
     
-    assert(response.status == LabDb::Db9Response::Success);
+    assert(response.status == Db9Response::Success);
     test.debug_print_file("after append");
     
     // Should now have 101 lines
@@ -1806,12 +1810,12 @@ static void test_append_operations() {
         std::string cmd_e0 = "(fio-write :path \"/tmp/fio_test_append_e0.txt\" :lines \"@e:0\" :mode \"append\" :content \"APPENDED AT END WITH @e:0\")";
         auto response_e0 = db9_execute(cmd_e0);
         
-        std::cout << "    @e:0 Response status: " << (response_e0.status == LabDb::Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
-        if (response_e0.status != LabDb::Db9Response::Success) {
+        std::cout << "    @e:0 Response status: " << (response_e0.status == Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
+        if (response_e0.status != Db9Response::Success) {
             std::cout << "    @e:0 Error: " << response_e0.error_message << std::endl;
         }
         
-        if (response_e0.status == LabDb::Db9Response::Success) {
+        if (response_e0.status == Db9Response::Success) {
             test_e0.debug_print_file("after @e:0 append");
             
             // Should now have 101 lines
@@ -1832,12 +1836,12 @@ static void test_append_operations() {
         std::string cmd_e1 = "(fio-write :path \"/tmp/fio_test_append_e1.txt\" :lines \"@e:-1\" :mode \"append\" :content \"APPENDED BEFORE LAST WITH @e:-1\")";
         auto response_e1 = db9_execute(cmd_e1);
         
-        std::cout << "    @e:-1 Response status: " << (response_e1.status == LabDb::Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
-        if (response_e1.status != LabDb::Db9Response::Success) {
+        std::cout << "    @e:-1 Response status: " << (response_e1.status == Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
+        if (response_e1.status != Db9Response::Success) {
             std::cout << "    @e:-1 Error: " << response_e1.error_message << std::endl;
         }
         
-        if (response_e1.status == LabDb::Db9Response::Success) {
+        if (response_e1.status == Db9Response::Success) {
             test_e1.debug_print_file("after @e:-1 append");
             
             // Should now have 101 lines
@@ -1859,12 +1863,12 @@ static void test_append_operations() {
         std::string cmd_default = "(fio-write :path \"/tmp/fio_test_append_default.txt\" :mode \"append\" :content \"APPENDED LINE AT END BY DEFAULT\")";
         auto response_default = db9_execute(cmd_default);
         
-        std::cout << "    Default append Response status: " << (response_default.status == LabDb::Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
-        if (response_default.status != LabDb::Db9Response::Success) {
+        std::cout << "    Default append Response status: " << (response_default.status == Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
+        if (response_default.status != Db9Response::Success) {
             std::cout << "    Default append Error: " << response_default.error_message << std::endl;
         }
         
-        if (response_default.status == LabDb::Db9Response::Success) {
+        if (response_default.status == Db9Response::Success) {
             test_default.debug_print_file("after default append");
             
             // Should now have 101 lines
@@ -1886,12 +1890,12 @@ static void test_append_operations() {
         std::string cmd_e0_replace = "(fio-write :path \"/tmp/fio_test_append_e0_replace.txt\" :lines \"@e:0\" :mode \"replace\" :content \"REPLACED AT END WITH @e:0\")";
         auto response_e0_replace = db9_execute(cmd_e0_replace);
         
-        std::cout << "    @e:0 replace Response status: " << (response_e0_replace.status == LabDb::Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
-        if (response_e0_replace.status != LabDb::Db9Response::Success) {
+        std::cout << "    @e:0 replace Response status: " << (response_e0_replace.status == Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
+        if (response_e0_replace.status != Db9Response::Success) {
             std::cout << "    @e:0 replace Error: " << response_e0_replace.error_message << std::endl;
         }
         
-        if (response_e0_replace.status == LabDb::Db9Response::Success) {
+        if (response_e0_replace.status == Db9Response::Success) {
             test_e0_replace.debug_print_file("after @e:0 replace");
             
             // Behavior depends on implementation - might append or replace last line
@@ -1923,7 +1927,7 @@ static void test_unicode_escaping() {
     std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"LINE1※nLINE2※nLINE3\")";
     auto response = db9_execute(cmd);
     
-    assert(response.status == LabDb::Db9Response::Success);
+    assert(response.status == Db9Response::Success);
     
     // Read back and verify escaping worked
     std::ifstream file(test_path);
@@ -1943,7 +1947,7 @@ static void test_unicode_escaping() {
     // Test quotes and tabs
     std::string multi_cmd = "(fio-write :path \"" + test_path + "\" :content \"printf(″Col1※tCol2※n″);\")";
     auto multi_response = db9_execute(multi_cmd);
-    assert(multi_response.status == LabDb::Db9Response::Success);
+    assert(multi_response.status == Db9Response::Success);
     
     std::ifstream multi_file(test_path);
     std::string multi_content((std::istreambuf_iterator<char>(multi_file)),
@@ -1984,13 +1988,13 @@ static void test_unicode_escaping() {
     
     std::string struct_cmd = "(fio-write :path \"" + test_path + "\" :content \"line1();↵⇥line2_indented();\")";
     auto struct_response = db9_execute(struct_cmd);
-    assert(struct_response.status == LabDb::Db9Response::Success);
+    assert(struct_response.status == Db9Response::Success);
     
     // Use fio-read to check line structure
     std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
     auto read_response = db9_execute(read_cmd);
     
-    if (read_response.status == LabDb::Db9Response::Success) {
+    if (read_response.status == Db9Response::Success) {
         if (read_response.result.find("\"total_lines\": 2") != std::string::npos) {
             std::cout << "✅ ↵ correctly created 2 lines" << std::endl;
         } else {
@@ -2026,7 +2030,7 @@ FIRST LINE B
 FIRST LINE C"))";
         auto response = db9_execute(cmd);
 
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
         test.debug_print_file("after fromstart");
 
         // Should now have 98 lines (removed 5, added 3)
@@ -2088,14 +2092,14 @@ static void test15_unicode_escape_sequences() {
     std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"" + unicode_content + "\")";
     auto response = db9_execute(cmd);
 
-    assert(response.status == LabDb::Db9Response::Success);
+    assert(response.status == Db9Response::Success);
     assert(std::filesystem::exists(test_path));
 
     // Read back and verify conversions
     std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
     auto read_response = db9_execute(read_cmd);
     
-    assert(read_response.status == LabDb::Db9Response::Success);
+    assert(read_response.status == Db9Response::Success);
     
     std::string content = FioUtils::extractContentFromReadResponse(read_response.result);    
     std::cout << "📊 Generated file content:" << std::endl;
@@ -2213,12 +2217,12 @@ static void test17_unicode_tab_and_mixed_escapes() {
     std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"" + unicode_content + "\")";
     auto response = db9_execute(cmd);
     
-    if (response.status == LabDb::Db9Response::Success) {
+    if (response.status == Db9Response::Success) {
         // Read back the converted content
         std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
         auto read_response = db9_execute(read_cmd);
         
-        if (read_response.status == LabDb::Db9Response::Success) {
+        if (read_response.status == Db9Response::Success) {
             std::cout << "📊 Read response: " << read_response.result << std::endl;
             
             // Extract content from JSON response
@@ -2308,7 +2312,7 @@ Line 4:     return x;
 Line 5: }"))";
 
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
 
         // Test fio-read to see if lines are preserved correctly
         std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
@@ -2342,7 +2346,7 @@ printf(\"Debug: %s\\n\", message);
 Done."))";
 
         auto response = db9_execute(cmd);
-        assert(response.status == LabDb::Db9Response::Success);
+        assert(response.status == Db9Response::Success);
 
         // Read back and analyze
         std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
@@ -2376,7 +2380,7 @@ static void test_unicode_help_vs_behavior_consistency() {
     std::string help_cmd = "(fio-write help)";
     auto help_response = db9_execute(help_cmd);
 
-    std::cout << "📊 Help response status: " << (help_response.status == LabDb::Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
+    std::cout << "📊 Help response status: " << (help_response.status == Db9Response::Success ? "SUCCESS" : "ERROR") << std::endl;
 
     // Check for specific claims in help text about Unicode escaping
     bool mentions_unicode_escaping = help_response.result.find("※") != std::string::npos;
@@ -2406,7 +2410,7 @@ static void test_unicode_help_vs_behavior_consistency() {
         std::string unicode_test_cmd = "(fio-write :path \"" + test_path + "\" :content \"Test※nLine\")";
         auto unicode_response = db9_execute(unicode_test_cmd);
         
-        if (unicode_response.status == LabDb::Db9Response::Success) {
+        if (unicode_response.status == Db9Response::Success) {
             std::ifstream file(test_path);
             std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             file.close();
@@ -2429,7 +2433,7 @@ static void test_unicode_help_vs_behavior_consistency() {
         std::string quote_test_cmd = "(fio-write :path \"" + test_path + "\" :content \"printf(″Hello″);\")";
         auto quote_response = db9_execute(quote_test_cmd);
         
-        if (quote_response.status == LabDb::Db9Response::Success) {
+        if (quote_response.status == Db9Response::Success) {
             std::ifstream file(test_path);
             std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             file.close();
@@ -2452,7 +2456,7 @@ static void test_unicode_help_vs_behavior_consistency() {
         std::string delimiter_test_cmd = "(fio-write :path §" + test_path + "§ :content §printf(″Test※n″);§)";
         auto delimiter_response = db9_execute(delimiter_test_cmd);
         
-        if (delimiter_response.status == LabDb::Db9Response::Success) {
+        if (delimiter_response.status == Db9Response::Success) {
             std::ifstream file(test_path);
             std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             file.close();
@@ -2475,16 +2479,16 @@ static void test_unicode_help_vs_behavior_consistency() {
         std::string newline_test_cmd = "(fio-write :path \"" + test_path + "\" :content \"line1();↵line2();\")";
         auto newline_response = db9_execute(newline_test_cmd);
         
-        if (newline_response.status == LabDb::Db9Response::Success) {
+        if (newline_response.status == Db9Response::Success) {
             std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
             auto read_response = db9_execute(read_cmd);
             
-            if (read_response.status == LabDb::Db9Response::Success &&
+            if (read_response.status == Db9Response::Success &&
                 read_response.result.find("\"total_lines\": 2") != std::string::npos) {
                 std::cout << "    ✅ ↵ NEWLINE ESCAPING WORKING: Creates actual newlines" << std::endl;
             } else {
                 std::cout << "    ❌ ↵ NEWLINE ESCAPING FAILED: Expected 2 lines" << std::endl;
-                if (read_response.status == LabDb::Db9Response::Success) {
+                if (read_response.status == Db9Response::Success) {
                     std::cout << "    📝 Read result: " << read_response.result << std::endl;
                 }
             }
@@ -2500,7 +2504,7 @@ static void test_unicode_help_vs_behavior_consistency() {
         std::string tab_test_cmd = "(fio-write :path \"" + test_path + "\" :content \"⇥indented_line();\")";
         auto tab_response = db9_execute(tab_test_cmd);
         
-        if (tab_response.status == LabDb::Db9Response::Success) {
+        if (tab_response.status == Db9Response::Success) {
             std::ifstream file(test_path);
             std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             file.close();

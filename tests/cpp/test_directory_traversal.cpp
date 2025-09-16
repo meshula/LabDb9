@@ -83,7 +83,7 @@ TEST(recursive_traversal_full_depth) {
     EXPECT_EQ(scifi_count, 3);     // briefcase, rabbit, tesseract
     EXPECT_EQ(fantasy_count, 3);   // ring, wand, staff
     EXPECT_EQ(unicode_count, 3);   // sanskrit, mixed, normalization
-    EXPECT_EQ(md_files.size(), 14);  // Total McGuffin files
+    EXPECT_EQ(md_files.size(), 15);  // Total McGuffin files + root files
 }
 
 TEST(performance_metrics) {
@@ -109,7 +109,7 @@ TEST(performance_metrics) {
     
     // Performance should be sub-millisecond for our small test corpus
     EXPECT_LT(duration.count(), 10000); // Less than 10ms
-    EXPECT_EQ(md_files.size(), 14);
+    EXPECT_EQ(md_files.size(), 15);
 }
 
 int main() {

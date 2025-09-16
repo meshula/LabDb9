@@ -43,7 +43,7 @@ static PyObject* py_execute_db9_command(PyObject* self, PyObject* args) {
         LabDb::Db9Response response = LabDb::getGlobalDb9Dispatcher().executeCommand(command_str);
         
         // Convert response to JSON and return as Python string
-        std::string json_result = response.toJson();
+        std::string json_result = response.toJsonString();
         return PyUnicode_FromString(json_result.c_str());
         
     } catch (...) {
@@ -87,7 +87,7 @@ static PyObject* py_execute_db9_commands(PyObject* self, PyObject* args) {
         LabDb::Db9Response response = LabDb::getGlobalDb9Dispatcher().executeCommands(commands);
         
         // Convert response to JSON and return as Python string
-        std::string json_result = response.toJson();
+        std::string json_result = response.toJsonString();
         return PyUnicode_FromString(json_result.c_str());
         
     } catch (...) {

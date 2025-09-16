@@ -1,0 +1,33 @@
+# Test script for file-based executeCommands with dbid substitution
+# This tests the new Db9Dispatcher::executeCommands(filePath, dbid) method
+
+# Create a test database
+(create-database :path "/tmp/test_file_commands.db9")
+
+# Open database - the dbid will be substituted by the method
+(open-database :path "/tmp/test_file_commands.db9")
+
+# Create some test entities with dbid substitution
+(add-entity :value "test-entity-1" :dbid §dbid§)
+(add-entity :value "test-entity-2" :dbid §dbid§)
+
+# Add some test triples
+(add-triple-semantic :subject "test-entity-1" :predicate "text-content" :object "This is test content for entity 1" :dbid §dbid§)
+(add-triple-semantic :subject "test-entity-2" :predicate "text-content" :object "This is test content for entity 2" :dbid §dbid§)
+
+# Test relationships
+(add-triple-semantic :subject "test-entity-1" :predicate "relates-to" :object "test-concept" :dbid §dbid§)
+
+# Query the data back
+(find-triple-enhanced :subject "*" :predicate "text-content" :object "*" :dbid §dbid§)
+
+# Test rope creation
+(rope-create :rope-name "test-rope" :description "Test rope for file loading" :dbid §dbid§)
+(rope-append :rope-name "test-rope" :entity-id "test-entity-1" :dbid §dbid§)
+(rope-append :rope-name "test-rope" :entity-id "test-entity-2" :dbid §dbid§)
+
+# Test chunk retrieval
+(rope-chunk :rope-name "test-rope" :center-entity "test-entity-1" :fragment-count 2 :dbid §dbid§)
+
+# Close database
+(close-database :dbid §dbid§)

@@ -24,4 +24,4 @@ private:
     CwdParameters extractParameters(const lab::Text::Sexpr& sexpr);
 };
 
-}
+} // namespace LabDb

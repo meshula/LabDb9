@@ -17,51 +17,11 @@ class Db9Dispatcher;
 
 // Forward declarations for line surgery
 struct LineRange;
-struct LineRange;
 
 //-----------------------------------------------------------------------------
 // File I/O Verb Declarations
 //-----------------------------------------------------------------------------
 
-/// Write content to file with atomic operations and backup support
-class FioWriteVerb : public IDb9Verb {
-public:
-    std::string getVerbName() const override { return "fio-write"; }
-    std::string getDescription() const override;
-    Db9Response execute(const lab::Text::Sexpr& sexpr) override;
-
-    struct IndexRange {
-        int start_idx;  // 0-based start index
-        int end_idx;    // 0-based end index
-        bool valid;
-        
-        IndexRange(int start, int end, bool v = true) : start_idx(start), end_idx(end), valid(v) {}
-    };
-
-private:
-    struct WriteParameters {
-        std::string path;
-        std::string content;
-        std::string encoding = "utf-8";
-        bool backup = true;
-        bool atomic = true;
-        std::string mode = "create"; // create, append, overwrite
-    };
-
-    Db9Response performTouchOperation(const std::string& path, std::chrono::steady_clock::time_point start_time);
-    WriteParameters extractParameters(const lab::Text::Sexpr& sexpr);
-    Db9Response performWrite(const WriteParameters& params);
-    Db9Response performFullFileWrite(const std::string& path, const std::string& content, std::chrono::steady_clock::time_point start_time);
-    Db9Response performLineSurgery(const std::string& path, const std::string& content, const LineRange& range, int write_mode_type, std::chrono::steady_clock::time_point start_time);
-    int performLineReplacement(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range);
-    int performLineInsertion(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range);
-    int performLineAppend(std::vector<std::string>& lines, const std::vector<std::string>& new_content, const LineRange& range);
-    int performLinePrepend(std::vector<std::string>& lines, const std::vector<std::string>& new_content);
-    std::string createBackupPath(const std::string& original_path);
-    bool validatePath(const std::string& path);
-    std::string generateTimestamp();
-    IndexRange calculateIndices(const LineRange& range, int file_line_count);
-};
 
 /// List directory contents with filtering and metadata
 class FioListVerb : public IDb9Verb {

@@ -89,6 +89,31 @@ EidResolutionResult IDb9Verb::resolveEidChain(const std::string& start_eid,
 // S-Expression Parameter Extraction
 //-----------------------------------------------------------------------------
 
+bool IDb9Verb::hasStringParam(const ::lab::Text::Sexpr& sexpr,
+                              const std::string& param_name) {
+    // Look for :param_name in the parsed S-expression
+    for (size_t i = 0; i < sexpr.expr.size() - 1; ++i) {
+        const auto& elem = sexpr.expr[i];
+        
+        // Look for atoms that match our parameter name
+        if (elem.token == tsSexprAtom) {
+            int stringIndex = elem.ref;
+            if (stringIndex >= 0 && stringIndex < static_cast<int>(sexpr.strings.size())) {
+                const std::string& atomValue = sexpr.strings[stringIndex];
+                
+                // Check if this matches our parameter (with or without leading :)
+                if (atomValue == ":" + param_name || atomValue == param_name) {
+                    return true;  // Parameter found
+                }
+            }
+        }
+    }
+    
+    return false; // Parameter not found
+}
+
+//-----------------------------------------------------------------------------
+
 std::string IDb9Verb::extractStringParam(const ::lab::Text::Sexpr& sexpr, 
                                          const std::string& param_name) {
     // Look for :param_name value pattern in the parsed S-expression

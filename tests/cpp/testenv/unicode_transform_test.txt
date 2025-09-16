@@ -1,0 +1,5 @@
+// Original code
+	if (debug) {
+		printf("Value: %d\n", x);
+	}
+// End marker

@@ -1,0 +1,2525 @@
+- title: Editorial and Scholarly Apparatus
+  description: Deleted text, editorial additions, and figure labels
+  editorial_content:
+    deletions:
+    - xml-line: 157
+      text: ἣ καλεῖται περιφέρεια
+      betacode: h(\ kalei=tai perife/reia
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 159
+      text: πρὸς τὴν τοῦ κύκλου περιφέρειαν
+      betacode: pro\s th\n tou= ku/klou perife/reian
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 207
+      text: καὶ ἐὰν ἀνίσοις ἴσα προστεθῇ, τὰ ὅλα ἐστὶν ἄνισα.
+      betacode: kai\ e)a\n a)ni/sois i)/sa prosteqh=|, ta\ o(/la e)sti\n a)/nisa.
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 208
+      text: καὶ τὰ τοῦ αὐτοῦ διπλάσια ἴσα ἀλλήλοις ἐστίν.
+      betacode: kai\ ta\ tou= au)tou= dipla/sia i)/sa a)llh/lois e)sti/n.
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 209
+      text: καὶ τὰ τοῦ αὐτοῦ ἡμίση ἴσα ἀλλήλοις ἐστίν.
+      betacode: kai\ ta\ tou= au)tou= h(mi/sh i)/sa a)llh/lois e)sti/n.
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='6']/p/del
+      status: unremarkable
+    - xml-line: 211
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 236
+      text: Ἐπὶ τῆς δοθείσης ἄρα εὐθείας πεπερασμένης τρίγωνον ἰσόπλευρον συνέσταται
+      betacode: "*)epi\\ th=s doqei/shs a)/ra eu)qei/as peperasme/nhs tri/gwnon \n\
+        i)so/pleuron sune/statai"
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 280
+      text: ταῖς
+      betacode: tai=s
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 317
+      text: ταῖς
+      betacode: tai=s
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 411
+      text: ταῖς
+      betacode: tai=s
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 441
+      text: ταῖς
+      betacode: tai=s
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 541
+      text: εὐθείᾳ
+      betacode: eu)qei/a|
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='13']/p/del
+      status: unremarkable
+    - xml-line: 602
+      text: Πόρισμα
+      betacode: '*po/risma'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 603
+      text: ἐκ δὴ τούτου φανερὸν ὅτι, ἐὰν δύο εὐθεῖαι τέμνωσιν ἀλλήλας, τὰς πρὸς τῇ
+        τομῇ γωνίας τέτρασιν ὀρθαῖς ἴσας ποιήσουσιν.
+      betacode: "e)k dh\\ tou/tou fanero\\n o(/ti, e)a\\n du/o eu)qei=ai te/mnwsin\
+        \ \na)llh/las, ta\\s pro\\s th=| tomh=| gwni/as te/trasin o)rqai=s i)/sas\
+        \ \npoih/sousin."
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 741
+      text: εὐθείαις
+      betacode: eu)qei/ais
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='22']/p/del
+      status: unremarkable
+    - xml-line: 742
+      text: διὰ τὸ καὶ παντὸς τριγώνου τὰς δύο πλευρὰς τῆς λοιπῆς μείζονας εἶναι πάντῃ
+        μεταλαμβανομένας
+      betacode: "dia\\ to\\ \nkai\\ panto\\s trigw/nou ta\\s du/o pleura\\s th=s loiph=s\
+        \ mei/zonas \nei)=nai pa/nth| metalambanome/nas"
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='22']/p/del
+      status: unremarkable
+    - xml-line: 791
+      text: ταῖς
+      betacode: tai=s
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='24']/p/del
+      status: unremarkable
+    - xml-line: 853
+      text: ἑκατέραν ἑκατέρᾳ
+      betacode: e(kate/ran e(kate/ra|
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='26']/p/del
+      status: unremarkable
+    - xml-line: 973
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='29']/p/del
+      status: unremarkable
+    - xml-line: 1001
+      text: Αἱ ἄρα τῇ αὐτῇ εὐθείᾳ παράλληλοι καὶ ἀλλήλαις εἰσὶ παράλληλοι·
+      betacode: "*ai( a)/ra th=| au)th=| eu)qei/a| para/llhloi \nkai\\ a)llh/lais\
+        \ ei)si\\ para/llhloi:"
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='29']/p/del
+      status: unremarkable
+    - xml-line: 1104
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 1144
+      text: καὶ αἱ ΕΒ, ΘΓ ἄρα ἴσαι τέ εἰσι καὶ παράλληλοι
+      betacode: kai\ ai( *e*b, *q*g a)/ra i)/sai te/ ei)si kai\ para/llhloi
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='36']/p/del
+      status: unremarkable
+    - xml-line: 1170
+      text: τὰ δὲ τῶν ἴσων ἡμίση ἴσα ἀλλήλοις ἐστίν
+      betacode: "ta\\ de\\ tw=n i)/swn h(mi/sh i)/sa \na)llh/lois e)sti/n"
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='37']/p/del
+      status: unremarkable
+    - xml-line: 1194
+      text: τὰ δὲ τῶν ἴσων ἡμίση ἴσα ἀλλήλοις ἐστίν
+      betacode: ta\ de\ tw=n i)/swn h(mi/sh i)/sa a)llh/lois e)sti/n
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='38']/p/del
+      status: unremarkable
+    - xml-line: 1230
+      text: τριγώνῳ
+      betacode: trigw/nw|
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='40']/p/del
+      status: unremarkable
+    - xml-line: 1231
+      text: τρίγωνον
+      betacode: tri/gwnon
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='40']/p/del
+      status: unremarkable
+    - xml-line: 1424
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='47']/p/del
+      status: unremarkable
+    - xml-line: 1426
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='47']/p/del
+      status: unremarkable
+    - xml-line: 1434
+      text: τὰ δὲ τῶν ἴσων διπλάσια ἴσα ἀλλήλοις ἐστίν·
+      betacode: 'ta\ de\ tw=n i)/swn dipla/sia i)/sa a)llh/lois e)sti/n:'
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='47']/p/del
+      status: unremarkable
+    - xml-line: 1445
+      text: γωνίαν
+      betacode: gwni/an
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='47']/p/del
+      status: unremarkable
+    - xml-line: 1470
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='1']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='48']/p/del
+      status: unremarkable
+    - xml-line: 1581
+      text: καὶ εἰς αὐτὰς ἐμπέπτωκεν εὐθεῖα ἡ ΓΒ
+      betacode: kai\ ei)s au)ta\s e)mpe/ptwken eu)qei=a h( *g*b
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 1588
+      text: ἀπὸ
+      betacode: a)po\
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 1604
+      text: πόρισμα
+      betacode: po/risma
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 1605
+      text: ἐκ δὴ τούτου φανερόν, ὅτι ἐν τοῖς τετραγώνοις χωρίοις τὰ περὶ τὴν διάμετρον
+        παραλληλόγραμμα τετράγωνά ἐστιν
+      betacode: "e)k dh\\ tou/tou fanero/n, o(/ti e)n toi=s tetragw/nois xwri/ois\
+        \ \nta\\ peri\\ th\\n dia/metron parallhlo/gramma tetra/gwna/ \ne)stin"
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 1666
+      text: περιεχομένῳ ὀρθογωνίῳ
+      betacode: "periexome/nw| \no)rqogwni/w|"
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='6']/p/del
+      status: unremarkable
+    - xml-line: 1725
+      text: τῇ ΑΒ εὐθεῖα
+      betacode: th=| *a*b eu)qei=a
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 1793
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 1851
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 1862
+      text: ἴση ἐστὶν ἡ ΕΓ τῇ ΓΑ,
+      betacode: "i)/sh \ne)sti\\n h( *e*g th=| *g*a,"
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 1863
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 1881
+      text: τετράγωνα
+      betacode: tetra/gwna
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 1881
+      text: τετραγώνων
+      betacode: tetragw/nwn
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 1883
+      text: τετράγωνα
+      betacode: tetra/gwna
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 1945
+      text: περιεχομένῳ ὀρθογωνίῳ
+      betacode: periexome/nw| o)rqogwni/w|
+      context: div1[@type='book'][@n='2']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 2064
+      text: κύκλου
+      betacode: ku/klou
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 2078
+      text: κύκλου
+      betacode: ku/klou
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 2121
+      text: εἰσίν
+      betacode: ei)si/n
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 2218
+      text: αἱ ἄρα ΒΕ, ΕΖ ἴσαι εἰσὶ τῇ ΑΖ
+      betacode: "ai( a)/ra *b*e, *e*z i)/sai ei)si\\ th=| \n*a*z"
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='7']/p/del
+      status: unremarkable
+    - xml-line: 2240
+      text: ἴση ἐστίν
+      betacode: i)/sh e)sti/n
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='7']/p/del
+      status: unremarkable
+    - xml-line: 2313
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 2404
+      text: καὶ ληφθῇ αὐτῶν τὰ κέντρα
+      betacode: kai\ lhfqh=| au)tw=n ta\ ke/ntra
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='11']/p/del
+      status: unremarkable
+    - xml-line: 2405
+      text: καὶ ἐκβαλλομένη
+      betacode: kai\ e)kballome/nh
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='11']/p/del
+      status: unremarkable
+    - xml-line: 2429
+      text: εὐθεῖα
+      betacode: eu)qei=a
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 2460
+      text: καθ’
+      betacode: kaq'
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='13']/p/del
+      status: unremarkable
+    - xml-line: 2527
+      text: ἐστίν
+      betacode: e)sti/n
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 2529
+      text: καὶ ἡ ΒΓ τῆς ΖΗ μείζων ἐστίν
+      betacode: "kai\\ h( *b*g th=s \n*z*h mei/zwn e)sti/n"
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 2588
+      text: καὶ ὅτι εὐθεῖα κύκλου καθ’ ἓν μόνον ἐφάπτεται σημεῖον, ἐπειδήπερ καὶ ἡ
+        κατὰ δύο αὐτῷ συμβάλλουσα ἐντὸς αὐτοῦ πίπτουσα ἐδείχθη
+      betacode: "kai\\ o(/ti eu)qei=a ku/klou kaq' e(\\n mo/non e)fa/ptetai shmei=on,\
+        \ \ne)peidh/per kai\\ h( kata\\ du/o au)tw=| sumba/llousa e)nto\\s \nau)tou=\
+        \ pi/ptousa e)dei/xqh"
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='16']/p/del
+      status: unremarkable
+    - xml-line: 2642
+      text: γωνίας
+      betacode: gwni/as
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='19']/p/del
+      status: unremarkable
+    - xml-line: 2650
+      text: οὖν
+      betacode: ou)=n
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='19']/p/del
+      status: unremarkable
+    - xml-line: 2689
+      text: αἱ γωνίαι
+      betacode: ai( gwni/ai
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='20']/p/del
+      status: unremarkable
+    - xml-line: 2823
+      text: τῶν ΒΓ, ΕΖ
+      betacode: tw=n *b*g, *e*z
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='26']/p/del
+      status: unremarkable
+    - xml-line: 2943
+      text: αἱ ἄρα ὑπὸ ΑΒΓ, ΑΔΓ γωνίαι δυσὶν ὀρθαῖς ἴσαι εἰσίν
+      betacode: "ai( a)/ra u(po\\ *a*b*g, *a*d*g gwni/ai \ndusi\\n o)rqai=s i)/sai\
+        \ ei)si/n"
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 2960
+      text: τμήματι
+      betacode: tmh/mati
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 2961
+      text: γωνία
+      betacode: gwni/a
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 2961
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 2962
+      text: γωνία
+      betacode: gwni/a
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 2964
+      text: πόρισμα
+      betacode: po/risma
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 2965
+      text: ἐκ δὴ τούτου φανερόν, ὅτι ἐὰν ἡ μία γωνία τριγώνου ταῖς δυσὶν ἴση ᾖ, ὀρθή
+        ἐστιν ἡ γωνία διὰ τὸ καὶ τὴν ἐκείνης ἐκτὸς ταῖς αὐταῖς ἴσην εἶναι· ἐὰν δὲ
+        αἱ ἐφεξῆς ἴσαι ὦσιν, ὀρθαί εἰσιν.
+      betacode: "e)k dh\\ tou/tou fanero/n, o(/ti e)a\\n h( mi/a gwni/a trigw/nou\
+        \ \ntai=s dusi\\n i)/sh h)=|, o)rqh/ e)stin h( gwni/a dia\\ to\\ kai\\ th\\\
+        n e)kei/nhs \ne)kto\\s tai=s au)tai=s i)/shn ei)=nai: e)a\\n de\\ ai( e)fech=s\
+        \ i)/sai \nw)=sin, o)rqai/ ei)sin."
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 3014
+      text: γωνία
+      betacode: gwni/a
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 3026
+      text: γωνίᾳ
+      betacode: gwni/a|
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 3044
+      text: γωνίᾳ
+      betacode: gwni/a|
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 3044
+      text: πάλιν
+      betacode: pa/lin
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 3101
+      text: γωνίᾳ
+      betacode: gwni/a|
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 3133
+      text: κοινὸν
+      betacode: koino\n
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='35']/p/del
+      status: unremarkable
+    - xml-line: 3190
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='36']/p/del
+      status: unremarkable
+    - xml-line: 3190
+      text: γωνία
+      betacode: gwni/a
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='36']/p/del
+      status: unremarkable
+    - xml-line: 3209
+      text: τῆς
+      betacode: th=s
+      context: div1[@type='book'][@n='3']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='37']/p/del
+      status: unremarkable
+    - xml-line: 3294
+      text: γωνίᾳ
+      betacode: gwni/a|
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 3304
+      text: ἰσογώνιον ἄρα ἐστὶ τὸ ΑΒΓ τρίγωνον τῷ ΔΕΖ τριγώνῳ, καὶ ἐγγέγραπται εἰς
+        τὸν ΑΒΓ κύκλον
+      betacode: "i)sogw/nion a)/ra e)sti\\ to\\ *a*b*g \ntri/gwnon tw=| *d*e*z trigw/nw|,\
+        \ kai\\ e)gge/graptai ei)s to\\n \n*a*b*g ku/klon"
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 3338
+      text: λοιπῇ
+      betacode: loiph=|
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 3404
+      text: πάλιν
+      betacode: pa/lin
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 3410
+      text: Πόρισμα
+      betacode: '*po/risma'
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 3418
+      text: ὥστε καὶ ὅταν ἐλάττων ὀρθῆς τυγχάνῃ ἡ διδομένη γωνία, ἐντὸς τοῦ τριγώνου
+        πεσοῦνται αἱ ΔΖ, ΕΖ, ὅταν δὲ ὀρθή, ἐπὶ τῆς ΒΓ, ὅταν δὲ μείζων ὀρθῆς, ἐκτὸς
+        τῆς ΒΓ· ὅπερ ἔδει ποιῆσαι.
+      betacode: "w(/ste kai\\ o(/tan e)la/ttwn o)rqh=s tugxa/nh| \nh( didome/nh gwni/a,\
+        \ e)nto\\s tou= trigw/nou pesou=ntai \nai( *d*z, *e*z, o(/tan de\\ o)rqh/,\
+        \ e)pi\\ th=s *b*g, o(/tan de\\ mei/zwn \no)rqh=s, e)kto\\s th=s *b*g: o(/per\
+        \ e)/dei poih=sai."
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 3465
+      text: καὶ ἑκατέρα ἄρα τῶν ΗΘ, ΖΚ ἑκατέρᾳ τῶν ΗΖ, ΘΚ ἐστιν ἴση
+      betacode: "kai\\ e(kate/ra a)/ra tw=n *h*q, *z*k e(kate/ra| tw=n *h*z, \n*q*k\
+        \ e)stin i)/sh"
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='7']/p/del
+      status: unremarkable
+    - xml-line: 3484
+      text: εἰσίν
+      betacode: ei)si/n
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 3491
+      text: εἰσίν
+      betacode: ei)si/n
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 3522
+      text: εὐθειῶν
+      betacode: eu)qeiw=n
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 3636
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 3637
+      text: γωνίᾳ
+      betacode: gwni/a|
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 3667
+      text: Περὶ τὸν δοθέντα ἄρα κύκλον πεντάγωνον ἰσόπλευρόν τε καὶ ἰσογώνιον περιγέγραπται
+      betacode: "*peri\\ to\\n doqe/nta a)/ra ku/klon penta/gwnon i)so/pleuro/n \n\
+        te kai\\ i)sogw/nion perige/graptai"
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 3680
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='13']/p/del
+      status: unremarkable
+    - xml-line: 3696
+      text: ὀρθῇ
+      betacode: o)rqh=|
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='13']/p/del
+      status: unremarkable
+    - xml-line: 3774
+      text: ταῖς ὑπὸ ΕΗΔ, ΔΗΓ, ΓΗΒ
+      betacode: tai=s u(po\ *e*h*d, *d*h*g, *g*h*b
+      context: div1[@type='book'][@n='4']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 4001
+      text: Καὶ
+      betacode: '*kai\'
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 4333
+      text: μέγεθος
+      betacode: me/geqos
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='14']/p/del
+      status: unremarkable
+    - xml-line: 4374
+      text: ἀνάλογον
+      betacode: a)na/logon
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='16']/p/del
+      status: unremarkable
+    - xml-line: 4388
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='16']/p/del
+      status: unremarkable
+    - xml-line: 4489
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='19']/p/del
+      status: unremarkable
+    - xml-line: 4490
+      text: Καὶ ἐπεὶ ἐδείχθη ὡς τὸ ΑΒ πρὸς τὸ ΓΔ, οὕτως τὸ ΕΒ πρὸς τὸ ΖΔ, καὶ ἐναλλὰξ
+        ὡς τὸ ΑΒ πρὸς τὸ ΒΕ οὕτως τὸ ΓΔ πρὸς τὸ ΖΔ, συγκείμενα ἄρα μεγέθη ἀνάλογόν
+        ἐστιν· ἐδείχθη δὲ ὡς τὸ ΒΑ πρὸς τὸ ΑΕ, οὕτως τὸ ΔΓ πρὸς τὸ ΓΖ· καί ἐστιν ἀναστρέψαντι
+      betacode: "*kai\\ e)pei\\ e)dei/xqh w(s to\\ *a*b pro\\s to\\ *g*d, ou(/tws\
+        \ to\\ \n*e*b pro\\s to\\ *z*d, kai\\ e)nalla\\c w(s to\\ *a*b pro\\s to\\\
+        \ *b*e \nou(/tws to\\ *g*d pro\\s to\\ *z*d, sugkei/mena a)/ra mege/qh \n\
+        a)na/logo/n e)stin: e)dei/xqh de\\ w(s to\\ *b*a pro\\s to\\ *a*e, ou(/tws\
+        \ \nto\\ *d*g pro\\s to\\ *g*z: kai/ e)stin a)nastre/yanti"
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='19']/p/del
+      status: unremarkable
+    - xml-line: 4513
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='20']/p/del
+      status: unremarkable
+    - xml-line: 4654
+      text: αὐτῶν
+      betacode: au)tw=n
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='25']/p/del
+      status: unremarkable
+    - xml-line: 4663
+      text: οὖν
+      betacode: ou)=n
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='25']/p/del
+      status: unremarkable
+    - xml-line: 4673
+      text: ἐπεὶ
+      betacode: e)pei\
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='25']/p/del
+      status: unremarkable
+    - xml-line: 4673
+      text: ἀνίσοις ἴσα προστεθῇ, τὰ ὅλα ἄνισά ἐστιν, ἐὰν ἄρα
+      betacode: "a)ni/sois i)/sa prosteqh=|, ta\\ o(/la a)/nisa/ \ne)stin, e)a\\n\
+        \ a)/ra"
+      context: div1[@type='book'][@n='5']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='25']/p/del
+      status: unremarkable
+    - xml-line: 4687
+      text: Ἀντιπεπονθότα δὲ σχήματά ἐστιν, ὅταν ἐν ἑκατέρῳ τῶν σχημάτων ἡγούμενοί
+        τε καὶ ἑπόμενοι λόγοι ὦσιν.
+      betacode: "*)antipeponqo/ta de\\ sxh/mata/ e)stin, o(/tan e)n e(kate/rw| \n\
+        tw=n sxhma/twn h(gou/menoi/ te kai\\ e(po/menoi lo/goi \nw)=sin."
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 4695
+      text: Λόγος ἐκ λόγων συγκεῖσθαι λέγεται, ὅταν αἱ τῶν λόγων πηλικότητες ἐφ’ ἑαυτὰς
+        πολλαπλασιασθεῖσαι ποιῶσί τινα.
+      betacode: "*lo/gos e)k lo/gwn sugkei=sqai le/getai, o(/tan ai( tw=n \nlo/gwn\
+        \ phliko/thtes e)f' e(auta\\s pollaplasiasqei=sai \npoiw=si/ tina."
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='5*']/p/del
+      status: unremarkable
+    - xml-line: 4711
+      text: ὁσαιδηποτοῦν
+      betacode: o(saidhpotou=n
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 4767
+      text: τρίγωνον
+      betacode: tri/gwnon
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 4835
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 4904
+      text: τριγώνῳ
+      betacode: trigw/nw|
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 4907
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 4914
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 4954
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='6']/p/del
+      status: unremarkable
+    - xml-line: 4994
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='7']/p/del
+      status: unremarkable
+    - xml-line: 5051
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 5054
+      text: τριγώνων
+      betacode: trigw/nwn
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 5071
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 5076
+      text: καὶ ἔτι τῆς βάσεως καὶ ἑνὸς ὁποιουοῦν τῶν τμημάτων ἡ πρὸς τῷ τμήματι πλευρὰ
+        μέση ἀνάλογόν ἐστιν
+      betacode: "kai\\ e)/ti th=s ba/sews kai\\ e(no\\s o(poiouou=n tw=n \ntmhma/twn\
+        \ h( pro\\s tw=| tmh/mati pleura\\ me/sh a)na/logo/n \ne)stin"
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 5082
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 5125
+      text: δύο εὐθεῖαι
+      betacode: du/o eu)qei=ai
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='11']/p/del
+      status: unremarkable
+    - xml-line: 5144
+      text: τυχοῦσαν
+      betacode: tuxou=san
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 5243
+      text: τρίγωνον
+      betacode: tri/gwnon
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 5259
+      text: γὰρ
+      betacode: ga\r
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='16']/p/del
+      status: unremarkable
+    - xml-line: 5309
+      text: ὀρθογώνιον
+      betacode: o)rqogw/nion
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 5401
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='19']/p/del
+      status: unremarkable
+    - xml-line: 5406
+      text: ἐπείπερ ἐδείχθη, ὡς ἡ ΓΒ πρὸς ΒΗ, οὕτως τὸ ΑΒΓ τρίγωνον πρὸς τὸ ΑΒΗ τρίγωνον,
+        τουτέστι τὸ ΔΕΖ
+      betacode: "e)pei/per e)dei/xqh, w(s h( *g*b pro\\s \n*b*h, ou(/tws to\\ *a*b*g\
+        \ tri/gwnon pro\\s to\\ *a*b*h tri/gwnon, \ntoute/sti to\\ *d*e*z"
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='19']/p/del
+      status: unremarkable
+    - xml-line: 5468
+      text: τρίγωνον
+      betacode: tri/gwnon
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='20']/p/del
+      status: unremarkable
+    - xml-line: 5502
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='20']/p/del
+      status: unremarkable
+    - xml-line: 5504
+      text: ὁμοίων
+      betacode: o(moi/wn
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='20']/p/del
+      status: unremarkable
+    - xml-line: 5509
+      text: πόρισμα β#
+      betacode: po/risma b#
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='20']/p/del
+      status: unremarkable
+    - xml-line: 5510
+      text: καὶ ἐὰν τῶν ΑΒ, ΖΗ τρίτην ἀνάλογον λάβωμεν τὴν Ξ, ἡ ΒΑ πρὸς τὴν Ξ διπλασίονα
+        λόγον ἔχει ἤπερ ἡ ΑΒ πρὸς τὴν ΖΗ. ἔχει δὲ καὶ τὸ πολύγωνον πρὸς τὸ πολύγωνον
+        ἢ τὸ τετράπλευρον πρὸς τὸ τετράπλευρον διπλασίονα λόγον ἤπερ ἡ ὁμόλογος πλευρὰ
+        πρὸς τὴν ὁμόλογον πλευράν, τουτέστιν ἡ ΑΒ πρὸς τὴν ΖΗ· ἐδείχθη δὲ τοῦτο καὶ
+        ἐπὶ τῶν τριγώνων· ὥστε καὶ καθόλου φανερόν, ὅτι, ἐὰν τρεῖς εὐθεῖαι ἀνάλογον
+        ὦσιν, ἔσται ὡς ἡ πρώτη πρὸς τὴν τρίτην, οὕτως τὸ ἀπὸ τῆς πρώτης εἶδος πρὸς
+        τὸ ἀπὸ τῆς δευτέρας τὸ ὅμοιον καὶ ὁμοίως ἀναγραφόμενον.
+      betacode: "kai\\ e)a\\n tw=n *a*b, *z*h tri/thn a)na/logon la/bwmen th\\n \n\
+        *c, h( *b*a pro\\s th\\n *c diplasi/ona lo/gon e)/xei h)/per h( *a*b \npro\\\
+        s th\\n *z*h. e)/xei de\\ kai\\ to\\ polu/gwnon pro\\s to\\ polu/gwnon \n\
+        h)\\ to\\ tetra/pleuron pro\\s to\\ tetra/pleuron diplasi/ona \nlo/gon h)/per\
+        \ h( o(mo/logos pleura\\ pro\\s th\\n o(mo/logon \npleura/n, toute/stin h(\
+        \ *a*b pro\\s th\\n *z*h: e)dei/xqh de\\ tou=to \nkai\\ e)pi\\ tw=n trigw/nwn:\
+        \ w(/ste kai\\ kaqo/lou fanero/n, o(/ti, \ne)a\\n trei=s eu)qei=ai a)na/logon\
+        \ w)=sin, e)/stai w(s h( prw/th pro\\s \nth\\n tri/thn, ou(/tws to\\ a)po\\\
+        \ th=s prw/ths ei)=dos pro\\s to\\ a)po\\ \nth=s deute/ras to\\ o(/moion kai\\\
+        \ o(moi/ws a)nagrafo/menon."
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='20']/p/del
+      status: unremarkable
+    - xml-line: 5531
+      text: ὥστε καὶ τὸ Α τῷ Β ἰσογώνιόν τέ ἐστι καὶ τὰς περὶ τὰς ἴσας γωνίας πλευρὰς
+        ἀνάλογον ἔχει
+      betacode: "w(/ste kai\\ to\\ *a tw=| *b \ni)sogw/nio/n te/ e)sti kai\\ ta\\\
+        s peri\\ ta\\s i)/sas \ngwni/as pleura\\s a)na/logon e)/xei"
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='21']/p/del
+      status: unremarkable
+    - xml-line: 5555
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='22']/p/del
+      status: unremarkable
+    - xml-line: 5585
+      text: λῆμμα
+      betacode: lh=mma
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='22']/p/del
+      status: unremarkable
+    - xml-line: 5586
+      text: ὅτι δέ, ἐὰν εὐθύγραμμα ἴσα ᾖ καὶ ὅμοια, αἱ ὁμόλογοι αὐτῶν πλευραὶ ἴσαι
+        ἀλλήλαις εἰσίν, δείξομεν οὕτως.
+      betacode: "o(/ti de/, e)a\\n eu)qu/gramma i)/sa h)=| kai\\ o(/moia, ai( o(mo/logoi\
+        \ \nau)tw=n pleurai\\ i)/sai a)llh/lais ei)si/n, dei/comen ou(/tws."
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='22']/p/del
+      status: unremarkable
+    - xml-line: 5588
+      text: ἔστω ἴσα καὶ ὅμοια εὐθύγραμμα τὰ ΝΘ, ΣΡ, καὶ ἔστω ὡς ἡ ΘΗ πρὸς τὴν ΗΝ,
+        οὕτως ἡ ΡΠ πρὸς τὴν ΠΣ· λέγω, ὅτι ἴση ἐστὶν ἡ ΡΠ τῇ ΘΗ.
+      betacode: "e)/stw i)/sa kai\\ o(/moia eu)qu/gramma ta\\ *n*q, *s*r, kai\\ \n\
+        e)/stw w(s h( *q*h pro\\s th\\n *h*n, ou(/tws h( *r*p pro\\s th\\n \n*p*s:\
+        \ le/gw, o(/ti i)/sh e)sti\\n h( *r*p th=| *q*h."
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='22']/p/del
+      status: unremarkable
+    - xml-line: 5591
+      text: εἰ γὰρ ἄνισοί εἰσιν, μία αὐτῶν μείζων ἐστίν. ἔστω μείζων ἡ ΡΠ τῆς ΘΗ.
+        καὶ ἐπεί ἐστιν ὡς ἡ ΡΠ πρὸς ΠΣ, οὕτως ἡ ΘΗ πρὸς τὴν ΗΝ, καὶ ἐναλλάξ, ὡς ἡ
+        ΡΠ πρὸς τὴν ΘΗ, οὕτως ἡ ΠΣ πρὸς τὴν ΗΝ, μείζων δὲ ἡ ΠΡ τῆς ΘΗ, μείζων ἄρα
+        καὶ ἡ ΠΣ τῆς ΗΝ· ὥστε καὶ τὸ ΡΣ μεῖζόν ἐστι τοῦ ΘΝ. ἀλλὰ καὶ ἴσον· ὅπερ ἀδύνατον.
+        οὐκ ἄρα ἄνισός ἐστιν ἡ ΠΡ τῇ ΗΘ· ἴση ἄρα· ὅπερ ἔδει δεῖξαι.
+      betacode: "ei) ga\\r a)/nisoi/ ei)sin, mi/a au)tw=n mei/zwn e)sti/n. e)/stw\
+        \  \nmei/zwn h( *r*p th=s *q*h. kai\\ e)pei/ e)stin w(s h( *r*p pro\\s \n\
+        *p*s, ou(/tws h( *q*h pro\\s th\\n *h*n, kai\\ e)nalla/c, w(s h( *r*p \npro\\\
+        s th\\n *q*h, ou(/tws h( *p*s pro\\s th\\n *h*n, mei/zwn de\\ h( \n*p*r th=s\
+        \ *q*h, mei/zwn a)/ra kai\\ h( *p*s th=s *h*n: w(/ste kai\\ \nto\\ *r*s mei=zo/n\
+        \ e)sti tou= *q*n. a)lla\\ kai\\ i)/son: o(/per a)du/naton. \nou)k a)/ra a)/niso/s\
+        \ e)stin h( *p*r th=| *h*q: i)/sh a)/ra: o(/per e)/dei \ndei=cai."
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='22']/p/del
+      status: unremarkable
+    - xml-line: 5678
+      text: παραλληλογράμμῳ
+      betacode: parallhlogra/mmw|
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='24']/p/del
+      status: unremarkable
+    - xml-line: 5728
+      text: αὐτῶν
+      betacode: au)tw=n
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='26']/p/del
+      status: unremarkable
+    - xml-line: 5751
+      text: παραλληλόγραμμον
+      betacode: parallhlo/grammon
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='27']/p/del
+      status: unremarkable
+    - xml-line: 5758
+      text: παραλληλογράμμοις
+      betacode: parallhlogra/mmois
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='27']/p/del
+      status: unremarkable
+    - xml-line: 5785
+      text: ᾧ δεῖ ἴσον παραβαλεῖν
+      betacode: w(=| dei= i)/son parabalei=n
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 5787
+      text: τοῦ τε ἀπὸ τῆς ἡμισείας καὶ ᾧ δεῖ ὅμοιον ἐλλείπειν
+      betacode: tou= te a)po\ th=s h(misei/as kai\ w(=| dei= o(/moion e)llei/pein
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 5806
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 5813
+      text: τὸ ΗΠ
+      betacode: to\ *h*p
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 5813
+      text: ἀλλὰ τὸ ΚΜ τῷ ΗΒ ὅμοιόν ἐστιν
+      betacode: a)lla\ to\ *k*m tw=| *h*b o(/moio/n e)stin
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 5829
+      text: ἐπειδήπερ τὸ ΠΒ τῷ ΗΠ ὅμοιόν ἐστιν
+      betacode: e)peidh/per to\ *p*b tw=| *h*p o(/moio/n e)stin
+      context: div1[@type='book'][@n='6']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 6013
+      text: Περισσάκις ἀρτιός ἐστιν ὁ ὑπὸ περισσοῦ ἀριθμοῦ μετρούμενος κατὰ ἄρτιον
+        ἀριθμόν
+      betacode: "*perissa/kis a)rtio/s e)stin o( u(po\\ perissou= a)riqmou= \nmetrou/menos\
+        \ kata\\ a)/rtion a)riqmo/n"
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 6047
+      text: ἀνίσων
+      betacode: a)ni/swn
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 6106
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 6179
+      text: ἀριθμοῦ
+      betacode: a)riqmou=
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 6193
+      text: εἰσὶν
+      betacode: ei)si\n
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 6238
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='7']/p/del
+      status: unremarkable
+    - xml-line: 6324
+      text: ὃ μέρος ἐστὶν ὁ ΑΗ τοῦ ΔΘ ἢ μέρη, τὸ αὐτὸ μέρος ἐστὶ καὶ ὁ ΗΒ τοῦ ΘΕ ἢ
+        τὰ αὐτὰ μέρη· καὶ ὃ ἄρα μέρος ἐστὶν ὁ ΑΗ τοῦ ΔΘ ἢ μέρη, τὸ αὐτὸ μέρος ἐστὶ
+        καὶ ὁ ΑΒ τοῦ ΔΕ ἢ τὰ αὐτὰ μέρη· ἀλλ’ ὃ μέρος ἐστὶν ὁ ΑΗ τοῦ ΔΘ ἢ μέρη, τὸ
+        αὐτὸ μέρος ἐδείχθη καὶ ὁ Γ τοῦ Ζ ἢ τὰ αὐτὰ μέρη, καὶ
+      betacode: "o(\\ me/ros \ne)sti\\n o( *a*h tou= *d*q h)\\ me/rh, to\\ au)to\\\
+        \ me/ros e)sti\\ kai\\ o( \n*h*b tou= *q*e h)\\ ta\\ au)ta\\ me/rh: kai\\\
+        \ o(\\ a)/ra me/ros e)sti\\n o(  \n*a*h tou= *d*q h)\\ me/rh, to\\ au)to\\\
+        \ me/ros e)sti\\ kai\\ o( *a*b tou= \n*d*e h)\\ ta\\ au)ta\\ me/rh: a)ll'\
+        \ o(\\ me/ros e)sti\\n o( *a*h tou= *d*q \nh)\\ me/rh, to\\ au)to\\ me/ros\
+        \ e)dei/xqh kai\\ o( *g tou= *z h)\\ ta\\ au)ta\\ \nme/rh, kai\\"
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 6330
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 6544
+      text: 2αὐτοῖς
+      betacode: 2au)toi=s
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='21']/p/del
+      status: unremarkable
+    - xml-line: 6586
+      text: τις
+      betacode: tis
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='23']/p/del
+      status: unremarkable
+    - xml-line: 6601
+      text: τις
+      betacode: tis
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='24']/p/del
+      status: unremarkable
+    - xml-line: 6656
+      text: καὶ ἀεὶ περὶ τοὺς ἄκρους τοῦτο συμβαίνει
+      betacode: "kai\\ a)ei\\ peri\\ tou\\s \na)/krous tou=to sumbai/nei"
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='27']/p/del
+      status: unremarkable
+    - xml-line: 6789
+      text: τινες
+      betacode: tines
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 6881
+      text: τινα
+      betacode: tina
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='36']/p/del
+      status: unremarkable
+    - xml-line: 6884
+      text: τὸν Ε
+      betacode: to\n *e
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='36']/p/del
+      status: unremarkable
+    - xml-line: 6892
+      text: τὸν Ε· καὶ
+      betacode: 'to\n *e: kai\'
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='36']/p/del
+      status: unremarkable
+    - xml-line: 6924
+      text: ἀριθμὸς
+      betacode: a)riqmo\s
+      context: div1[@type='book'][@n='7']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='38']/p/del
+      status: unremarkable
+    - xml-line: 6964
+      text: τῶν Α, Β, Γ, Δ
+      betacode: tw=n *a, *b, *g, *d
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 6964
+      text: τῶν Ε, Ζ, Η, Θ
+      betacode: "tw=n \n*e, *z, *h, *q"
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 6988
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 6996
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 7152
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 7177
+      text: οὐδὲ ὁ Ζ ἄρα τὸν Θ μετρεῖ
+      betacode: "ou)de\\ \no( *z a)/ra to\\n *q metrei="
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='6']/p/del
+      status: unremarkable
+    - xml-line: 7182
+      text: ἑξῆς
+      betacode: e(ch=s
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='7']/p/del
+      status: unremarkable
+    - xml-line: 7193
+      text: αὐτοῖς
+      betacode: au)toi=s
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 7303
+      text: μονὰς
+      betacode: mona\s
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 7398
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 7404
+      text: καὶ ἀεὶ περὶ τοὺς ἄκρους τοῦτο συμβαίνει
+      betacode: "kai\\ a)ei\\ peri\\ tou\\s a)/krous tou=to \nsumbai/nei"
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='13']/p/del
+      status: unremarkable
+    - xml-line: 7460
+      text: ποιείτω
+      betacode: poiei/tw
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 7520
+      text: πλευράν
+      betacode: pleura/n
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    - xml-line: 7530
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    - xml-line: 7561
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='19']/p/del
+      status: unremarkable
+    - xml-line: 7619
+      text: γὰρ
+      betacode: ga\r
+      context: div1[@type='book'][@n='8']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='20']/p/del
+      status: unremarkable
+    - xml-line: 7953
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 7953
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 7955
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 7973
+      text: ἑξῆς
+      betacode: e(ch=s
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 7983
+      text: καὶ τῶν ἕνα διαλειπόντων
+      betacode: "kai\\ tw=n \ne(/na dialeipo/ntwn"
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 8078
+      text: πρώτου
+      betacode: prw/tou
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 8087
+      text: ἄλλου
+      betacode: a)/llou
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='13']/p/del
+      status: unremarkable
+    - xml-line: 8192
+      text: ἐὰν γὰρ δύο ἀριθμοὶ πρῶτοι πρὸς ἀλλήλους ὦσιν, ὁ ἐκ τοῦ ἑνὸς αὐτῶν γενόμενος
+        πρὸς τὸν λοιπὸν πρῶτός ἐστιν
+      betacode: "e)a\\n ga\\r du/o a)riqmoi\\ prw=toi \npro\\s a)llh/lous w)=sin,\
+        \ o( e)k tou= e(no\\s au)tw=n geno/menos pro\\s \nto\\n loipo\\n prw=to/s\
+        \ e)stin"
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 8206
+      text: εἰσι
+      betacode: ei)si
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 8316
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='19']/p/del
+      status: unremarkable
+    - xml-line: 8384
+      text: ὁ ΓΑ ἔχει μέρος ἥμισυ
+      betacode: o( *g*a e)/xei me/ros h(/misu
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='24']/p/del
+      status: unremarkable
+    - xml-line: 8384
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='24']/p/del
+      status: unremarkable
+    - xml-line: 8406
+      text: γὰρ
+      betacode: ga\r
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='27']/p/del
+      status: unremarkable
+    - xml-line: 8450
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 8451
+      text: οἱ Α, Γ
+      betacode: oi( *a, *g
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='31']/p/del
+      status: unremarkable
+    - xml-line: 8467
+      text: τῶν Β, Γ, Δ
+      betacode: tw=n *b, *g, *d
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='32']/p/del
+      status: unremarkable
+    - xml-line: 8474
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='32']/p/del
+      status: unremarkable
+    - xml-line: 8576
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='9']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='36']/p/del
+      status: unremarkable
+    - xml-line: 8652
+      text: ἐκκειμένων
+      betacode: e)kkeime/nwn
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 8720
+      text: μετρεῖ
+      betacode: metrei=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 8746
+      text: μέγεθος
+      betacode: me/geqos
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 8750
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 8797
+      text: ἀριθμόν
+      betacode: a)riqmo/n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 8800
+      text: ἀριθμόν
+      betacode: a)riqmo/n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='5']/p/del
+      status: unremarkable
+    - xml-line: 8863
+      text: ἀριθμοῦ
+      betacode: a)riqmou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8863
+      text: ἀριθμὸν
+      betacode: a)riqmo\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8869
+      text: ἀριθμὸν
+      betacode: a)riqmo\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8872
+      text: ἀριθμὸς
+      betacode: a)riqmo\s
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8872
+      text: ἀριθμοῦ
+      betacode: a)riqmou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8873
+      text: ἀριθμόν
+      betacode: a)riqmo/n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8876
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8879
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8880
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8881
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8883
+      text: ἀριθμοῦ
+      betacode: a)riqmou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8883
+      text: ἀριθμοῦ
+      betacode: a)riqmou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8884
+      text: ἀριθμοῦ
+      betacode: a)riqmou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8884
+      text: ἀριθμὸν
+      betacode: a)riqmo\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8885
+      text: ἀριθμοῦ
+      betacode: a)riqmou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8885
+      text: ἀριθμὸν
+      betacode: a)riqmo\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8886
+      text: ἀριθμὸς
+      betacode: a)riqmo\s
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8887
+      text: ἀριθμόν
+      betacode: a)riqmo/n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8891
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8895
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8898
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8901
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8916
+      text: εἰσὶ
+      betacode: ei)si\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8929
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8937
+      text: εἰσι
+      betacode: ei)si
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 8978
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 9018
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 9060
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='14']/p/del
+      status: unremarkable
+    - xml-line: 9061
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='14']/p/del
+      status: unremarkable
+    - xml-line: 9063
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='14']/p/del
+      status: unremarkable
+    - xml-line: 9064
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='14']/p/del
+      status: unremarkable
+    - xml-line: 9118
+      text: αὐτὰ
+      betacode: au)ta\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='16']/p/del
+      status: unremarkable
+    - xml-line: 9155
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 9156
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 9203
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 9208
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    - xml-line: 9214
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    - xml-line: 9216
+      text: μέρει
+      betacode: me/rei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    - xml-line: 9225
+      text: οὖν
+      betacode: ou)=n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    - xml-line: 9249
+      text: εἰσὶ σύμμετροι
+      betacode: ei)si\ su/mmetroi
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    - xml-line: 9304
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='21']/p/del
+      status: unremarkable
+    - xml-line: 9306
+      text: τουτέστιν ἡ ἴσον αὐτῷ τετράγωνον δυναμένη
+      betacode: "toute/stin h( i)/son au)tw=| \ntetra/gwnon duname/nh"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='21']/p/del
+      status: unremarkable
+    - xml-line: 9351
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='22']/p/del
+      status: unremarkable
+    - xml-line: 9384
+      text: δύνανται γὰρ αὐτὰ εὐθεῖαι, αἵ εἰσι δυνάμει σύμμετροι, ὧν ἡ ἑτέρα μέση·
+        ὥστε καὶ ἡ λοιπὴ μέση ἐστίν.
+      betacode: "du/nantai ga\\r au)ta\\ eu)qei=ai, ai(/ ei)si  \nduna/mei su/mmetroi,\
+        \ w(=n h( e(te/ra me/sh: w(/ste kai\\ h( loiph\\ \nme/sh e)sti/n."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='23']/p/del
+      status: unremarkable
+    - xml-line: 9491
+      text: οὕτως
+      betacode: ou(/tws
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='27']/p/del
+      status: unremarkable
+    - xml-line: 9491
+      text: εἰσὶ
+      betacode: ei)si\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='27']/p/del
+      status: unremarkable
+    - xml-line: 9501
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='27']/p/del
+      status: unremarkable
+    - xml-line: 9506
+      text: τρεῖς
+      betacode: trei=s
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9533
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9553
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9554
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9556
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9557
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9559
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9561
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9561
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9571
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9575
+      text: τοῦ
+      betacode: tou=
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9586
+      text: αὐτῷ
+      betacode: au)tw=|
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9588
+      text: δυνατοῦ δὲ ὄντος καὶ κατὰ πλείονας τρόπους τοὺς εἰρημένους ἀριθμοὺς ἐπιδεικνύειν,
+        ἀρκείσθωσαν ἡμῖν οἱ εἰρημένοι, ἵνα μὴ μακροτέρας οὔσης τῆς πραγματείας ἐπὶ
+        πλέον αὐτὴν μηκύνωμεν.
+      betacode: "dunatou= de\\ o)/ntos kai\\ kata\\ plei/onas tro/pous tou\\s \nei)rhme/nous\
+        \ a)riqmou\\s e)pideiknu/ein, a)rkei/sqwsan h(mi=n oi(  \nei)rhme/noi, i(/na\
+        \ mh\\ makrote/ras ou)/shs th=s pragmatei/as e)pi\\ \nple/on au)th\\n mhku/nwmen."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='28']/p/del
+      status: unremarkable
+    - xml-line: 9603
+      text: οὖν
+      betacode: ou)=n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='29']/p/del
+      status: unremarkable
+    - xml-line: 9614
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='29']/p/del
+      status: unremarkable
+    - xml-line: 9697
+      text: μόνον
+      betacode: mo/non
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='32']/p/del
+      status: unremarkable
+    - xml-line: 9704
+      text: αἱ γὰρ Β, Γ ῥηταί εἰσι δυνάμει μόνον σύμμετροι
+      betacode: ai( ga\r *b, *g r(htai/ ei)si duna/mei mo/non su/mmetroi
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='32']/p/del
+      status: unremarkable
+    - xml-line: 9717
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='32']/p/del
+      status: unremarkable
+    - xml-line: 9719
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='32']/p/del
+      status: unremarkable
+    - xml-line: 9739
+      text: ἐὰν δὲ τέσσαρες εὐθεῖαι ἀνάλογον ὦσιν, τὸ ὑπὸ τῶν ἄκρων ἴσον ἐστὶ τῷ ὑπὸ
+        τῶν μέσων.
+      betacode: "e)a\\n de\\ te/ssares eu)qei=ai a)na/logon w)=sin, to\\ \nu(po\\\
+        \ tw=n a)/krwn i)/son e)sti\\ tw=| u(po\\ tw=n me/swn."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='32']/p/del
+      status: unremarkable
+    - xml-line: 9757
+      text: δύο
+      betacode: du/o
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 9793
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 9808
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 9861
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='36']/p/del
+      status: unremarkable
+    - xml-line: 9911
+      text: αὐτὸ
+      betacode: au)to\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='38']/p/del
+      status: unremarkable
+    - xml-line: 9922
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='39']/p/del
+      status: unremarkable
+    - xml-line: 9928
+      text: ῥητὸν δὲ τὸ συγκείμενον ἐκ τῶν ἀπὸ τῶν ΑΒ, ΒΓ
+      betacode: r(hto\n de\ to\ sugkei/menon e)k tw=n a)po\ tw=n *a*b, *b*g
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='39']/p/del
+      status: unremarkable
+    - xml-line: 10059
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='44']/p/del
+      status: unremarkable
+    - xml-line: 10127
+      text: δύο μέσα δυναμένη
+      betacode: du/o me/sa duname/nh
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='47']/p/del
+      status: unremarkable
+    - xml-line: 10160
+      text: σημεῖον
+      betacode: shmei=on
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 1']/div3[@type='number'][@n='47']/p/del
+      status: unremarkable
+    - xml-line: 10165
+      text: ἡ ὅλη
+      betacode: h( o(/lh
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Def 2']/div3[@type='number'][@n='1']/p/del
+      status: unremarkable
+    - xml-line: 10171
+      text: τοῦ ἐλάσσονος
+      betacode: tou= e)la/ssonos
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Def 2']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 10237
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='49']/p/del
+      status: unremarkable
+    - xml-line: 10290
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='50']/p/del
+      status: unremarkable
+    - xml-line: 10295
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='50']/p/del
+      status: unremarkable
+    - xml-line: 10320
+      text: μείζων δὲ ὁ ΒΑ τοῦ ΑΓ
+      betacode: mei/zwn de\ o( *b*a tou= *a*g
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='51']/p/del
+      status: unremarkable
+    - xml-line: 10339
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='52']/p/del
+      status: unremarkable
+    - xml-line: 10408
+      text: τῆς
+      betacode: th=s
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='53']/p/del
+      status: unremarkable
+    - xml-line: 10442
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='53']/p/del
+      status: unremarkable
+    - xml-line: 10445
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='53']/p/del
+      status: unremarkable
+    - xml-line: 10533
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='55']/p/del
+      status: unremarkable
+    - xml-line: 10549
+      text: ὥστε δυνάμει εἰσὶ σύμμετροι αἱ ΜΝ, ΝΞ
+      betacode: "w(/ste duna/mei ei)si\\ su/mmetroi ai( *m*n, \n*n*c"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='55']/p/del
+      status: unremarkable
+    - xml-line: 10579
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='56']/p/del
+      status: unremarkable
+    - xml-line: 10584
+      text: Καὶ
+      betacode: '*kai\'
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='56']/p/del
+      status: unremarkable
+    - xml-line: 10588
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='56']/p/del
+      status: unremarkable
+    - xml-line: 10603
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='57']/p/del
+      status: unremarkable
+    - xml-line: 10615
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='57']/p/del
+      status: unremarkable
+    - xml-line: 10617
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='57']/p/del
+      status: unremarkable
+    - xml-line: 10622
+      text: συγκείμενον
+      betacode: sugkei/menon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='57']/p/del
+      status: unremarkable
+    - xml-line: 10645
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='58']/p/del
+      status: unremarkable
+    - xml-line: 10648
+      text: αἱ ΒΑ, ΑΕ ῥηταί εἰσι δυνάμει μόνον σύμμετροι.
+      betacode: "ai( *b*a, *a*e r(htai/ ei)si duna/mei mo/non \nsu/mmetroi."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='58']/p/del
+      status: unremarkable
+    - xml-line: 10668
+      text: γὰρ
+      betacode: ga\r
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='59']/p/del
+      status: unremarkable
+    - xml-line: 10686
+      text: λῆμμα
+      betacode: lh=mma
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='59']/p/del
+      status: unremarkable
+    - xml-line: 10687
+      text: ἐὰν εὐθεῖα γραμμὴ τμηθῇ εἰς ἄνισα, τὰ ἀπὸ τῶν ἀνίσων τετράγωνα μείζονά
+        ἐστι τοῦ δὶς ὑπὸ τῶν ἀνίσων περιεχομένου ὀρθογωνίου.
+      betacode: "e)a\\n eu)qei=a grammh\\ tmhqh=| ei)s a)/nisa, ta\\ a)po\\ tw=n \n\
+        a)ni/swn tetra/gwna mei/zona/ e)sti tou= di\\s u(po\\ tw=n a)ni/swn \nperiexome/nou\
+        \ o)rqogwni/ou."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='59']/p/del
+      status: unremarkable
+    - xml-line: 10690
+      text: ἔστω εὐθεῖα ἡ ΑΒ καὶ τετμήσθω εἰς ἄνισα κατὰ τὸ Γ, καὶ ἔστω μείζων ἡ ΑΓ·
+        λέγω, ὅτι τὰ ἀπὸ τῶν ΑΓ, ΓΒ μείζονά ἐστι τοῦ δὶς ὑπὸ τῶν ΑΓ, ΓΒ.
+      betacode: "e)/stw eu)qei=a h( *a*b kai\\ tetmh/sqw ei)s a)/nisa kata\\ \nto\\\
+        \ *g, kai\\ e)/stw mei/zwn h( *a*g: le/gw, o(/ti ta\\ a)po\\ tw=n \n*a*g,\
+        \ *g*b mei/zona/ e)sti tou= di\\s u(po\\ tw=n *a*g, *g*b."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='59']/p/del
+      status: unremarkable
+    - xml-line: 10693
+      text: τετμήσθω γὰρ ἡ ΑΒ δίχα κατὰ τὸ Δ. ἐπεὶ
+      betacode: tetmh/sqw ga\r h( *a*b di/xa kata\ to\ *d. e)pei\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='59']/p/del
+      status: unremarkable
+    - xml-line: 10693
+      text: οὖν εὐθεῖα γραμμὴ τέτμηται εἰς μὲν ἴσα κατὰ τὸ Δ, εἰς δὲ ἄνισα κατὰ τὸ
+        Γ, τὸ ἄρα ὑπὸ τῶν ΑΓ, ΓΒ μετὰ τοῦ ἀπὸ ΓΔ ἴσον ἐστὶ τῷ ἀπὸ ΑΔ· ὥστε τὸ ὑπὸ
+        τῶν ΑΓ, ΓΒ ἔλαττόν ἐστι τοῦ ἀπὸ ΑΔ· τὸ ἄρα δὶς ὑπὸ τῶν ΑΓ, ΓΒ ἔλαττον ἢ διπλάσιόν
+        ἐστι τοῦ ἀπὸ ΑΔ. ἀλλὰ τὰ ἀπὸ τῶν ΑΓ, ΓΒ διπλάσιά [ἐστι] τῶν ἀπὸ τῶν ΑΔ, ΔΓ·
+        τὰ ἄρα ἀπὸ τῶν ΑΓ, ΓΒ μείζονά ἐστι τοῦ δὶς ὑπὸ τῶν ΑΓ, ΓΒ· ὅπερ ἔδει δεῖξαι.
+      betacode: "ou)=n eu)qei=a grammh\\ te/tmhtai ei)s me\\n i)/sa kata\\ \nto\\\
+        \ *d, ei)s de\\ a)/nisa kata\\ to\\ *g, to\\ a)/ra u(po\\ tw=n \n*a*g, *g*b\
+        \ meta\\ tou= a)po\\ *g*d i)/son e)sti\\ tw=| a)po\\ *a*d: \nw(/ste to\\ u(po\\\
+        \ tw=n *a*g, *g*b e)/latto/n e)sti tou= a)po\\ \n*a*d: to\\ a)/ra di\\s u(po\\\
+        \ tw=n *a*g, *g*b e)/latton h)\\ dipla/sio/n \ne)sti tou= a)po\\ *a*d. a)lla\\\
+        \ ta\\ a)po\\ tw=n *a*g, \n*g*b dipla/sia/ [e)sti] tw=n a)po\\ tw=n *a*d,\
+        \ *d*g: ta\\ a)/ra \na)po\\ tw=n *a*g, *g*b mei/zona/ e)sti tou= di\\s u(po\\\
+        \ tw=n *a*g, \n*g*b: o(/per e)/dei dei=cai."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='59']/p/del
+      status: unremarkable
+    - xml-line: 10717
+      text: ἑκατέρᾳ τῶν ΜΛ, ΗΖ
+      betacode: e(kate/ra| tw=n *m*l, *h*z
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='60']/p/del
+      status: unremarkable
+    - xml-line: 10723
+      text: σύμμετρόν ἐστι τοῖς ἀπὸ τῶν ΑΓ, ΓΒ· ῥητὸν ἄρα ἐστὶ τὸ συγκείμενον ἐκ τῶν
+        ἀπὸ τῶν ΑΓ, ΓΒ
+      betacode: "su/mmetro/n e)sti toi=s a)po\\ tw=n *a*g, *g*b: \nr(hto\\n a)/ra\
+        \ e)sti\\ to\\ sugkei/menon e)k tw=n a)po\\ tw=n *a*g, \n*g*b"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='60']/p/del
+      status: unremarkable
+    - xml-line: 10778
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='61']/p/del
+      status: unremarkable
+    - xml-line: 10893
+      text: ῥηταὶ
+      betacode: r(htai\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='64']/p/del
+      status: unremarkable
+    - xml-line: 10943
+      text: ἐπεί
+      betacode: e)pei/
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='66']/p/del
+      status: unremarkable
+    - xml-line: 10945
+      text: εἰσὶ
+      betacode: ei)si\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='66']/p/del
+      status: unremarkable
+    - xml-line: 10987
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='67']/p/del
+      status: unremarkable
+    - xml-line: 10997
+      text: καὶ διὰ τοῦτό ἐστιν ἐκ δύο μέσων πρώτη
+      betacode: "kai\\ dia\\ tou=to/ \ne)stin e)k du/o me/swn prw/th"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='67']/p/del
+      status: unremarkable
+    - xml-line: 11039
+      text: καὶ αὐτὴ
+      betacode: kai\ au)th\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='69']/p/del
+      status: unremarkable
+    - xml-line: 11053
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='69']/p/del
+      status: unremarkable
+    - xml-line: 11065
+      text: τετραγώνων
+      betacode: tetragw/nwn
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='70']/p/del
+      status: unremarkable
+    - xml-line: 11095
+      text: ῥητὴν
+      betacode: r(hth\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='71']/p/del
+      status: unremarkable
+    - xml-line: 11194
+      text: Ὁμοίως δὴ δείξομεν, ὅτι κἂν ἔλαττον ᾖ τὸ ΑΒ τοῦ ΓΔ, ἡ τὸ ΑΔ χωρίον δυναμένη
+        ἢ ἐκ δύο μέσων δευτέρα ἐστὶν ἤτοι δύο μέσα δυναμένη
+      betacode: "*(omoi/ws dh\\ dei/comen, o(/ti ka)\\n e)/latton h)=| to\\ *a*b tou=\
+        \ \n*g*d, h( to\\ *a*d xwri/on duname/nh h)\\ e)k du/o me/swn deute/ra \n\
+        e)sti\\n h)/toi du/o me/sa duname/nh"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='72']/p/del
+      status: unremarkable
+    - xml-line: 11285
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='75']/p/del
+      status: unremarkable
+    - xml-line: 11341
+      text: πλάτος ποιοῦν τὴν ΔΖ
+      betacode: "pla/tos poiou=n \nth\\n *d*z"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='78']/p/del
+      status: unremarkable
+    - xml-line: 11347
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='78']/p/del
+      status: unremarkable
+    - xml-line: 11360
+      text: ὀρθογώνιον
+      betacode: o)rqogw/nion
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='78']/p/del
+      status: unremarkable
+    - xml-line: 11364
+      text: μόνον
+      betacode: mo/non
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='79']/p/del
+      status: unremarkable
+    - xml-line: 11377
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='79']/p/del
+      status: unremarkable
+    - xml-line: 11402
+      text: πάλιν
+      betacode: pa/lin
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='80']/p/del
+      status: unremarkable
+    - xml-line: 11408
+      text: τετραγώνων
+      betacode: tetragw/nwn
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='80']/p/del
+      status: unremarkable
+    - xml-line: 11535
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 2']/div3[@type='number'][@n='84']/p/del
+      status: unremarkable
+    - xml-line: 11571
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Def 3']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 11621
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='86']/p/del
+      status: unremarkable
+    - xml-line: 11663
+      text: τετράγωνον
+      betacode: tetra/gwnon
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='87']/p/del
+      status: unremarkable
+    - xml-line: 11718
+      text: Λέγω δή, ὅτι καὶ τετάρτη
+      betacode: '*le/gw dh/, o(/ti kai\ teta/rth'
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='88']/p/del
+      status: unremarkable
+    - xml-line: 11735
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='89']/p/del
+      status: unremarkable
+    - xml-line: 11870
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='91']/p/del
+      status: unremarkable
+    - xml-line: 11921
+      text: ῥητὴ ἄρα καὶ ἑκατέρα τῶν ΔΕ, ΕΗ καὶ σύμμετρος τῇ ΑΓ μήκει.
+      betacode: "r(hth\\ a)/ra kai\\ e(kate/ra tw=n *d*e, *e*h \nkai\\ su/mmetros\
+        \ th=| *a*g mh/kei."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='92']/p/del
+      status: unremarkable
+    - xml-line: 11930
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='92']/p/del
+      status: unremarkable
+    - xml-line: 11935
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='92']/p/del
+      status: unremarkable
+    - xml-line: 11940
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='92']/p/del
+      status: unremarkable
+    - xml-line: 12013
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='93']/p/del
+      status: unremarkable
+    - xml-line: 12168
+      text: σημεῖον
+      betacode: shmei=on
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='96']/p/del
+      status: unremarkable
+    - xml-line: 12193
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='96']/p/del
+      status: unremarkable
+    - xml-line: 12251
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='97']/p/del
+      status: unremarkable
+    - xml-line: 12282
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='98']/p/del
+      status: unremarkable
+    - xml-line: 12307
+      text: καὶ ἐπεὶ σύμμετρόν ἐστι τὸ ἀπὸ τῆς ΑΗ τῷ ἀπὸ τῆς ΒΗ, σύμμετρόν ἐστι καὶ
+        τὸ ΓΘ τῷ ΚΛ, τουτέστιν ἡ ΓΚ τῇ ΚΜ.
+      betacode: "kai\\ e)pei\\ su/mmetro/n \ne)sti to\\ a)po\\ th=s *a*h tw=| a)po\\\
+        \ th=s *b*h, su/mmetro/n e)sti  \nkai\\ to\\ *g*q tw=| *k*l, toute/stin h(\
+        \ *g*k th=| *k*m."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='98']/p/del
+      status: unremarkable
+    - xml-line: 12336
+      text: καί ἐστι μέσα τὰ ἀπὸ τῶν ΑΗ, ΗΒ
+      betacode: "kai/ e)sti me/sa ta\\ a)po\\ tw=n *a*h, \n*h*b"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='99']/p/del
+      status: unremarkable
+    - xml-line: 12349
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='99']/p/del
+      status: unremarkable
+    - xml-line: 12373
+      text: ἀπὸ τῆς ΜΝ, τουτέστι τῷ
+      betacode: "a)po\\ th=s *m*n, \ntoute/sti tw=|"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='99']/p/del
+      status: unremarkable
+    - xml-line: 12416
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='100']/p/del
+      status: unremarkable
+    - xml-line: 12417
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='100']/p/del
+      status: unremarkable
+    - xml-line: 12419
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='100']/p/del
+      status: unremarkable
+    - xml-line: 12474
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='101']/p/del
+      status: unremarkable
+    - xml-line: 12514
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='102']/p/del
+      status: unremarkable
+    - xml-line: 12526
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='102']/p/del
+      status: unremarkable
+    - xml-line: 12560
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='103']/p/del
+      status: unremarkable
+    - xml-line: 12565
+      text: ἀποτομὴ ἄρα ἐστὶν ἡ ΓΔ.
+      betacode: "a)potomh\\ a)/ra \ne)sti\\n h( *g*d."
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='103']/p/del
+      status: unremarkable
+    - xml-line: 12567
+      text: λέγω δή, ὅτι καὶ τῇ τάξει ἡ αὐτὴ τῇ ΑΒ.
+      betacode: le/gw dh/, o(/ti kai\ th=| ta/cei h( au)th\ th=| *a*b.
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='103']/p/del
+      status: unremarkable
+    - xml-line: 12577
+      text: τῆς ΕΒ
+      betacode: th=s *e*b
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='103']/p/del
+      status: unremarkable
+    - xml-line: 12593
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='104']/p/del
+      status: unremarkable
+    - xml-line: 12599
+      text: γάρ
+      betacode: ga/r
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='104']/p/del
+      status: unremarkable
+    - xml-line: 12600
+      text: ἀλλ’ ὡς μὲν ἡ ΑΕ πρὸς τὴν ΕΒ, οὕτως τὸ ἀπὸ τῆς ΑΕ πρὸς τὸ ὑπὸ τῶν ΑΕ,
+        ΕΒ, ὡς δὲ ἡ ΓΖ πρὸς τὴν ΖΔ, οὕτως τὸ ἀπὸ τῆς ΓΖ πρὸς τὸ ὑπὸ τῶν ΓΖ, ΖΔ
+      betacode: "a)ll' w(s me\\n h( *a*e pro\\s th\\n *e*b, ou(/tws \nto\\ a)po\\\
+        \ th=s *a*e pro\\s to\\ u(po\\ tw=n *a*e, *e*b, w(s de\\ h( *g*z \npro\\s\
+        \ th\\n *z*d, ou(/tws to\\ a)po\\ th=s *g*z pro\\s to\\ u(po\\ tw=n \n*g*z,\
+        \ *z*d"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='104']/p/del
+      status: unremarkable
+    - xml-line: 12605
+      text: καὶ ἐναλλὰξ ὡς τὸ ἀπὸ τῆς ΑΕ πρὸς τὸ ἀπὸ τῆς ΓΖ, οὕτως τὸ ὑπὸ τῶν ΑΕ,
+        ΕΒ πρὸς τὸ ὑπὸ τῶν ΓΖ, ΖΔ
+      betacode: "kai\\ e)nalla\\c w(s to\\ a)po\\ th=s *a*e pro\\s to\\ a)po\\ \n\
+        th=s *g*z, ou(/tws to\\ u(po\\ tw=n *a*e, *e*b pro\\s to\\ u(po\\ tw=n \n\
+        *g*z, *z*d"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='104']/p/del
+      status: unremarkable
+    - xml-line: 12610
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='104']/p/del
+      status: unremarkable
+    - xml-line: 12611
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='104']/p/del
+      status: unremarkable
+    - xml-line: 12626
+      text: καὶ ἐναλλάξ
+      betacode: kai\ e)nalla/c
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='105']/p/del
+      status: unremarkable
+    - xml-line: 12682
+      text: τετραγώνων
+      betacode: tetragw/nwn
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='107']/p/del
+      status: unremarkable
+    - xml-line: 12761
+      text: προσαρμόζουσα δὲ ἡ ΖΚ. ἤτοι δὴ ἡ ΖΘ τῆς ΖΚ μεῖζον δύναται τῷ ἀπὸ συμμέτρου
+        ἢ τῷ ἀπὸ ἀσυμμέτρου ἑαυτῇ
+      betacode: "prosarmo/zousa de\\ h( *z*k. h)/toi dh\\ h( *z*q \nth=s *z*k mei=zon\
+        \ du/natai tw=| a)po\\ summe/trou h)\\ tw=| a)po\\ \na)summe/trou e(auth=|"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='110']/p/del
+      status: unremarkable
+    - xml-line: 12778
+      text: μήκει
+      betacode: mh/kei
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='110']/p/del
+      status: unremarkable
+    - xml-line: 12808
+      text: ἐπεὶ οὖν σύμμετρός ἐστιν ἡ ΔΖ τῇ ΗΖ, ῥητὴ δέ ἐστιν ἡ ΔΖ, ῥητὴ ἄρα ἐστὶ
+        καὶ ἡ ΗΖ. ἐπεὶ οὖν σύμμετρός ἐστιν ἡ ΔΖ τῇ ΗΖ μήκει
+      betacode: "e)pei\\ ou)=n su/mmetro/s e)stin h( \n*d*z th=| *h*z, r(hth\\ de/\
+        \ e)stin h( *d*z, r(hth\\ a)/ra e)sti\\ kai\\ h( \n*h*z. e)pei\\ ou)=n su/mmetro/s\
+        \ e)stin h( *d*z th=| *h*z mh/kei"
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='111']/p/del
+      status: unremarkable
+    - xml-line: 12812
+      text: εἰσι
+      betacode: ei)si
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='111']/p/del
+      status: unremarkable
+    - xml-line: 12817
+      text: Πόρισμα
+      betacode: '*po/risma'
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='111']/p/del
+      status: unremarkable
+    - xml-line: 12900
+      text: ἑαυτῇ
+      betacode: e(auth=|
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='112']/p/del
+      status: unremarkable
+    - xml-line: 12943
+      text: εἰσὶ
+      betacode: ei)si\
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='113']/p/del
+      status: unremarkable
+    - xml-line: 12953
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='113']/p/del
+      status: unremarkable
+    - xml-line: 12973
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='10']/div2[@type='type'][@n='Prop 3']/div3[@type='number'][@n='113']/p/del
+      status: unremarkable
+    - xml-line: 13039
+      text: ὑποκειμένῳ
+      betacode: u(pokeime/nw|
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Def']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 13137
+      text: ἐπιπέδῳ
+      betacode: e)pipe/dw|
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 13183
+      text: ἐστίν
+      betacode: e)sti/n
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 13259
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='6']/p/del
+      status: unremarkable
+    - xml-line: 13321
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='8']/p/del
+      status: unremarkable
+    - xml-line: 13520
+      text: διὰ τὰ αὐτὰ δὴ ἡ ΒΗ καὶ τῷ διὰ τῶν ΗΘ, ΗΚ ἐπιπέδῳ πρὸς ὀρθάς ἐστιν. τὸ
+        δὲ διὰ τῶν ΗΘ, ΗΚ ἐπίπεδόν ἐστι τὸ διὰ τῶν ΔΕ, ΕΖ· ἡ ΒΗ ἄρα τῷ διὰ τῶν ΔΕ,
+        ΕΖ ἐπιπέδῳ ἐστὶ πρὸς ὀρθάς. ἐδείχθη δὲ ἡ ΗΒ καὶ τῷ διὰ τῶν ΑΒ, ΒΓ ἐπιπέδῳ
+        πρὸς ὀρθάς
+      betacode: "dia\\ ta\\ au)ta\\ dh\\ h( *b*h kai\\ tw=| dia\\ tw=n *h*q, *h*k\
+        \ \ne)pipe/dw| pro\\s o)rqa/s e)stin. to\\ de\\ dia\\ tw=n *h*q, *h*k e)pi/pedo/n\
+        \ \ne)sti to\\ dia\\ tw=n *d*e, *e*z: h( *b*h a)/ra tw=| dia\\ tw=n \n*d*e,\
+        \ *e*z e)pipe/dw| e)sti\\ pro\\s o)rqa/s. e)dei/xqh de\\ h( *h*b kai\\ \n\
+        tw=| dia\\ tw=n *a*b, *b*g e)pipe/dw| pro\\s o)rqa/s"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 13694
+      text: γωνίαι
+      betacode: gwni/ai
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='21']/p/del
+      status: unremarkable
+    - xml-line: 13913
+      text: στερεοῦ
+      betacode: stereou=
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='25']/p/del
+      status: unremarkable
+    - xml-line: 13954
+      text: ἐπειδήπερ ἐὰν ἀπολάβωμεν ἴσας τὰς ΑΛ, ΔΓ καὶ ἐπιζεύξωμεν τὰς ΚΛ, ΘΛ, ΗΓ,
+        ΖΓ, ἐπεὶ ὅλη ἡ ὑπὸ ΒΑΛ ὅλῃ τῇ ὑπὸ ΕΔΓ ἐστιν ἴση, ὧν ἡ ὑπὸ ΒΑΚ τῇ ὑπὸ ΕΔΗ ὑπόκειται
+        ἴση, λοιπὴ ἄρα ἡ ὑπὸ ΚΑΛ λοιπῇ τῇ ὑπὸ ΗΔΓ ἐστιν ἴση. καὶ ἐπεὶ δύο αἱ ΚΑ, ΑΛ
+        δυσὶ ταῖς ΗΔ, ΔΓ ἴσαι εἰσίν, καὶ γωνίας ἴσας περιέχουσιν, βάσις ἄρα ἡ ΚΛ βάσει
+        τῇ ΗΓ ἐστιν ἴση. ἔστι δὲ καὶ ἡ ΚΘ τῇ ΗΖ ἴση· δύο δὴ αἱ ΛΚ, ΚΘ δυσὶ ταῖς ΓΗ,
+        ΗΖ εἰσιν ἴσαι· καὶ γωνίας ὀρθὰς περιέχουσιν· βάσις ἄρα ἡ ΘΛ βάσει τῇ ΖΓ ἐστιν
+        ἴση. καὶ ἐπεὶ δύο αἱ ΘΑ, ΑΛ δυσὶ ταῖς ΖΔ, ΔΓ εἰσιν ἴσαι, καὶ βάσις ἡ ΘΛ βάσει
+        τῇ ΖΓ ἐστιν ἴση, γωνία ἄρα ἡ ὑπὸ ΘΑΛ γωνίᾳ τῇ ὑπὸ ΖΔΓ ἐστιν ἴση
+      betacode: "e)peidh/per e)a\\n a)pola/bwmen i)/sas ta\\s *a*l, \n*d*g kai\\ e)pizeu/cwmen\
+        \ ta\\s *k*l, *q*l, *h*g, *z*g, e)pei\\ o(/lh h( \nu(po\\ *b*a*l o(/lh| th=|\
+        \ u(po\\ *e*d*g e)stin i)/sh, w(=n h( u(po\\ *b*a*k th=| \nu(po\\ *e*d*h u(po/keitai\
+        \ i)/sh, loiph\\ a)/ra h( u(po\\ *k*a*l loiph=| th=| \nu(po\\ *h*d*g e)stin\
+        \ i)/sh. kai\\ e)pei\\ du/o ai( *k*a, *a*l dusi\\ tai=s \n*h*d, *d*g i)/sai\
+        \ ei)si/n, kai\\ gwni/as i)/sas perie/xousin, ba/sis \na)/ra h( *k*l ba/sei\
+        \ th=| *h*g e)stin i)/sh. e)/sti de\\ kai\\ h( *k*q th=| \n*h*z i)/sh: du/o\
+        \ dh\\ ai( *l*k, *k*q dusi\\ tai=s *g*h, *h*z ei)sin \ni)/sai: kai\\ gwni/as\
+        \ o)rqa\\s perie/xousin: ba/sis a)/ra h( *q*l ba/sei \nth=| *z*g e)stin i)/sh.\
+        \ kai\\ e)pei\\ du/o ai( *q*a, *a*l dusi\\ tai=s *z*d, \n*d*g ei)sin i)/sai,\
+        \ kai\\ ba/sis h( *q*l ba/sei th=| *z*g e)stin i)/sh, \ngwni/a a)/ra h( u(po\\\
+        \ *q*a*l gwni/a| th=| u(po\\ *z*d*g e)stin i)/sh"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='26']/p/del
+      status: unremarkable
+    - xml-line: 14196
+      text: καὶ ὅμοιον
+      betacode: kai\ o(/moion
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 14199
+      text: παραλληλογράμμῳ
+      betacode: parallhlogra/mmw|
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 14213
+      text: παραλληλόγραμμον
+      betacode: parallhlo/grammon
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 14231
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='33']/p/del
+      status: unremarkable
+    - xml-line: 14259
+      text: εἰ γὰρ τῶν ΕΘ, ΝΠ βάσεων ἴσων οὐσῶν μὴ εἴη τὰ ΑΗ, ΓΜ ὕψη ἴσα, οὐδ’ ἄρα
+        τὸ ΑΒ στερεὸν ἴσον ἔσται τῷ ΓΔ. ὑπόκειται δὲ ἴσον· οὐκ ἄρα ἄνισόν ἐστι τὸ
+        ΓΜ ὕψος τῷ ΑΗ ὕψει· ἴσον ἄρα
+      betacode: "ei) ga\\r tw=n *e*q, \n*n*p ba/sewn i)/swn ou)sw=n mh\\ ei)/h ta\\\
+        \ *a*h, *g*m u(/yh i)/sa,  \nou)d' a)/ra to\\ *a*b stereo\\n i)/son e)/stai\
+        \ tw=| *g*d. u(po/keitai de\\ \ni)/son: ou)k a)/ra a)/niso/n e)sti to\\ *g*m\
+        \ u(/yos tw=| *a*h u(/yei: i)/son \na)/ra"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14268
+      text: εἰ γὰρ μή, οὐδ’ ἄρα πάλιν τὰ ΑΒ, ΓΔ στερεὰ ἴσα ἔσται· ὑπόκειται δὲ ἴσα
+      betacode: "ei) ga\\r mh/, ou)d' \na)/ra pa/lin ta\\ *a*b, *g*d sterea\\ i)/sa\
+        \ e)/stai: u(po/keitai de\\ \ni)/sa"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14290
+      text: γὰρ
+      betacode: ga\r
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14298
+      text: βάσει
+      betacode: ba/sei
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14305
+      text: βάσις
+      betacode: ba/sis
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14313
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14326
+      text: ὧν αἱ ἐφεστῶσαι οὐκ εἰσὶν ἐπὶ τῶν αὐτῶν εὐθειῶν
+      betacode: "w(=n ai( e)festw=sai ou)k \nei)si\\n e)pi\\ tw=n au)tw=n eu)qeiw=n"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14329
+      text: ὧν αἱ ἐφεστῶσαι οὐκ εἰσὶν ἐπὶ τῶν αὐτῶν εὐθειῶν
+      betacode: "w(=n ai( e)festw=sai ou)k ei)si\\n e)pi\\ \ntw=n au)tw=n eu)qeiw=n"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14331
+      text: τῶν δὲ ἴσων στερεῶν παραλληλεπιπέδων, ὧν τὰ ὕψη πρὸς ὀρθάς ἐστι ταῖς βάσεσιν
+        αὐτῶν,
+      betacode: "tw=n de\\ i)/swn sterew=n parallhlepipe/dwn, \nw(=n ta\\ u(/yh pro\\\
+        s o)rqa/s e)sti tai=s ba/sesin au)tw=n,"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14332
+      text: ἀντιπεπόνθασιν αἱ βάσεις τοῖς ὕψεσιν
+      betacode: a)ntipepo/nqasin ai( ba/seis toi=s u(/yesin
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14359
+      text: ὧν δὲ στερεῶν παραλληλεπιπέδων τὰ ὕψη πρὸς ὀρθάς ἐστι ταῖς βάσεσιν αὐτῶν,
+        ἀντιπεπόνθασι δὲ αἱ βάσεις τοῖς ὕψεσιν, ἴσα ἐστὶν ἐκεῖνα
+      betacode: "w(=n de\\ sterew=n parallhlepipe/dwn ta\\ u(/yh pro\\s \no)rqa/s\
+        \ e)sti tai=s ba/sesin au)tw=n, a)ntipepo/nqasi de\\ ai( ba/seis \ntoi=s u(/yesin,\
+        \ i)/sa e)sti\\n e)kei=na"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14363
+      text: εἰσι
+      betacode: ei)si
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14364
+      text: ὧν αἱ ἐφεστῶσαι οὐκ εἰσὶν ἐπὶ τῶν αὐτῶν εὐθειῶν
+      betacode: w(=n ai( e)festw=sai ou)k ei)si\n e)pi\ tw=n au)tw=n eu)qeiw=n
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14365
+      text: ἐπί τε γὰρ πάλιν τῆς αὐτῆς βάσεώς εἰσι τῆς ΞΡ καὶ ὑπὸ τὸ αὐτὸ ὕψος καὶ
+        οὐκ ἐν ταῖς αὐταῖς εὐθείαις
+      betacode: "e)pi/ te ga\\r  \npa/lin th=s au)th=s ba/sew/s ei)si th=s *c*r kai\\\
+        \ u(po\\ to\\ au)to\\ u(/yos \nkai\\ ou)k e)n tai=s au)tai=s eu)qei/ais"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='34']/p/del
+      status: unremarkable
+    - xml-line: 14412
+      text: οὕτως· ἐπεζεύχθωσαν αἱ ΘΒ, ΜΕ. καὶ ἐπεὶ τὸ ἀπὸ τῆς ΑΘ ἴσον ἐστὶ τοῖς ἀπὸ
+        τῶν ΑΚ, ΚΘ, τῷ δὲ ἀπὸ τῆς ΑΚ ἴσα ἐστὶ τὰ ἀπὸ τῶν ΑΒ, ΒΚ, τὰ ἄρα ἀπὸ τῶν ΑΒ,
+        ΒΚ, ΚΘ ἴσα ἐστὶ τῷ ἀπὸ ΑΘ. ἀλλὰ τοῖς ἀπὸ τῶν ΒΚ, ΚΘ ἴσον ἐστὶ τὸ ἀπὸ τῆς ΒΘ·
+        ὀρθὴ γὰρ ἡ ὑπὸ ΘΚΒ γωνία διὰ τὸ καὶ τὴν ΘΚ κάθετον εἶναι ἐπὶ τὸ ὑποκείμενον
+        ἐπίπεδον· τὸ ἄρα ἀπὸ τῆς ΑΘ ἴσον ἐστὶ τοῖς ἀπὸ τῶν ΑΒ, ΒΘ· ὀρθὴ ἄρα ἐστὶν
+        ἡ ὑπὸ ΑΒΘ γωνία. διὰ τὰ αὐτὰ δὴ καὶ ἡ ὑπὸ ΔΕΜ γωνία ὀρθή ἐστιν. ἔστι δὲ καὶ
+        ἡ ὑπὸ ΒΑΘ γωνία τῇ ὑπὸ ΕΔΜ ἴση· ὑπόκεινται γάρ· καὶ ἔστιν ἡ ΑΘ τῇ ΔΜ ἴση·
+        ἴση ἄρα ἐστὶ καὶ ἡ ΑΒ τῇ ΔΕ
+      betacode: "ou(/tws: e)pezeu/xqwsan ai( *q*b, *m*e. kai\\ e)pei\\ to\\ a)po\\\
+        \ \nth=s *a*q i)/son e)sti\\ toi=s a)po\\ tw=n *a*k, *k*q, tw=| de\\ a)po\\\
+        \ th=s \n*a*k i)/sa e)sti\\ ta\\ a)po\\ tw=n *a*b, *b*k, ta\\ a)/ra a)po\\\
+        \ tw=n *a*b, \n*b*k, *k*q i)/sa e)sti\\ tw=| a)po\\ *a*q. a)lla\\ toi=s a)po\\\
+        \ tw=n *b*k, \n*k*q i)/son e)sti\\ to\\ a)po\\ th=s *b*q: o)rqh\\ ga\\r h(\
+        \ u(po\\ *q*k*b \ngwni/a dia\\ to\\ kai\\ th\\n *q*k ka/qeton ei)=nai e)pi\\\
+        \ to\\ u(pokei/menon \ne)pi/pedon: to\\ a)/ra a)po\\ th=s *a*q i)/son e)sti\\\
+        \ toi=s a)po\\ tw=n \n*a*b, *b*q: o)rqh\\ a)/ra e)sti\\n h( u(po\\ *a*b*q\
+        \ gwni/a. dia\\ ta\\ au)ta\\ \ndh\\ kai\\ h( u(po\\ *d*e*m gwni/a o)rqh/ e)stin.\
+        \ e)/sti de\\ kai\\ h( u(po\\ \n*b*a*q gwni/a th=| u(po\\ *e*d*m i)/sh: u(po/keintai\
+        \ ga/r: kai\\ e)/stin \nh( *a*q th=| *d*m i)/sh: i)/sh a)/ra e)sti\\ kai\\\
+        \ h( *a*b th=| *d*e"
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='35']/p/del
+      status: unremarkable
+    - xml-line: 14432
+      text: τὰς
+      betacode: ta\s
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='35']/p/del
+      status: unremarkable
+    - xml-line: 14450
+      text: ὅπερ ἔδει δεῖξαι
+      betacode: o(/per e)/dei dei=cai
+      context: div1[@type='book'][@n='11']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='35']/p/del
+      status: unremarkable
+    - xml-line: 14621
+      text: ἔστωσαν
+      betacode: e)/stwsan
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 14632
+      text: εὐθείας
+      betacode: eu)qei/as
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 14687
+      text: ἐστὶν
+      betacode: e)sti\n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 14718
+      text: ὁμοίας
+      betacode: o(moi/as
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 14748
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 14769
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 14771
+      text: ὥστε καὶ πυραμίς, ἧς βάσις μὲν τὸ ΑΒΓ τρίγωνον, κορυφὴ δὲ τὸ Δ σημεῖον,
+        ὁμοία ἐστὶ πυραμίδι, ἧς βάσις μὲν τὸ ΑΕΗ τρίγωνον, κορυφὴ δὲ τὸ Θ σημεῖον
+      betacode: "w(/ste kai\\ purami/s, h(=s ba/sis \nme\\n to\\ *a*b*g tri/gwnon,\
+        \ korufh\\ de\\ to\\ *d shmei=on, o(moi/a \ne)sti\\ purami/di, h(=s ba/sis\
+        \ me\\n to\\ *a*e*h tri/gwnon, korufh\\ \nde\\ to\\ *q shmei=on"
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 14797
+      text: καὶ
+      betacode: kai\
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 14818
+      text: καὶ ὁμοίας τῇ ὅλῃ
+      betacode: kai\ o(moi/as th=| o(/lh|
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='3']/p/del
+      status: unremarkable
+    - xml-line: 14843
+      text: εὐθύγραμμα
+      betacode: eu)qu/gramma
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 14847
+      text: τρίγωνον
+      betacode: tri/gwnon
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 14847
+      text: τρίγωνον
+      betacode: tri/gwnon
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 14849
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 14885
+      text: τρίγωνον
+      betacode: tri/gwnon
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 14899
+      text: ἐστὶ
+      betacode: e)sti\
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 14902
+      text: εἰσὶν
+      betacode: ei)si\n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 15031
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='6']/p/del
+      status: unremarkable
+    - xml-line: 15047
+      text: ἐπειδήπερ κἂν ἕτερόν τι σχῆμα εὐθύγραμμον ἔχῃ ἡ βάσις τοῦ πρίσματος, τοιοῦτο
+        καὶ τὸ ἀπεναντίον, καὶ διαιρεῖται εἰς πρίσματα τρίγωνα ἔχοντα τὰς βάσεις καὶ
+        τὰ ἀπεναντίον, καὶ ὡς ἡ ὅλη βάσις πρὸς ἕκαστον
+      betacode: "e)peidh/per ka)\\n e(/tero/n ti sxh=ma eu)qu/grammon \ne)/xh| h(\
+        \ ba/sis tou= pri/smatos, toiou=to kai\\ to\\ a)penanti/on, \nkai\\ diairei=tai\
+        \ ei)s pri/smata tri/gwna e)/xonta ta\\s ba/seis \nkai\\ ta\\ a)penanti/on,\
+        \ kai\\ w(s h( o(/lh ba/sis pro\\s e(/kaston"
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='6']/p/del
+      status: unremarkable
+    - xml-line: 15152
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 15235
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 15302
+      text: εἰσιν
+      betacode: ei)sin
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='11']/p/del
+      status: unremarkable
+    - xml-line: 15384
+      text: τοῖς κώνοις
+      betacode: toi=s kw/nois
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='11']/p/del
+      status: unremarkable
+    - xml-line: 15392
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 15394
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 15492
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 15495
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 15499
+      text: πολύγωνον
+      betacode: polu/gwnon
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 15505
+      text: στερεὸν
+      betacode: stereo\n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 15512
+      text: σημεῖον
+      betacode: shmei=on
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 15653
+      text: ὕψος
+      betacode: u(/yos
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='15']/p/del
+      status: unremarkable
+    - xml-line: 15700
+      text: εὐθειῶν
+      betacode: eu)qeiw=n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 15734
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 15761
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 15795
+      text: τῶν
+      betacode: tw=n
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 15842
+      text: σφαίρᾳ
+      betacode: sfai/ra|
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 15868
+      text: ἄρα
+      betacode: a)/ra
+      context: div1[@type='book'][@n='12']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    - xml-line: 15950
+      text: διπλῆ ἄρα καὶ ἡ ΚΓ τῆς ΓΘ
+      betacode: diplh= a)/ra kai\ h( *k*g th=s *g*q
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 15981
+      text: μεῖζον
+      betacode: mei=zon
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='2']/p/del
+      status: unremarkable
+    - xml-line: 16039
+      text: τὸ ΓΚ τετράγωνον διπλάσιά ἐστι τοῦ ΘΗ· ὥστε ὁ ΛΜΝ γνώμων καὶ
+      betacode: "to\\ *g*k \ntetra/gwnon dipla/sia/ e)sti tou= *q*h: w(/ste o( *l*m*n\
+        \ gnw/mwn \nkai\\"
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 16042
+      text: μὲν
+      betacode: me\n
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 16053
+      text: κείσθω
+      betacode: kei/sqw
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 16063
+      text: κοινὸν προσκείσθω τὸ ΘΒ
+      betacode: "koino\\n proskei/sqw to\\ \n*q*b"
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='4']/p/del
+      status: unremarkable
+    - xml-line: 16089
+      text: ἐστιν
+      betacode: e)stin
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='6']/p/del
+      status: unremarkable
+    - xml-line: 16215
+      text: ἐγγραφομένου
+      betacode: e)ggrafome/nou
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 16228
+      text: κατὰ τὸ Γ
+      betacode: kata\ to\ *g
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='9']/p/del
+      status: unremarkable
+    - xml-line: 16261
+      text: ἐστι
+      betacode: e)sti
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='10']/p/del
+      status: unremarkable
+    - xml-line: 16292
+      text: ΑΒΓΔΕ
+      betacode: '*a*b*g*d*e'
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='11']/p/del
+      status: unremarkable
+    - xml-line: 16334
+      text: δυνάμει μόνον
+      betacode: duna/mei mo/non
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='11']/p/del
+      status: unremarkable
+    - xml-line: 16395
+      text: τοῦ κύκλου
+      betacode: tou= ku/klou
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='12']/p/del
+      status: unremarkable
+    - xml-line: 16448
+      text: ἐπειδήπερ ἐὰν ἐπιζεύξωμεν τὴν ΕΛ, ὀρθὴ γίνεται ἡ ὑπὸ ΛΕΚ γωνία διὰ τὸ
+        ἰσογώνιον γίνεσθαι τὸ ΕΛΚ τρίγωνον ἑκατέρῳ τῶν ΕΛΘ, ΕΘΚ τριγώνων
+      betacode: "e)peidh/per \ne)a\\n e)pizeu/cwmen th\\n *e*l, o)rqh\\ gi/netai h(\
+        \ u(po\\ *l*e*k gwni/a \ndia\\ to\\ i)sogw/nion gi/nesqai to\\ *e*l*k tri/gwnon\
+        \ e(kate/rw| tw=n \n*e*l*q, *e*q*k trigw/nwn"
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='13']/p/del
+      status: unremarkable
+    - xml-line: 16464
+      text: ἐπειδήπερ ἐπιζευγνυμένης τῆς ΔΒ ἐστιν ὡς ἡ ΒΑ πρὸς τὴν ΑΔ, οὕτως ἡ ΔΑ
+        πρὸς τὴν ΑΓ διὰ τὴν ὁμοιότητα τῶν ΔΑΒ, ΔΑΓ τριγώνων, καὶ εἶναι ὡς τὴν πρώτην
+        πρὸς τὴν τρίτην, οὕτως τὸ ἀπὸ τῆς πρώτης πρὸς τὸ ἀπὸ τῆς δευτέρας
+      betacode: "e)peidh/per e)pizeugnume/nhs th=s *d*b \ne)stin w(s h( *b*a pro\\\
+        s th\\n *a*d, ou(/tws h( *d*a pro\\s th\\n *a*g \ndia\\ th\\n o(moio/thta\
+        \ tw=n *d*a*b, *d*a*g trigw/nwn, kai\\ ei)=nai \nw(s th\\n prw/thn pro\\s\
+        \ th\\n tri/thn, ou(/tws to\\ a)po\\ th=s prw/ths \npro\\s to\\ a)po\\ th=s\
+        \ deute/ras"
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='13']/p/del
+      status: unremarkable
+    - xml-line: 16788
+      text: ἔστιν ἄρα ὡς συναμφότερος ἡ ΝΟ, ΟΡ πρὸς τὴν ΟΝ, οὕτως ἡ ΝΟ πρὸς τὴν ΟΡ
+      betacode: "e)/stin a)/ra w(s sunamfo/teros h( *n*o, *o*r pro\\s th\\n *o*n,\
+        \  \nou(/tws h( *n*o pro\\s th\\n *o*r"
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 16789
+      text: ἔστιν ἄρα ὡς ἡ ΣΝ πρὸς τὴν ΝΟ, οὕτως ἡ ΝΟ πρὸς τὴν ΟΣ
+      betacode: "e)/stin \na)/ra w(s h( *s*n pro\\s th\\n *n*o, ou(/tws h( *n*o pro\\\
+        s th\\n *o*s"
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 16798
+      text: 1ὀρθὴ γὰρ ἡ ὑπὸ ΦΣΒ γωνία
+      betacode: "1o)rqh\\ ga\\r h( \nu(po\\ *f*s*b gwni/a"
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='17']/p/del
+      status: unremarkable
+    - xml-line: 16989
+      text: τῆς δὲ ΛΜ μείζων ἐστὶν ἡ ΜΒ
+      betacode: "th=s de\\ *l*m mei/zwn e)sti\\n h( \n*m*b"
+      context: div1[@type='book'][@n='13']/div2[@type='type'][@n='Prop']/div3[@type='number'][@n='18']/p/del
+      status: unremarkable
+    additions: []
+    figures: []

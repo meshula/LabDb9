@@ -1,0 +1,52 @@
+# Euclid Minimal Seed Data - S-Expression Commands
+# Purpose: Foundation validation for Bush's Memex realization
+# Test: Discovery→Navigation synthesis with classical Greek texts
+
+# Database initialization
+(create-database :path "test_euclid.db9")
+(open-database :path "test_euclid.db9")
+
+# Core text fragment entities with Unicode Greek content
+(add-entity :value "σημεῖόν ἐστιν, οὗ μέρος οὐθέν." :dbid db1)
+(add-entity :value "γραμμὴ δὲ μῆκος ἀπλατές." :dbid db1)
+(add-entity :value "ἄκρον καὶ μέσον λόγον εὐθεῖα τετμῆσθαι λέγεται, ὅταν ᾖ ὡς ἡ ὅλη πρὸς τὸ μεῖζον τμῆμα, οὕτως τὸ μεῖζον πρὸς τὸ ἔλαττον." :dbid db1)
+(add-entity :value "ἐν τοῖς ὀρθογωνίοις τριγώνοις τὸ ἀπὸ τῆς τὴν ὀρθὴν γωνίαν ὑποτεινούσης πλευρᾶς τετράγωνον ἴσον ἐστὶ τοῖς ἀπὸ τῶν τὴν ὀρθὴν γωνίαν περιεχουσῶν πλευρῶν τετραγώνοις." :dbid db1)
+(add-entity :value "golden-ratio" :dbid db1)
+(add-entity :value "proportion" :dbid db1)
+(add-entity :value "triangle" :dbid db1)
+(add-entity :value "definition" :dbid db1)
+(add-entity :value "proposition" :dbid db1)
+(add-entity :value "book-1" :dbid db1)
+(add-entity :value "book-6" :dbid db1)
+
+# Semantic relationship establishment - triadic consciousness foundation
+(add-triple-semantic :subject "b1-def-1" :predicate "field-type" :object "definition" :dbid db1)
+(add-triple-semantic :subject "b1-def-2" :predicate "field-type" :object "definition" :dbid db1)
+(add-triple-semantic :subject "b6-def-3" :predicate "field-type" :object "definition" :dbid db1)
+(add-triple-semantic :subject "b1-p47" :predicate "field-type" :object "proposition" :dbid db1)
+(add-triple-semantic :subject "b1-def-1" :predicate "part-of" :object "book-1" :dbid db1)
+(add-triple-semantic :subject "b1-def-2" :predicate "part-of" :object "book-1" :dbid db1)
+(add-triple-semantic :subject "b1-p47" :predicate "part-of" :object "book-1" :dbid db1)
+(add-triple-semantic :subject "b6-def-3" :predicate "part-of" :object "book-6" :dbid db1)
+(add-triple-semantic :subject "b6-def-3" :predicate "embodies" :object "golden-ratio" :dbid db1)
+(add-triple-semantic :subject "b6-def-3" :predicate "relates-to" :object "proportion" :dbid db1)
+(add-triple-semantic :subject "b1-p47" :predicate "embodies" :object "triangle" :dbid db1)
+(add-triple-semantic :subject "b1-def-2" :predicate "follows" :object "b1-def-1" :dbid db1)
+(add-triple-semantic :subject "b1-p47" :predicate "depends-on" :object "b1-def-1" :dbid db1)
+(add-triple-semantic :subject "b6-def-3" :predicate "develops-concept" :object "golden-ratio" :dbid db1)
+
+# Create minimal rope for bounded navigation testing
+(rope-create :name "euclid-minimal-test" :description "Minimal test rope for Phase 1 validation" :dbid db1)
+(rope-append :rope "euclid-minimal-test" :entity "b1-def-1" :dbid db1)
+(rope-append :rope "euclid-minimal-test" :entity "b1-def-2" :dbid db1)
+(rope-append :rope "euclid-minimal-test" :entity "b6-def-3" :dbid db1)
+(rope-append :rope "euclid-minimal-test" :entity "b1-p47" :dbid db1)
+
+# Foundation validation queries - Bush's Memex discovery patterns
+(find-triple-enhanced :subject "*" :predicate "relates-to" :object "golden-ratio" :dbid db1)
+(find-triple-enhanced :subject "*" :predicate "field-type" :object "definition" :dbid db1)
+(find-triple-enhanced :subject "b6-def-3" :predicate "*" :object "*" :dbid db1)
+(get-vocabulary-stats :dbid db1)
+
+# Test bounded navigation around golden mean definition
+(rope-chunk :rope "euclid-minimal-test" :center-entity "b6-def-3" :fragment-count 4 :dbid db1)

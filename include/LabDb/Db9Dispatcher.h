@@ -28,6 +28,9 @@ public:
     
     // Execute multiple commands in sequence
     Db9Response executeCommands(const std::vector<std::string>& sexprCommands);
+
+    // Execute commands from a file with dbid substitution
+    Db9Response executeCommands(const std::string& filePath, const std::string& dbid);
     
     // Register a verb implementation
     void registerVerb(std::unique_ptr<IDb9Verb> verb);

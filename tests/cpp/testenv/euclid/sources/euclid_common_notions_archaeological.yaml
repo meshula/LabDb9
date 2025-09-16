@@ -1,0 +1,68 @@
+- volume: 1
+  title: Book 1 Common Notions
+  xml-line: 202
+  common_notions:
+  - book: 1
+    num: 1
+    num_display: '1'
+    xml-line: 203
+    text: τὰ τῷ αὐτῷ ἴσα καὶ ἀλλήλοις ἐστὶν ἴσα.
+    betacode: ta\ tw=| au)tw=| i)/sa kai\ a)llh/lois e)sti\n i)/sa.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='1']
+  - book: 1
+    num: 2
+    num_display: '2'
+    xml-line: 204
+    text: καὶ ἐὰν ἴσοις ἴσα προστεθῇ, τὰ ὅλα ἐστὶν ἴσα.
+    betacode: kai\ e)a\n i)/sois i)/sa prosteqh=|, ta\ o(/la e)sti\n i)/sa.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='2']
+  - book: 1
+    num: 3
+    num_display: '3'
+    xml-line: 205
+    text: καὶ ἐὰν ἀπὸ ἴσων ἴσα ἀφαιρεθῇ, τὰ καταλειπόμενά ἐστιν ἴσα.
+    betacode: "kai\\ e)a\\n a)po\\ i)/swn i)/sa a)faireqh=|, ta\\ kataleipo/mena/\
+      \ \ne)stin i)/sa."
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='3']
+  - book: 1
+    num: 4
+    num_display: '4'
+    xml-line: 207
+    text: καὶ ἐὰν ἀνίσοις ἴσα προστεθῇ, τὰ ὅλα ἐστὶν ἄνισα.
+    betacode: kai\ e)a\n a)ni/sois i)/sa prosteqh=|, ta\ o(/la e)sti\n a)/nisa.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='4']
+  - book: 1
+    num: 5
+    num_display: '5'
+    xml-line: 208
+    text: καὶ τὰ τοῦ αὐτοῦ διπλάσια ἴσα ἀλλήλοις ἐστίν.
+    betacode: kai\ ta\ tou= au)tou= dipla/sia i)/sa a)llh/lois e)sti/n.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='5']
+  - book: 1
+    num: 6
+    num_display: '6'
+    xml-line: 209
+    text: καὶ τὰ τοῦ αὐτοῦ ἡμίση ἴσα ἀλλήλοις ἐστίν.
+    betacode: kai\ ta\ tou= au)tou= h(mi/sh i)/sa a)llh/lois e)sti/n.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='6']
+  - book: 1
+    num: 7
+    num_display: '7'
+    xml-line: 210
+    text: καὶ τὰ ἐφαρμόζοντα ἐπ’ ἄλληλα ἴσα ἀλλήλοις ἐστίν.
+    betacode: kai\ ta\ e)farmo/zonta e)p' a)/llhla i)/sa a)llh/lois e)sti/n.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='7']
+  - book: 1
+    num: 8
+    num_display: '8'
+    xml-line: 211
+    text: καὶ τὸ ὅλον τοῦ μέρους μεῖζον ἐστιν.
+    betacode: kai\ to\ o(/lon tou= me/rous mei=zon e)stin.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='8']
+  - book: 1
+    num: 9
+    num_display: '9'
+    xml-line: 212
+    text: καὶ δύο εὐθεῖαι χωρίον οὐ περιέχουσιν.
+    betacode: kai\ du/o eu)qei=ai xwri/on ou) perie/xousin.
+    context: div1[@type='book'][@n='1']/div2[@type='type'][@n='CN']/div3[@type='number'][@n='9']
