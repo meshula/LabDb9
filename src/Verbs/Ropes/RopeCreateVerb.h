@@ -17,6 +17,10 @@ class RopeCreateVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "rope-create"; }
     std::string getDescription() const override;
+    
+    /// ENHANCED: Contextual help for user guidance
+    std::string getContextualHelp() const;
+    
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 
 private:

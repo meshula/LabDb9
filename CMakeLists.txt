@@ -170,8 +170,8 @@ if(LABDB_MCP)
                            "Error: ${PYTHON_VERSION_ERROR}")
     endif()
     
-    if(NOT PYTHON_VERSION_OUTPUT MATCHES "Python [0-9]+\\\\.[0-9]+")
-        message(FATAL_ERROR "LABDB_PYEXE does not appear to be a Python executable: ${LABDB_PYEXE}\n"
+    if(NOT PYTHON_VERSION_OUTPUT MATCHES "Python [0-9]+\\.[0-9]+")
+        message(FATAL_ERROR "LABDB_PYEXE returned an unexpected version: ${LABDB_PYEXE}\n"
                            "Version output: ${PYTHON_VERSION_OUTPUT}")
     endif()
     
@@ -224,6 +224,8 @@ add_library(labdb
     src/Verbs.cpp
     src/Verbs/VocabularyStatsVerb.h
     src/Verbs/VocabularyStatsVerb.cpp
+    src/Verbs/ListVerbsVerb.h
+    src/Verbs/ListVerbsVerb.cpp
     src/Verbs/FioVerbs.cpp
     src/Verbs/FioVerbs.h
     src/Verbs/Fio/GetVerbDescription.cpp
@@ -241,6 +243,8 @@ add_library(labdb
     src/Verbs/Fio/ConfirmVerb.cpp
     src/Verbs/Fio/ConfirmVerb.h
     src/Verbs/RopeVerbs.cpp
+    # Memex Verbs for Bush's associative navigation
+    src/Verbs/MemexVerbs.cpp
     src/Verbs/RopeVerbs.h
     src/Verbs/Ropes/RopeUtils.cpp
     src/Verbs/Ropes/RopeUtils.h
@@ -261,6 +265,10 @@ add_library(labdb
     src/Verbs/Ropes/RopeInsertVerb.cpp
     src/Verbs/Ropes/RopeInsertVerb.h
     src/Verbs/Ropes/RopeFindVerb.cpp
+    # Memex Verb Implementations
+    src/Verbs/Memex/MemexUtils.cpp
+    src/Verbs/Memex/MemexChunkPrecedingVerb.cpp
+    src/Verbs/Memex/MemexChunkSucceedingVerb.cpp
     src/Verbs/Ropes/RopeFindVerb.h
 )
 

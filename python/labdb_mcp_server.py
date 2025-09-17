@@ -22,7 +22,7 @@ app = FastMCP("LabDb db9 S-Expression Gateway")
 @app.tool
 def db9(commands: str) -> str:
     """
-    Execute db9 S-expression commands against triadic consciousness database.
+    Execute db9 S-expression commands.
     
     Args:
         commands: JSON string of S-expression commands to execute
@@ -82,6 +82,34 @@ def db9_readme() -> str:
         return "Error: LabDb not available. Check PYTHONPATH and build."
     except Exception as e:
         return f"Error getting specification: {str(e)}"
+
+@app.tool
+def db9_list_verbs() -> str:
+    """
+    List all available db9 S-expression verbs.
+    
+    Returns:
+        JSON list of available verb names for discovery and validation
+        
+    Examples:
+        - Check if specific verbs are available
+        - Discover new functionality 
+        - Validate deployment status
+    """
+    try:
+        # Lazy import LabDb only when needed
+        import labdb
+        return labdb.get_db9_available_verbs()
+    except ImportError:
+        return json.dumps({
+            "status": "error",
+            "error_message": "LabDb not available. Check PYTHONPATH and build."
+        })
+    except Exception as e:
+        return json.dumps({
+            "status": "error", 
+            "error_message": f"Failed to get available verbs: {str(e)}"
+        })
 
 @app.tool
 def roll_dice(n_dice: int) -> list[int]:

@@ -86,6 +86,16 @@ std::string DatabaseManager::generateDbid() {
 std::string DatabaseManager::createDatabase(const std::string& path) {
     std::lock_guard<std::mutex> lock(_mutex);
 
+    // if path is relative,
+    if (!std::filesystem::path(path).is_absolute()) {
+        // get the current working directory for relative paths
+        std::string cwd = std::filesystem::current_path().string();
+        // if cwd is empty, throw and say we need absolute path
+        if (cwd.empty()) {
+            throw std::runtime_error("Current working directory is not set; please provide an absolute path.");
+        }
+    }
+
     try {
         // Check if file already exists
         if (std::filesystem::exists(path)) {
@@ -111,6 +121,10 @@ std::string DatabaseManager::createDatabase(const std::string& path) {
         return dbid;
 
     } catch (const std::exception& e) {
+        std::string msg = e.what();
+        std::string cwd = std::filesystem::current_path().string();
+        msg += "\nCurrent working directory: " + cwd;
+        msg += "\nPlease ensure the path is correct and writable.";
         throw std::runtime_error("Failed to create database: " + std::string(e.what()));
     }
 }

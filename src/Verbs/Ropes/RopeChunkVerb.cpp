@@ -49,6 +49,42 @@ std::string RopeChunkVerb::getDescription() const {
     })Rope";
 }
 
+// ENHANCED: Contextual help for discovery-navigation synthesis
+std::string RopeChunkVerb::getContextualHelp() const {
+    return R"Help(
+=== ROPE-CHUNK: CORE MEMEX NAVIGATION ===
+
+PURPOSE: Extract bounded text segments for contemplative reading (Bush's core innovation)
+
+CONTEXT: Transforms semantic discovery into readable text context via bounded chunks
+
+USAGE: (rope-chunk :rope-name "name" :center-entity "entity-id" :fragment-count 24 :dbid db1)
+
+DISCOVERY-NAVIGATION SYNTHESIS (Bush's Vision):
+  1. find-triple-enhanced → discover entry points via semantic relationships
+  2. rope-chunk → navigate to readable text context around discovered entities  
+  3. Bush's principle: associative trails with contemplative reading flow
+
+MEMEX INTEGRATION:
+  Discovery: Semantic entry points from find-triple-enhanced queries
+  Navigation: Bounded chunks preserve reading flow while enabling association
+  Principle: "Trails that do not fade" - persistent associative navigation
+
+EXAMPLES:
+  # Complete discovery-navigation workflow:
+  (find-triple-enhanced :subject "*" :predicate "embodies" :object "golden-ratio" :dbid db1)
+  # → Returns: "b6-def-3"
+  
+  (rope-chunk :rope-name "euclid-complete-text" :center-entity "b6-def-3" :fragment-count 24 :dbid db1)
+  # → Returns: 24 readable fragments around golden ratio definition
+
+TROUBLESHOOTING:
+  - Entity not found: Use rope-list to see available ropes
+  - Empty results: Check entity was added with rope-append
+  - Discovery issues: Use find-triple-enhanced to discover entry points
+)Help";
+}
+
 RopeChunkVerb::ChunkParameters RopeChunkVerb::extractParameters(const lab::Text::Sexpr& sexpr) {
     ChunkParameters params;
     

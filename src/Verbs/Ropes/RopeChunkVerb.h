@@ -13,11 +13,15 @@ namespace LabDb {
 // RopeChunkVerb - Core Memex Bounded Navigation
 //-----------------------------------------------------------------------------
 
-/// Retrieve bounded text chunks for contemplative reading
+/// Retrieve bounded text chunks for contemplative reading (CORE MEMEX VERB)
 class RopeChunkVerb : public IDb9Verb {
 public:
     std::string getVerbName() const override { return "rope-chunk"; }
     std::string getDescription() const override;
+    
+    /// ENHANCED: Contextual help for discovery-navigation synthesis
+    std::string getContextualHelp() const;
+    
     Db9Response execute(const lab::Text::Sexpr& sexpr) override;
 
 private:

@@ -3,8 +3,10 @@
 #include "LabDb/DatabaseVerbs.h"
 #include "LabDb/EnhancedDatabaseVerbs.h"
 #include "Verbs/VocabularyStatsVerb.h"
+#include "Verbs/ListVerbsVerb.h"
 #include "Verbs/FioVerbs.h"
 #include "Verbs/RopeVerbs.h"
+#include "Verbs/MemexVerbs.h"
 
 #include <sstream>
 #include <iomanip>
@@ -658,8 +660,10 @@ Db9Dispatcher& getGlobalDb9Dispatcher() {
         initDatabaseVerbRegistration(dispatcher);
         initEnhancedDatabaseVerbRegistration(dispatcher);
         VocabularyStatsVerb::registerVerb(dispatcher);
+        ListVerbsVerb::registerVerb(dispatcher);
         initFioVerbRegistration(dispatcher);
         initRopeVerbRegistration(dispatcher);
+        initMemexVerbRegistration(dispatcher);
         initialized = true;
     }
     

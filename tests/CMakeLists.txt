@@ -146,6 +146,13 @@ add_executable(test_rope
 target_link_libraries(test_rope labdb)
 add_test(NAME RopeTest COMMAND test_rope)
 
+# Memex Verbs Test (Bush's associative memory realization)
+add_executable(test_memex
+    cpp/test_memex.cpp
+)
+target_link_libraries(test_memex labdb)
+add_test(NAME MemexTest COMMAND test_memex)
+
 # Euclid Ontology TDD Validation Test (Memex realization through Euclid's Elements)
 add_executable(test_euclid_ontology_validation
     cpp/test_euclid_ontology_validation.cpp

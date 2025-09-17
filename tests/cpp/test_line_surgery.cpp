@@ -192,12 +192,21 @@ static void test_trivial_full_file_write() {
     
     // Force line surgery path by not specifying :lines (should default to Full range)
     std::string write_cmd = "(fio-write :path \"" + test_path + "\" :content \"" + test_content + "\")";
-    auto write_response = db9_execute(write_cmd);
     
-    std::cout << "Write response: " << write_response.result << std::endl;
+    // Use the preview-confirm workflow for safety (prevents accidental overwrites)
+    auto [preview_response, confirm_response] = execute_with_confirmation(write_cmd);
     
-    AXIOM(write_response.status == Db9Response::Success, "Write should succeed");
-    AXIOM(std::filesystem::exists(test_path), "File should be created");
+    std::cout << "Write response (preview): " << preview_response.result << std::endl;
+    
+    AXIOM(preview_response.status == Db9Response::Success, "Preview should succeed");
+    
+    // If confirmation was needed and executed
+    if (!confirm_response.result.empty()) {
+        std::cout << "Confirm response: " << confirm_response.result << std::endl;
+        AXIOM(confirm_response.status == Db9Response::Success, "Confirmation should succeed");
+    }
+    
+    AXIOM(std::filesystem::exists(test_path), "File should be created after confirmation");
     
     // Verify content
     std::string actual_content = read_file_content(test_path);
@@ -229,9 +238,16 @@ static void test_existing_file_overwrite() {
     std::string new_content = "New line 1\nNew line 2\nNew line 3\nNew line 4";
     
     std::string write_cmd = "(fio-write :path \"" + test_path + "\" :content \"" + new_content + "\")";
-    auto write_response = db9_execute(write_cmd);
     
-    AXIOM(write_response.status == Db9Response::Success, "Overwrite should succeed");
+    // Use the preview-confirm workflow for safety (prevents accidental overwrites)
+    auto [preview_response, confirm_response] = execute_with_confirmation(write_cmd);
+    
+    AXIOM(preview_response.status == Db9Response::Success, "Preview should succeed");
+    
+    // If confirmation was needed and executed
+    if (!confirm_response.result.empty()) {
+        AXIOM(confirm_response.status == Db9Response::Success, "Confirmation should succeed");
+    }
     
     // Verify new content completely replaced old content
     auto new_lines = read_file_lines(test_path);

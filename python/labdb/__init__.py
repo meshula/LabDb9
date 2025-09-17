@@ -1,5 +1,5 @@
 """
-LabDb - Triadic Consciousness Database
+LabDb - Auto-Reflexive Database with Memex functionality
 
 Minimal Python package providing direct access to LabDb's C++ S-expression interface.
 No abstraction layers, no complex wrappers - just direct access to the proven C++ implementation.

@@ -1,6 +1,7 @@
 #include "FioCommon.h"
 #include <sstream>
 #include <cmath>
+#include <cctype>
 
 namespace LabDb {
 
@@ -30,6 +31,29 @@ std::string extractStringParam(const lab::Text::Sexpr& sexpr, const std::string&
 	return "";
 }
 
+// Helper function to safely convert string to integer
+bool safeStringToInt(const std::string& str, int& result) {
+	if (str.empty()) return false;
+	
+	// Check if string contains only valid characters for integer
+	size_t start = 0;
+	if (str[0] == '-' || str[0] == '+') {
+		if (str.length() == 1) return false;  // Just a sign is invalid
+		start = 1;
+	}
+	
+	for (size_t i = start; i < str.length(); ++i) {
+		if (!std::isdigit(str[i])) return false;
+	}
+	
+	try {
+		result = std::stoi(str);
+		return true;
+	} catch (...) {
+		return false;
+	}
+}
+
 LineRange parseLineSpec(const std::string& lines_param) {
 	LineRange range;
 	if (lines_param.empty()) {
@@ -48,7 +72,12 @@ LineRange parseLineSpec(const std::string& lines_param) {
 		if (start_str == "e") {
 			if (end_str.starts_with("-")) {
 				range.type = LineRange::FromEnd;
-				range.count = std::abs(std::stoi(end_str));
+				int temp_count;
+				if (!safeStringToInt(end_str, temp_count)) {
+					range.valid = false;
+					return range;
+				}
+				range.count = std::abs(temp_count);
 			} else if (end_str == "0") {
 				range.type = LineRange::AppendAtEnd;
 				range.count = 0;
@@ -57,23 +86,35 @@ LineRange parseLineSpec(const std::string& lines_param) {
 			}
 		} else if (start_str == "0" && !end_str.starts_with("-")) {
 			range.type = LineRange::FromStart;
-			range.count = std::stoi(end_str);
+			if (!safeStringToInt(end_str, range.count)) {
+				range.valid = false;
+				return range;
+			}
 		} else {
 			range.type = LineRange::Range;
 			if (end_str.starts_with("-")) {
-				int end_line = std::stoi(start_str);
-				int line_count = std::abs(std::stoi(end_str));
-				range.start = end_line - line_count + 1;
-				range.count = line_count;
+				int end_line, line_count;
+				if (!safeStringToInt(start_str, end_line) || !safeStringToInt(end_str, line_count)) {
+					range.valid = false;
+					return range;
+				}
+				range.start = end_line - std::abs(line_count) + 1;
+				range.count = std::abs(line_count);
 			} else {
-				range.start = std::stoi(start_str);
-				int end_line = std::stoi(end_str);
+				int end_line;
+				if (!safeStringToInt(start_str, range.start) || !safeStringToInt(end_str, end_line)) {
+					range.valid = false;
+					return range;
+				}
 				range.count = end_line - range.start + 1;
 			}
 		}
 	} else {
 		range.type = LineRange::SingleLine;
-		range.start = std::stoi(spec);
+		if (!safeStringToInt(spec, range.start)) {
+			range.valid = false;
+			return range;
+		}
 		range.count = 1;
 	}
 	return range;
