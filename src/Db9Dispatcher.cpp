@@ -221,6 +221,15 @@ Db9Response Db9Dispatcher::Impl::parseSexprAndExecute(const std::string& sexprCo
             return response;
         }
 
+        // Validate that parens were balanced
+        if (sexpr.balance != 0) {
+            Db9Response response;
+            response.status = Db9Response::Error;
+            response.error_code = "PARSE_ERROR";
+            response.error_message = "Unbalanced parentheses in S-expression";
+            return response;
+        }
+
         // Extract verb name (first atom after opening paren)
         std::string verbName;
         size_t exprIndex = 1; // Skip the initial PushList

@@ -104,6 +104,7 @@ private:
         SearchMode mode = Literal;
         std::string lines_param; // Optional line range
         bool case_sensitive = true;
+        bool escape = false;  // Unicode escape processing
         int context_lines = 0;
         std::vector<std::string> paths; // For multi-file search
     };

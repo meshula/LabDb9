@@ -34,9 +34,84 @@ using LabDb::Db9Response;
 namespace LabDb {
 namespace FioUtils {
 
-//-----------------------------------------------------------------------------
-// FioUtils Implementation  
-//-----------------------------------------------------------------------------
+
+std::string unescapeJsonString(const std::string& content) {
+    std::string unescaped;
+    unescaped.reserve(content.length()); // Optimize for common case
+    
+    for (size_t i = 0; i < content.length(); ++i) {
+        if (content[i] == '\\' && i + 1 < content.length()) {
+            switch (content[i + 1]) {
+                case '\\': unescaped += '\\'; i++; break;
+                case 'n':  unescaped += '\n'; i++; break;
+                case 't':  unescaped += '\t'; i++; break;
+                case 'r':  unescaped += '\r'; i++; break;
+                case '"':  unescaped += '"';  i++; break;
+                case '/':  unescaped += '/';  i++; break;  // JSON also escapes forward slash
+                case 'b':  unescaped += '\b'; i++; break;  // backspace
+                case 'f':  unescaped += '\f'; i++; break;  // form feed
+                default:   unescaped += content[i]; break; // Keep backslash for unknown escapes
+            }
+        } else {
+            unescaped += content[i];
+        }
+    }
+    
+    return unescaped;
+}
+
+std::string extractStringValue(const std::string& json_response, size_t quote_pos, const std::string& field_name) {
+    size_t string_start = quote_pos + 1; // Skip opening quote
+    size_t string_end = string_start;
+    
+    // Find closing quote, properly handling escapes
+    while (string_end < json_response.length()) {
+        if (json_response[string_end] == '\\') {
+            // Skip the backslash and the next character (whatever it is)
+            string_end += 2;
+        } else if (json_response[string_end] == '"') {
+            // Found unescaped closing quote
+            break;
+        } else {
+            string_end++;
+        }
+    }
+    
+    if (string_end >= json_response.length()) {
+        return ""; // Unterminated string
+    }
+    
+    std::string content = json_response.substr(string_start, string_end - string_start);
+    
+    // Only unescape for content field to preserve existing behavior
+    if (field_name == "content") {
+        return unescapeJsonString(content);
+    }
+    
+    return content;
+}
+
+std::string extractNumericValue(const std::string& json_response, size_t value_start) {
+    size_t value_end = value_start;
+    
+    // Find end of numeric value - stop at JSON structural characters or whitespace
+    while (value_end < json_response.length()) {
+        char c = json_response[value_end];
+        if (c == ',' || c == '}' || c == ']' || 
+            c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+            break;
+        }
+        value_end++;
+    }
+    
+    if (value_end <= value_start) {
+        return ""; // No numeric value found
+    }
+    
+    return json_response.substr(value_start, value_end - value_start);
+}
+
+
 /*
  * unescapeDb9String Version 3 - Unicode Escape System
  * 
@@ -91,8 +166,43 @@ namespace FioUtils {
  * C++, regex patterns, printf statements, and complex code structures
  * without any escape complexity mental overhead.
  */
+std::string extractFieldFromReadResponse(const std::string& json_response, const std::string& field_name) {
+    // Look for the field key: "field_name"
+    std::string field_key = "\"" + field_name + "\"";
+    size_t key_pos = json_response.find(field_key);
+    
+    if (key_pos == std::string::npos) {
+        return ""; // Field not found
+    }
+    
+    // Find the colon after the field name
+    size_t colon_pos = json_response.find(':', key_pos + field_key.length());
+    if (colon_pos == std::string::npos) {
+        return ""; // Malformed JSON - no colon after field name
+    }
+    
+    // Skip whitespace after colon
+    size_t value_start = colon_pos + 1;
+    while (value_start < json_response.length() && 
+           (json_response[value_start] == ' ' || json_response[value_start] == '\t' || 
+            json_response[value_start] == '\n' || json_response[value_start] == '\r')) {
+        value_start++;
+    }
+    
+    if (value_start >= json_response.length()) {
+        return ""; // No value found after field name
+    }
+    
+    // Check if it's a string value (starts with quote)
+    if (json_response[value_start] == '"') {
+        return extractStringValue(json_response, value_start, field_name);
+    } else {
+        return extractNumericValue(json_response, value_start);
+    }
+}
 
 
+#if 0
 std::string extractFieldFromReadResponse(const std::string& json_response, const std::string& field_name) {
     std::string field_key = "\"" + field_name + "\": \"";
     size_t field_start = json_response.find(field_key);
@@ -146,7 +256,7 @@ std::string extractFieldFromReadResponse(const std::string& json_response, const
     
     return content;
 }
-
+#endif
 
 std::string extractContentFromReadResponse(const std::string& json_response) {
     return extractFieldFromReadResponse(json_response, "content");
@@ -154,7 +264,7 @@ std::string extractContentFromReadResponse(const std::string& json_response) {
 
 
 //-------------------------------------------------------------------------
-// Triadic Consciousness Path Context Implementation
+// Reflexive Path Context Implementation
 
 std::string PathContext::toJsonString() const {
 	std::ostringstream json;
@@ -641,7 +751,7 @@ void initFioVerbRegistration(Db9Dispatcher& dispatcher) {
 
 std::string FioSearchVerb::getDescription() const {
     return R"DESC(
-Search content within files with revolutionary precision - the perfect companion to fio-write's Unicode escaping system!
+Search content within files with precision - the perfect companion to fio-write's Unicode escaping system!
 Usage:
 ```lisp
 ;; 🔍 Literal string search (fast, exact)
@@ -819,6 +929,7 @@ FioSearchVerb::SearchParameters FioSearchVerb::extractParameters(const lab::Text
     // Check if Unicode escaping should be applied (defaults to false)
     std::string escape_param = extractStringParam(sexpr, "escape");
     bool apply_escaping = (escape_param == "true");
+    params.escape = apply_escaping;  // Store in params for formatSearchResults
     
     // Apply Unicode escaping only if explicitly requested
     if (!params.pattern.empty() && apply_escaping) {
@@ -1080,9 +1191,28 @@ std::string FioSearchVerb::formatSearchResults(const std::vector<SearchMatch>& m
     result << "]"
     << ", \"total_matches\": " << matches.size();
     
-    // Add awareness fairy guidance
+    // Add awareness fairy guidance with enhanced UX suggestions
     if (matches.empty()) {
-        result << ", \"awareness_note\": \"No matches found for pattern '" << FioUtils::escapeJsonString(params.pattern) << "'. Check spelling or try a broader search pattern.\"";
+        std::ostringstream awareness_note;
+        awareness_note << "No matches found for pattern '" << FioUtils::escapeJsonString(params.pattern) << "'. ";
+        
+        // Suggest escape mode toggle
+        if (params.escape) {
+            awareness_note << "Currently using Unicode escapes (:escape true) - try :escape false for literal search. ";
+        } else {
+            awareness_note << "Try :escape true if pattern contains Unicode escapes (※n, ″, etc.). ";
+        }
+        
+        // Suggest case sensitivity toggle  
+        if (params.case_sensitive) {
+            awareness_note << "Currently case-sensitive - try :case-sensitive false for broader matching. ";
+        } else {
+            awareness_note << "Currently case-insensitive - try :case-sensitive true for exact matching. ";
+        }
+        
+        awareness_note << "Also check spelling or try a broader search pattern.";
+        
+        result << ", \"awareness_note\": \"" << awareness_note.str() << "\"";
     } else if (matches.size() > 50) {
         result << ", \"awareness_note\": \"Found " << matches.size() << " matches. Consider using a more specific pattern or :lines parameter to narrow the search.\"";
     }

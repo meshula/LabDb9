@@ -13,24 +13,6 @@
 
 using namespace LabDb;
 
-// Real db9 execution using LabDb dispatcher
-Db9Response db9_execute(const std::string& command) {
-    static LabDb::Db9Dispatcher dispatcher;
-    static bool initialized = false;
-    using namespace LabDb;
-
-    if (!initialized) {
-        // Register FIO verbs
-        dispatcher.registerVerb(std::make_unique<FioWriteVerb>());
-        dispatcher.registerVerb(std::make_unique<FioReadVerb>());
-        dispatcher.registerVerb(std::make_unique<FioSearchVerb>());
-        dispatcher.registerVerb(std::make_unique<FioListVerb>());
-        dispatcher.registerVerb(std::make_unique<FioConfirmVerb>());
-        initialized = true;
-    }
-
-    return dispatcher.executeCommand(command);
-}
 
 // Helper function to extract preview token from response
 static std::string extractPreviewToken(const std::string& response) {
@@ -50,220 +32,42 @@ static std::string extractPreviewToken(const std::string& response) {
     return "";  // No token found - direct execution
 }
 
-// Updated Complex Escaping Round-trip Test - Unicode Escape System
-static void test21_complex_unicode_escaping_roundtrip() {
+constexpr bool confirm_commands = true;  // Set to true to auto-confirm preview commands
+
+// Real db9 execution using LabDb dispatcher
+Db9Response db9_execute(const std::string& command, bool confirm = false) {
+    static LabDb::Db9Dispatcher dispatcher;
+    static bool initialized = false;
     using namespace LabDb;
 
-    std::cout << "🧪 Test 21: Complex Unicode escaping round-trip verification" << std::endl;
-
-    std::string test_path = "/tmp/fio_complex_unicode_escaping_test.cpp";
-
-    // Remove file if exists
-    if (std::filesystem::exists(test_path)) {
-        std::filesystem::remove(test_path);
+    if (!initialized) {
+        // Register FIO verbs
+        dispatcher.registerVerb(std::make_unique<FioWriteVerb>());
+        dispatcher.registerVerb(std::make_unique<FioReadVerb>());
+        dispatcher.registerVerb(std::make_unique<FioSearchVerb>());
+        dispatcher.registerVerb(std::make_unique<FioListVerb>());
+        dispatcher.registerVerb(std::make_unique<FioConfirmVerb>());
+        initialized = true;
     }
 
-    // Test content with various Unicode escape scenarios - MUCH cleaner!
-    // Using ※ for backslashes, ″ for quotes, ↵ for actual newlines, ⇥ for tabs
-    std::string content_with_unicode_escapes =
-        "// Test file with complex Unicode escape sequences↵"
-        "#include <iostream>↵"
-        "#include <regex>↵"
-        "↵"
-        "void test_escapes() {↵"
-        "    // Basic newline escaping (C++ string literals)↵"
-        "    std::cout << ″Line 1※nLine 2※nLine 3″;↵"
-        "    ↵"
-        "    // Tab escaping in printf↵"
-        "    printf(″Col1※tCol2※tCol3※n″);↵"
-        "    ↵"
-        "    // Regex patterns with escaped characters↵"
-        "    std::regex word_digits(″※w+※d+″);        // Should become \\w+\\d+↵"
-        "    std::regex email(″[a-z]+@[a-z]+※.[a-z]+″); // Should become \\.↵"
-        "    ↵"
-        "    // File path with literal backslashes↵"
-        "    std::string path = ″C:※※Users※※documents※※file.txt″;↵"
-        "    ↵"
-        "    // Complex printf with multiple escapes↵"
-        "    fprintf(stderr, ″Error: %s at line %d※n″, msg, line);↵"
-        "    ↵"
-        "    // JSON string with embedded C++ escapes↵"
-        "    std::string json = ″{※″key1※″: ※″value※nwith newline※″, ※″key2※″: 42}″;↵"
-        "    ↵"
-        "    // Complex indented code↵"
-        "⇥if (validate_input()) {↵"
-        "⇥⇥printf(″Input valid※n″);↵"
-        "⇥⇥std::regex pattern(″※s+※d+※s*″);↵"
-        "⇥}↵"
-        "}";
-
-    // Write using fio-write with Unicode escapes - so much cleaner!
-    std::string write_cmd = "(fio-write :path \"" + test_path + "\" :content \"" + content_with_unicode_escapes + "\")";
-    auto write_response = db9_execute(write_cmd);
-    std::string token = extractPreviewToken(write_response.result);
-    if (!token.empty() && token.starts_with("confirm-")) {
-        // This is a preview - need to confirm
-        std::string confirm_cmd = "(fio-confirm :token \"" + token + "\")";
-        auto confirm_response = db9_execute(confirm_cmd);
-        assert(confirm_response.status == Db9Response::Success);
+    Db9Response response = dispatcher.executeCommand(command);
+    if (!confirm) {
+        return response;
     }
 
-    assert(write_response.status == Db9Response::Success);
-    assert(std::filesystem::exists(test_path));
-
-    // Read back using fio-read
-    std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
-    auto read_response = db9_execute(read_cmd);
-
-    assert(read_response.status == Db9Response::Success);
-
-    std::cout << "📄 Read response: " << read_response.result << std::endl;
-
-    // Parse the JSON to extract content
-    std::string response_content = FioUtils::extractContentFromReadResponse(read_response.result);
-
-    // Verify Unicode escaping transformations
-    std::vector<std::pair<std::string, std::string>> escape_tests = {
-        {"※n", "\\n"},      // Newline escape
-        {"※t", "\\t"},      // Tab escape
-        {"※w", "\\w"},      // Word character regex
-        {"※d", "\\d"},      // Digit character regex
-        {"※.", "\\."},      // Escaped period
-        {"※\"", "\\\""},    // Escaped quote
-        {"※s", "\\s"},      // Space character regex
-    };
-
-    bool all_escapes_work = true;
-
-    for (const auto& test : escape_tests) {
-        bool found_converted = response_content.find(test.second) != std::string::npos;
-        bool found_original = response_content.find(test.first) != std::string::npos;
-
-        std::cout << "  Testing " << test.first << " → " << test.second << ": ";
-
-        if (found_converted && !found_original) {
-            std::cout << "✅ WORKING" << std::endl;
-        } else if (found_original && !found_converted) {
-            std::cout << "❌ NOT CONVERTED" << std::endl;
-            all_escapes_work = false;
-        } else if (found_converted && found_original) {
-            std::cout << "⚠️ PARTIAL (both forms present)" << std::endl;
-            all_escapes_work = false;
-        } else {
-            std::cout << "❓ UNCLEAR (neither form found)" << std::endl;
-            all_escapes_work = false;
-        }
+    std::string token = extractPreviewToken(response.result);
+    if (token.empty() || !token.starts_with("confirm-")) {
+        // No preview token - direct execution
+        return response;
     }
 
-    // Test Unicode quote conversion
-    std::cout << "  Testing ″ → \" (quotes): ";
-    bool has_unicode_quotes = response_content.find("″") != std::string::npos;
-    bool has_regular_quotes = response_content.find("\"") != std::string::npos;
-
-    if (has_regular_quotes && !has_unicode_quotes) {
-        std::cout << "✅ WORKING" << std::endl;
-    } else if (has_unicode_quotes) {
-        std::cout << "❌ NOT CONVERTED (still has ″)" << std::endl;
-        all_escapes_work = false;
-    } else {
-        std::cout << "❓ UNCLEAR" << std::endl;
-        all_escapes_work = false;
-    }
-
-    // Test newline conversion
-    std::cout << "  Testing ↵ → actual newlines: ";
-    bool has_unicode_newlines = response_content.find("↵") != std::string::npos;
-
-    if (!has_unicode_newlines) {
-        std::cout << "✅ WORKING (no ↵ found - converted to actual newlines)" << std::endl;
-    } else {
-        std::cout << "❌ NOT CONVERTED (still has ↵)" << std::endl;
-        all_escapes_work = false;
-    }
-
-    // Test tab conversion
-    std::cout << "  Testing ⇥ → actual tabs: ";
-    bool has_unicode_tabs = response_content.find("⇥") != std::string::npos;
-
-    if (!has_unicode_tabs) {
-        std::cout << "✅ WORKING (no ⇥ found - converted to actual tabs)" << std::endl;
-    } else {
-        std::cout << "❌ NOT CONVERTED (still has ⇥)" << std::endl;
-        all_escapes_work = false;
-    }
-
-    // Test the special case: ※※ should become single ※ (if implemented)
-    std::cout << "  Testing ※※ → single backslash (if implemented): ";
-    bool has_double_unicode = response_content.find("※※") != std::string::npos;
-    bool has_double_backslash = response_content.find("\\\\") != std::string::npos;
-
-    if (has_double_backslash && !has_double_unicode) {
-        std::cout << "✅ WORKING (※※ correctly converted to \\\\)" << std::endl;
-    } else if (has_double_unicode) {
-        std::cout << "⚠️ NOT IMPLEMENTED (still has ※※)" << std::endl;
-        // Note: This might be expected behavior if not implemented yet
-    } else {
-        std::cout << "❓ UNCLEAR" << std::endl;
-    }
-
-    // Verify line count preservation (should be around 30+ lines)
-    if (response_content.find("\"total_lines\": 3") != std::string::npos ||
-        response_content.find("\"total_lines\": 2") != std::string::npos) {
-        std::cout << "  ⚠️ Line count unexpectedly low - may indicate ↵ conversion issues" << std::endl;
-    } else if (response_content.find("\"total_lines\":") != std::string::npos) {
-        std::cout << "  ✅ Multi-line structure preserved (good line count)" << std::endl;
-    } else {
-        std::cout << "  ❓ Could not determine line count from response" << std::endl;
-    }
-
-    // Test search integration - verify generated C++ is searchable
-    std::cout << "  🔍 Testing search integration:" << std::endl;
-
-    /// @TODO rewrite this using the extractFieldFromReadResponse utility
-    // Search for converted printf
-
-    std::string search_printf_cmd = "(fio-search :path \"" + test_path + "\" :literal \"printf(\\\"Col1\\t\\\")";
-    auto search_printf_response = db9_execute(search_printf_cmd);
-
-    if (search_printf_response.status == Db9Response::Success &&
-        search_printf_response.result.find("\"total_matches\": 1") != std::string::npos) {
-        std::cout << "    ✅ Generated printf() is searchable" << std::endl;
-    } else {
-        std::cout << "    ⚠️ Printf search integration issue" << std::endl;
-    }
-
-    /// @TODO rewrite this using the extractFieldFromReadResponse utility
-    // Search for converted regex
-    std::string search_regex_cmd = "(fio-search :path \"" + test_path + "\" :literal \"std::regex word_digits\")";
-    auto search_regex_response = db9_execute(search_regex_cmd);
-
-    if (search_regex_response.status == Db9Response::Success &&
-        search_regex_response.result.find("\"total_matches\": 1") != std::string::npos) {
-        std::cout << "    ✅ Generated regex is searchable" << std::endl;
-    } else {
-        std::cout << "    ⚠️ Regex search integration issue" << std::endl;
-    }
-
-    // Overall assessment
-    if (all_escapes_work) {
-        std::cout << "🎉 COMPLEX UNICODE ESCAPING SYSTEM FULLY FUNCTIONAL!" << std::endl;
-    } else {
-        std::cout << "⚠️ UNICODE ESCAPING SYSTEM HAS SOME ISSUES - See individual test results above" << std::endl;
-    }
-
-    // Show a sample of what was generated
-    std::cout << "📝 Sample of generated C++ code:" << std::endl;
-    std::string sample_cmd = "(fio-read :path \"" + test_path + "\" :lines \"@1:10\")";
-    auto sample_response = db9_execute(sample_cmd);
-    if (sample_response.status == Db9Response::Success) {
-        std::cout << "  " << sample_response.result << std::endl;
-    }
-
-    // Clean up
-    std::filesystem::remove(test_path);
-
-    std::cout << "📝 Complex Unicode escaping round-trip test completed\n" << std::endl;
+    // This is a preview - need to confirm
+    std::string confirm_cmd = "(fio-confirm :token \"" + token + "\")";
+    auto confirm_response = db9_execute(confirm_cmd);
+    assert(confirm_response.status == Db9Response::Success);
+    return confirm_response;
 }
+
 
 class FioWriteTest {
 private:
@@ -1023,6 +827,7 @@ static void test23_unicode_escape_search_integration() {
     } else {
         std::cout << "    ❌ fio-search failed to find Unicode-escaped content" << std::endl;
         std::cout << "    📝 Search response: " << search_response.result << std::endl;
+        assert(false);
     }
 
     // Test our new escape feature - search for original Unicode patterns (should find nothing)
@@ -1036,6 +841,7 @@ static void test23_unicode_escape_search_integration() {
     } else {
         std::cout << "    ⚠️ Found ※ patterns in file - Unicode escaping may not be working" << std::endl;
         std::cout << "    📝 Search response: " << unicode_search_response.result << std::endl;
+        assert(false);
     }
 
     // Test searching for converted escapes using the escape feature
@@ -1049,6 +855,7 @@ static void test23_unicode_escape_search_integration() {
     } else {
         std::cout << "    ❌ Escape feature not working correctly" << std::endl;
         std::cout << "    📝 Escape search response: " << escape_search_response.result << std::endl;
+        assert(false);
     }
     // Test searching for fprintf as well
     std::cout << "  🔍 Searching for fprintf with \\n..." << std::endl;
@@ -1060,6 +867,7 @@ static void test23_unicode_escape_search_integration() {
         std::cout << "    ✅ fio-search found fprintf with converted escapes" << std::endl;
     } else {
         std::cout << "    ❌ fio-search failed to find fprintf content" << std::endl;
+        assert(false);
     }
 
     // Test searching with original Unicode patterns (should NOT find them in written file)
@@ -1073,6 +881,7 @@ static void test23_unicode_escape_search_integration() {
     } else {
         std::cout << "    ⚠️ Found ※ patterns in file - Unicode escaping may not be working" << std::endl;
         std::cout << "    📝 Search response: " << unicode_search_response.result << std::endl;
+        assert(false);
     }
 
     // Test searching for original Unicode quotes (should NOT find them)
@@ -1085,6 +894,7 @@ static void test23_unicode_escape_search_integration() {
         std::cout << "    ✅ Original ″ patterns correctly converted (not found in file)" << std::endl;
     } else {
         std::cout << "    ⚠️ Found ″ patterns in file - Unicode quote escaping may not be working" << std::endl;
+        assert(false);
     }
 
     // Bonus: Test searching for the actual newline character (↵ conversion)
@@ -1097,6 +907,7 @@ static void test23_unicode_escape_search_integration() {
         std::cout << "    ✅ Original ↵ patterns correctly converted to actual newlines" << std::endl;
     } else {
         std::cout << "    ⚠️ Found ↵ patterns in file - newline conversion may not be working" << std::endl;
+        assert(false);
     }
 
     // Final verification: Read the file to see what was actually written
@@ -1112,6 +923,7 @@ static void test23_unicode_escape_search_integration() {
             std::cout << "    ✅ Perfect! Generated 2 clean C++ lines as expected" << std::endl;
         } else {
             std::cout << "    ⚠️ Unexpected line count - check Unicode newline handling" << std::endl;
+            assert(false);
         }
     }
 
@@ -1151,7 +963,7 @@ static void test24_fio_trilogy_workflow() {
             "    return 0;↵"
             "}";
 
-        std::string create_cmd = "(fio-write :path \"" + test_path + "\" :content \"" + initial_content + "\")";
+        std::string create_cmd = "(fio-write :path \"" + test_path + "\" :mode \"replace\" :content \"" + initial_content + "\")";
         auto create_response = db9_execute(create_cmd);
         std::string token = extractPreviewToken(create_response.result);
         if (!token.empty() && token.starts_with("confirm-")) {
@@ -1206,6 +1018,7 @@ static void test24_fio_trilogy_workflow() {
                     std::cout << "    📊 Actually found " << match_count << " matches instead of 3" << std::endl;
                 }
             }
+            assert(false);
         }
     }
 
@@ -1274,7 +1087,8 @@ static void test24_fio_trilogy_workflow() {
         if (search_response.result.find("\"total_matches\": 1") != std::string::npos) {
             std::cout << "    ✅ Found 1 remaining occurrence" << std::endl;
         } else {
-            std::cout << "    ⚠️ Unexpected number of remaining matches" << std::endl;
+            std::cout << "    ⚠️ [line:" << __LINE__ << " Unexpected number of remaining matches" << std::endl;
+            assert(false);
         }
     }
 
@@ -1329,8 +1143,8 @@ static void test24_fio_trilogy_workflow() {
             std::cout << "    🔍 Remaining matches details: " << search_response.result << std::endl;
 
             // TODO: Fix the root cause - for now, don't fail the test completely
-            assert(false); // Should work now with proper :mode "replace"
             std::cout << "    ❌ TEST FAILED: Write operations still not working correctly" << std::endl;
+            assert(false); // Should work now with proper :mode "replace"
         }
     }
 
@@ -1379,6 +1193,7 @@ static void test24_fio_trilogy_workflow() {
             } else {
                 std::cout << "    ⚠️ Unicode escape conversion issue in workflow" << std::endl;
                 std::cout << "    📝 Content: " << converted_content << std::endl;
+                assert(false);
             }
         }
 
@@ -1386,13 +1201,13 @@ static void test24_fio_trilogy_workflow() {
         std::string search_escaped_cmd = "(fio-search :path \"" + test_path + "\" :literal \"printf(\\\"Function called!\\n\\\");\")";
         auto search_escaped_response = db9_execute(search_escaped_cmd);
 
-        /// @TODO rewrite this to use the extractContentFromSearchResponse utility
         if (search_escaped_response.status == Db9Response::Success &&
             search_escaped_response.result.find("\"total_matches\": 1") != std::string::npos) {
             std::cout << "    ✅ UNICODE ESCAPES + SEARCH working together perfectly!" << std::endl;
         } else {
             std::cout << "    ⚠️ Unicode escape integration with search needs attention" << std::endl;
             std::cout << "    📝 Search response: " << search_escaped_response.result << std::endl;
+            assert(false);
         }
 
         // Try to search for the original Unicode patterns (should find nothing)
@@ -1404,6 +1219,7 @@ static void test24_fio_trilogy_workflow() {
             std::cout << "    ✅ Unicode patterns correctly converted (not found)" << std::endl;
         } else {
             std::cout << "    ⚠️ Found unconverted Unicode patterns" << std::endl;
+            assert(false);
         }
 
         // Also test quote conversion
@@ -1415,6 +1231,7 @@ static void test24_fio_trilogy_workflow() {
             std::cout << "    ✅ Unicode quotes correctly converted (not found)" << std::endl;
         } else {
             std::cout << "    ⚠️ Found unconverted Unicode quotes" << std::endl;
+            assert(false);
         }
     }
 
@@ -1486,6 +1303,7 @@ static void test_unicode_escape_performance() {
         std::cout << "  ✅ Unicode escapes processed correctly in large content" << std::endl;
     } else {
         std::cout << "  ❌ Unicode escape processing failed in large content" << std::endl;
+        assert(false);
     }
 
     // Verify regex patterns were converted correctly
@@ -1498,6 +1316,7 @@ static void test_unicode_escape_performance() {
         std::cout << "  ✅ Unicode regex escapes processed correctly" << std::endl;
     } else {
         std::cout << "  ⚠️ Unicode regex escape processing may have issues" << std::endl;
+        assert(false);
     }
 
     // Verify no original Unicode characters remain
@@ -1546,10 +1365,11 @@ static void test_unicode_escape_performance() {
         std::cout << "  🎉 PERFECT! All 8000+ Unicode escapes converted successfully" << std::endl;
     } else {
         std::cout << "  ⚠️ Some Unicode escapes may not have converted properly" << std::endl;
+        assert(false);
     }
 
-    // Optional: Show a sample of the generated content
-    std::cout << "  📖 Sample of generated content:" << std::endl;
+    // Debug: uncomment to show a sample of the generated content
+    //std::cout << "  📖 Sample of generated content:" << std::endl;
     std::string sample_cmd = "(fio-read :path \"" + test_path + "\" :lines \"@1:3\")";
     auto sample_response = db9_execute(sample_cmd);
     if (sample_response.status == Db9Response::Success) {
@@ -1630,6 +1450,7 @@ void test32_basic_unicode_escaping() {
             std::cout << "✅ Found \\n - ※n Unicode escaping worked!" << std::endl;
         } else {
             std::cout << "❌ No \\n found - ※n escaping failed" << std::endl;
+            assert(false);
         }
 
         // Test 2: Check for converted quotes
@@ -1637,11 +1458,13 @@ void test32_basic_unicode_escaping() {
             std::cout << "✅ Found quotes - ″ Unicode escaping worked!" << std::endl;
         } else {
             std::cout << "❌ No quotes found - ″ quote escaping failed" << std::endl;
+            assert(false);
         }
 
         // Test 3: Should NOT find the original ※ Unicode characters
         if (content.find("※") != std::string::npos) {
             std::cout << "❌ Found literal ※ - escaping incomplete" << std::endl;
+            assert(false);
         } else {
             std::cout << "✅ No literal ※ found - good!" << std::endl;
         }
@@ -1649,6 +1472,7 @@ void test32_basic_unicode_escaping() {
         // Test 4: Should NOT find the original ″ Unicode characters
         if (content.find("″") != std::string::npos) {
             std::cout << "❌ Found literal ″ - quote escaping incomplete" << std::endl;
+            assert(false);
         } else {
             std::cout << "✅ No literal ″ found - good!" << std::endl;
         }
@@ -1659,6 +1483,7 @@ void test32_basic_unicode_escaping() {
             std::cout << "🎉 PERFECT! Generated clean C++ code: " << content << std::endl;
         } else {
             std::cout << "⚠️ Content mismatch. Expected: " << expected << ", Got: " << content << std::endl;
+            assert(false);
         }
 
         std::filesystem::remove(test_path);
@@ -1693,6 +1518,7 @@ void test32_basic_unicode_escaping() {
                     std::cout << "✅ ↵ correctly created 2 lines" << std::endl;
                 } else {
                     std::cout << "⚠️ ↵ newline conversion unexpected" << std::endl;
+                    assert(false);
                 }
             }
 
@@ -1707,6 +1533,7 @@ void test32_basic_unicode_escaping() {
                 std::cout << "✅ ⇥ correctly converted to actual tab" << std::endl;
             } else {
                 std::cout << "⚠️ ⇥ tab conversion may need attention" << std::endl;
+                assert(false);
             }
 
             // Check for printf escape (※t → \t in string)
@@ -1714,6 +1541,7 @@ void test32_basic_unicode_escaping() {
                 std::cout << "✅ ※t correctly converted to \\t in printf" << std::endl;
             } else {
                 std::cout << "⚠️ ※t printf escape may need attention" << std::endl;
+                assert(false);
             }
 
             std::filesystem::remove(test_path);
@@ -1753,7 +1581,8 @@ void test32_basic_unicode_escaping() {
                     std::cout << "✅ Unicode escapes converted correctly: std::regex pattern(\"\\w+\\d+\");" << std::endl;
 
                     // Now test search integration
-                    std::string search_cmd = "(fio-search :path \"" + test_path + "\" :literal \"std::regex pattern(\\\"\\w+\\d+\\\");\")";
+                    std::string search_cmd = "(fio-search :escape true :path \"" + test_path 
+                            + "\" :literal \"std::regex pattern(″※w+※d+″);\")";
                     auto search_response = db9_execute(search_cmd);
 
                     if (search_response.status == Db9Response::Success &&
@@ -1782,6 +1611,7 @@ void test32_basic_unicode_escaping() {
             std::filesystem::remove(test_path);
         } else {
             std::cout << "❌ Failed to write test file" << std::endl;
+            assert(false);
         }
     }
 
@@ -2250,6 +2080,7 @@ static void test_append_operations() {
             std::cout << "    ✅ @e:0 append test passed" << std::endl;
         } else {
             std::cout << "    ❌ @e:0 append test failed - syntax not supported" << std::endl;
+            assert(false);
         }
     }
 
@@ -2287,6 +2118,7 @@ static void test_append_operations() {
             std::cout << "    ✅ @e:-1 append test passed" << std::endl;
         } else {
             std::cout << "    ❌ @e:-1 append test failed - syntax not supported" << std::endl;
+            assert(false);
         }
     }
 
@@ -2460,6 +2292,7 @@ static void test_unicode_escaping() {
             std::cout << "✅ ↵ correctly created 2 lines" << std::endl;
         } else {
             std::cout << "⚠️ ↵ newline structure unexpected" << std::endl;
+            assert(false);
         }
 
         // Check for tab indentation
@@ -2472,6 +2305,7 @@ static void test_unicode_escaping() {
             std::cout << "✅ ⇥ correctly created tab indentation" << std::endl;
         } else {
             std::cout << "⚠️ ⇥ tab indentation may need attention" << std::endl;
+            assert(false);
         }
     }
 
@@ -2577,8 +2411,10 @@ static void test15_unicode_escape_sequences() {
     assert(read_response.status == Db9Response::Success);
 
     std::string content = FioUtils::extractContentFromReadResponse(read_response.result);
-    std::cout << "📊 Generated file content:" << std::endl;
-    std::cout << content << std::endl;
+
+    // uncomment to see full content
+    //std::cout << "📊 Generated file content:" << std::endl;
+    //std::cout << content << std::endl;
 
     // Test 1: Verify ※n → \n conversion in printf strings
     bool printf_escapes_work = content.find("printf(\"Hello\\nWorld\\n\");") != std::string::npos;
@@ -2586,6 +2422,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ ※n correctly converted to \\n in printf strings" << std::endl;
     } else {
         std::cout << "❌ ※n not converted to \\n in printf strings" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(printf_escapes_work);
 
@@ -2595,6 +2432,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ ※t correctly converted to \\t in printf strings" << std::endl;
     } else {
         std::cout << "❌ ※t not converted to \\t in printf strings" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(tab_escapes_work);
 
@@ -2604,6 +2442,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ Regex escapes (※w, ※d, ※.) correctly converted" << std::endl;
     } else {
         std::cout << "❌ Regex escapes not converted correctly" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(regex_escapes_work);
 
@@ -2613,6 +2452,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ File path backslashes correctly converted" << std::endl;
     } else {
         std::cout << "❌ File path backslashes not converted correctly" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(path_escapes_work);
 
@@ -2623,6 +2463,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ ″ correctly converted to \" (no Unicode quotes remaining)" << std::endl;
     } else {
         std::cout << "❌ ″ not converted to \" correctly" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(quote_escapes_work);
 
@@ -2633,6 +2474,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ ↵ correctly converted to actual newlines (" << newline_count << " found)" << std::endl;
     } else {
         std::cout << "❌ ↵ not converted to actual newlines (only " << newline_count << " found)" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(newline_structure_work);
 
@@ -2643,6 +2485,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ ⇥ correctly converted to actual tab characters for indentation" << std::endl;
     } else {
         std::cout << "❌ ⇥ not converted to actual tab characters" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(tab_indentation_work);
 
@@ -2655,6 +2498,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ All Unicode escape patterns converted (none remaining)" << std::endl;
     } else {
         std::cout << "❌ Some Unicode escape patterns remain unconverted" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(no_unicode_remaining);
 
@@ -2666,6 +2510,7 @@ static void test15_unicode_escape_sequences() {
         std::cout << "✅ Generated valid C++ code structure" << std::endl;
     } else {
         std::cout << "❌ Generated C++ code structure invalid" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
     assert(basic_syntax_ok);
 
@@ -2698,7 +2543,8 @@ static void test17_unicode_tab_and_mixed_escapes() {
         auto read_response = db9_execute(read_cmd);
 
         if (read_response.status == Db9Response::Success) {
-            std::cout << "📊 Read response: " << read_response.result << std::endl;
+            // uncomment to see full JSON response
+            //std::cout << "📊 Read response: " << read_response.result << std::endl;
 
             // Extract content from JSON response
             std::string content = FioUtils::extractContentFromReadResponse(read_response.result);
@@ -2708,6 +2554,7 @@ static void test17_unicode_tab_and_mixed_escapes() {
                 std::cout << "✅ ※t correctly converted to \\t in printf strings" << std::endl;
             } else {
                 std::cout << "❌ ※t not converted to \\t in printf strings" << std::endl;
+                assert(false); // Should work now with proper :mode "replace"
             }
 
             // Test 2: Check for actual tab characters (⇥ → \t)
@@ -2715,6 +2562,7 @@ static void test17_unicode_tab_and_mixed_escapes() {
                 std::cout << "✅ ⇥ correctly converted to actual tab characters" << std::endl;
             } else {
                 std::cout << "❌ ⇥ not converted to actual tab characters" << std::endl;
+                assert(false); // Should work now with proper :mode "replace"
             }
 
             // Test 3: Check for actual newlines (↵ → \n)
@@ -2723,6 +2571,7 @@ static void test17_unicode_tab_and_mixed_escapes() {
                 std::cout << "✅ ↵ correctly converted to actual newlines (" << newline_count << " found)" << std::endl;
             } else {
                 std::cout << "❌ ↵ not converted to actual newlines (only " << newline_count << " found)" << std::endl;
+                assert(false); // Should work now with proper :mode "replace"
             }
 
             // Test 4: Check for ″ → " conversion
@@ -2730,6 +2579,7 @@ static void test17_unicode_tab_and_mixed_escapes() {
                 std::cout << "✅ ″ correctly converted to \" in function calls" << std::endl;
             } else {
                 std::cout << "❌ ″ not converted to \" in function calls" << std::endl;
+                assert(false); // Should work now with proper :mode "replace"
             }
 
             // Test 5: Verify no unconverted Unicode patterns remain
@@ -2742,6 +2592,7 @@ static void test17_unicode_tab_and_mixed_escapes() {
                 std::cout << "✅ All Unicode escape patterns converted (none remaining)" << std::endl;
             } else {
                 std::cout << "❌ Some Unicode escape patterns not converted" << std::endl;
+                assert(false); // Should work now with proper :mode "replace"
             }
 
             // Test 6: Verify the generated C++ code structure
@@ -2752,22 +2603,245 @@ static void test17_unicode_tab_and_mixed_escapes() {
                 std::cout << "🎉 UNICODE MIXED ESCAPES WORKING PERFECTLY!" << std::endl;
             } else {
                 std::cout << "❌ Generated C++ code structure incorrect" << std::endl;
+                assert(false); // Should work now with proper :mode "replace"
             }
 
             // Show sample of generated content
             std::cout << "📝 Generated C++ code:" << std::endl;
             std::cout << content << std::endl;
 
-        } else {
+        } 
+        else {
             std::cout << "❌ Failed to read back test file" << std::endl;
+            assert(false); // Should work now with proper :mode "replace"
         }
 
         std::cout << "✅ Unicode tab and mixed escape sequences test passed" << std::endl;
-    } else {
+    } 
+    else {
         std::cout << "❌ Unicode mixed escapes test failed" << std::endl;
+        assert(false); // Should work now with proper :mode "replace"
     }
 
     std::cout << "📝 Unicode tab and mixed escape sequences test completed" << std::endl;
+}
+
+
+
+// Updated Complex Escaping Round-trip Test - Unicode Escape System
+static void test21_complex_unicode_escaping_roundtrip() {
+    using namespace LabDb;
+
+    std::cout << "🧪 Test 21: Complex Unicode escaping round-trip verification" << std::endl;
+
+    std::string test_path = "/tmp/fio_complex_unicode_escaping_test.cpp";
+
+    // Remove file if exists
+    if (std::filesystem::exists(test_path)) {
+        std::filesystem::remove(test_path);
+    }
+
+    // Test content with various Unicode escape scenarios
+    // Using ※ for backslashes, ″ for quotes, ↵ for actual newlines, ⇥ for tabs
+    std::string content_with_unicode_escapes =
+        "// Test file with complex Unicode escape sequences↵"
+        "#include <iostream>↵"
+        "#include <regex>↵"
+        "↵"
+        "void test_escapes() {↵"
+        "    // Basic newline escaping (C++ string literals)↵"
+        "    std::cout << ″Line 1※nLine 2※nLine 3″;↵"
+        "    ↵"
+        "    // Tab escaping in printf↵"
+        "    printf(″Col1※tCol2※tCol3※n″);↵"
+        "    ↵"
+        "    // Regex patterns with escaped characters↵"
+        "    std::regex word_digits(″※w+※d+″);        // Should become \\w+\\d+↵"
+        "    std::regex email(″[a-z]+@[a-z]+※.[a-z]+″); // Should become \\.↵"
+        "    ↵"
+        "    // File path with literal backslashes↵"
+        "    std::string path = ″C:※※Users※※documents※※file.txt″;↵"
+        "    ↵"
+        "    // Complex printf with multiple escapes↵"
+        "    fprintf(stderr, ″Error: %s at line %d※n″, msg, line);↵"
+        "    ↵"
+        "    // JSON string with embedded C++ escapes↵"
+        "    std::string json = ″{※″key1※″: ※″value※nwith newline※″, ※″key2※″: 42}″;↵"
+        "    ↵"
+        "    // Complex indented code↵"
+        "⇥if (validate_input()) {↵"
+        "⇥⇥printf(″Input valid※n″);↵"
+        "⇥⇥std::regex pattern(″※s+※d+※s*″);↵"
+        "⇥}↵"
+        "}↵";
+
+    // Write using fio-write with Unicode escapes - so much cleaner!
+    std::string write_cmd = "(fio-write :path \"" + test_path + "\" :content \"" + content_with_unicode_escapes + "\")";
+    auto write_response = db9_execute(write_cmd, confirm_commands);
+
+    assert(write_response.status == Db9Response::Success);
+    assert(std::filesystem::exists(test_path));
+
+    // Read back using fio-read
+    std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
+    auto read_response = db9_execute(read_cmd);
+
+    assert(read_response.status == Db9Response::Success);
+
+    // uncomment for debugging
+    //std::cout << "📄 Read response: " << read_response.result << std::endl;
+
+    // Parse the JSON to extract content
+    std::string response_content = FioUtils::extractContentFromReadResponse(read_response.result);
+
+    // Verify Unicode escaping transformations
+    std::vector<std::pair<std::string, std::string>> escape_tests = {
+        {"※n", "\\n"},      // Newline escape
+        {"※t", "\\t"},      // Tab escape
+        {"※w", "\\w"},      // Word character regex
+        {"※d", "\\d"},      // Digit character regex
+        {"※.", "\\."},      // Escaped period
+        {"※\"", "\\\""},    // Escaped quote
+        {"※s", "\\s"},      // Space character regex
+    };
+
+    bool all_escapes_work = true;
+
+    for (const auto& test : escape_tests) {
+        bool found_converted = response_content.find(test.second) != std::string::npos;
+        bool found_original = response_content.find(test.first) != std::string::npos;
+
+        std::cout << "  Testing " << test.first << " → " << test.second << ": ";
+
+        if (found_converted && !found_original) {
+            std::cout << "✅ WORKING" << std::endl;
+        } else if (found_original && !found_converted) {
+            std::cout << "❌ NOT CONVERTED" << std::endl;
+            all_escapes_work = false;
+        } else if (found_converted && found_original) {
+            std::cout << "⚠️ PARTIAL (both forms present)" << std::endl;
+            all_escapes_work = false;
+        } else {
+            std::cout << "❓ UNCLEAR (neither form found)" << std::endl;
+            all_escapes_work = false;
+        }
+    }
+
+    // Test Unicode quote conversion
+    std::cout << "  Testing ″ → \" (quotes): ";
+    bool has_unicode_quotes = response_content.find("″") != std::string::npos;
+    bool has_regular_quotes = response_content.find("\"") != std::string::npos;
+
+    if (has_regular_quotes && !has_unicode_quotes) {
+        std::cout << "✅ WORKING" << std::endl;
+    } else if (has_unicode_quotes) {
+        std::cout << "❌ NOT CONVERTED (still has ″)" << std::endl;
+        all_escapes_work = false;
+    } else {
+        std::cout << "❓ UNCLEAR" << std::endl;
+        all_escapes_work = false;
+    }
+
+    // Test newline conversion
+    std::cout << "  Testing ↵ → actual newlines: ";
+    bool has_unicode_newlines = response_content.find("↵") != std::string::npos;
+
+    if (!has_unicode_newlines) {
+        std::cout << "✅ WORKING (no ↵ found - converted to actual newlines)" << std::endl;
+    } else {
+        std::cout << "❌ NOT CONVERTED (still has ↵)" << std::endl;
+        all_escapes_work = false;
+    }
+
+    // Test tab conversion
+    std::cout << "  Testing ⇥ → actual tabs: ";
+    bool has_unicode_tabs = response_content.find("⇥") != std::string::npos;
+
+    if (!has_unicode_tabs) {
+        std::cout << "✅ WORKING (no ⇥ found - converted to actual tabs)" << std::endl;
+    } else {
+        std::cout << "❌ NOT CONVERTED (still has ⇥)" << std::endl;
+        all_escapes_work = false;
+    }
+
+    // Test the special case: ※※ should become single ※ (if implemented)
+    std::cout << "  Testing ※※ → single backslash (if implemented): ";
+    bool has_double_unicode = response_content.find("※※") != std::string::npos;
+    bool has_double_backslash = response_content.find("\\\\") != std::string::npos;
+
+    if (has_double_backslash && !has_double_unicode) {
+        std::cout << "✅ WORKING (※※ correctly converted to \\\\)" << std::endl;
+    } else if (has_double_unicode) {
+        std::cout << "⚠️ NOT IMPLEMENTED (still has ※※)" << std::endl;
+        // Note: This might be expected behavior if not implemented yet
+    } else {
+        std::cout << "❓ UNCLEAR" << std::endl;
+    }
+
+    // Verify line count preservation (should be exactly 30 lines)
+    std::string total_lines_str = FioUtils::extractFieldFromReadResponse(read_response.result, "total_lines");
+    if (total_lines_str.empty()) {
+        std::cout << "  ❓ Could not determine line count from response" << std::endl;
+        assert(false);
+    } else {
+        int total_lines = std::stoi(total_lines_str);
+        if (total_lines == 30) {
+            std::cout << "  ✅ Perfect! Got expected 30 lines from ↵ conversions" << std::endl;
+        } else {
+            std::cout << "  ⚠️ Expected 30 lines, got " << total_lines << " - may indicate ↵ conversion issues" << std::endl;
+            assert(false);
+        }
+    }
+
+    // Test search integration - verify generated C++ is searchable
+    std::cout << "  🔍 [line:" << __LINE__ << "] Testing search integration\n";
+
+    // Search for converted printf
+    std::string search_printf_cmd = "(fio-search :path \"" + test_path + "\" :escape true :literal \"printf(″Col1※t\")";
+    auto search_printf_response = db9_execute(search_printf_cmd);
+
+    if (search_printf_response.status == Db9Response::Success &&
+        search_printf_response.result.find("\"total_matches\": 1") != std::string::npos) {
+        std::cout << "    ✅ Generated printf() is searchable" << std::endl;
+    } else {
+        std::cout << "    ⚠️ [line:" << __LINE__ << " Printf search integration issue" << std::endl;
+        std::cout << "DEBUG: Full response = [" << search_printf_response.result << "]" << std::endl;
+        assert(false);
+    }
+
+    /// @TODO rewrite this using the extractFieldFromReadResponse utility
+    // Search for converted regex
+    std::string search_regex_cmd = "(fio-search :path \"" + test_path + "\" :literal \"std::regex word_digits\")";
+    auto search_regex_response = db9_execute(search_regex_cmd);
+
+    if (search_regex_response.status == Db9Response::Success &&
+        search_regex_response.result.find("\"total_matches\": 1") != std::string::npos) {
+        std::cout << "    ✅ Generated regex is searchable" << std::endl;
+    } else {
+        std::cout << "    ⚠️ Regex search integration issue" << std::endl;
+        assert(false);
+    }
+
+    // Overall assessment
+    if (all_escapes_work) {
+        std::cout << "🎉 COMPLEX UNICODE ESCAPING SYSTEM FULLY FUNCTIONAL!" << std::endl;
+    } else {
+        std::cout << "⚠️ UNICODE ESCAPING SYSTEM HAS SOME ISSUES - See individual test results above" << std::endl;
+        assert(false);
+    }
+
+    std::string sample_cmd = "(fio-read :path \"" + test_path + "\" :lines \"@1:10\")";
+    auto sample_response = db9_execute(sample_cmd);
+    if (sample_response.status == Db9Response::Success) {
+        // Uncomment to show a sample of what was generated
+        //std::cout << "📝 Sample of generated C++ code:" << std::endl;
+        //std::cout << "  " << sample_response.result << std::endl;
+    }
+
+    // Clean up
+    std::filesystem::remove(test_path);
+
+    std::cout << "📝 Complex Unicode escaping round-trip test completed\n" << std::endl;
 }
 
     // =========================================================================
@@ -2779,30 +2853,35 @@ static void test17_unicode_tab_and_mixed_escapes() {
 
         std::string test_path = "/tmp/fio_test_multiline.txt";
 
-        // Create file with explicit multi-line content using raw strings
-        std::string cmd = R"((fio-write :path "/tmp/fio_test_multiline.txt" :content "Line 1: Function header
-Line 2: {
-Line 3:     int x = 42;
-Line 4:     return x;
-Line 5: }"))";
-
-        auto response = db9_execute(cmd);
-        assert(response.status == Db9Response::Success);
+        std::string cmd = "(fio-write :path \"" + test_path + "\" :content \"Line 1: Function header\nLine 2: {\nLine 3:     int x = 42;\nLine 4:     return x;\nLine 5: }\")";
+        auto response = db9_execute(cmd, confirm_commands);
+        if (response.status != Db9Response::Success) {
+            std::cout << "DEBUG: Full response = [" << response.result << "]" << std::endl;
+            std::cout << "DEBUG: Response status = " << (int)response.status << std::endl;
+            assert(false);
+        }
 
         // Test fio-read to see if lines are preserved correctly
         std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
         auto read_response = db9_execute(read_cmd);
 
-        std::cout << "📊 Read response: " << read_response.result << std::endl;
+        // uncomment for debugging
+        //std::cout << "📊 Read response: " << read_response.result << std::endl;
 
         // Parse the JSON response to check line count
         // Look for "total_lines" field in the response
         if (read_response.result.find("\"total_lines\": 5") != std::string::npos) {
             std::cout << "✅ MULTI-LINE PRESERVATION WORKING: 5 lines correctly stored" << std::endl;
-        } else if (read_response.result.find("\"total_lines\": 1") != std::string::npos) {
+        } 
+        else if (read_response.result.find("\"total_lines\": 1") != std::string::npos) {
             std::cout << "⚠️  MULTI-LINE COMPRESSION BUG: Content compressed to 1 line" << std::endl;
-        } else {
+            assert(false);
+        } 
+        else {
             std::cout << "❓ UNEXPECTED LINE COUNT: Check response for total_lines" << std::endl;
+            std::cout << "DEBUG: Full response = [" << read_response.result << "]" << std::endl;
+            std::cout << "DEBUG: Response status = " << (int)read_response.status << std::endl;
+            assert(false);
         }
 
         std::filesystem::remove(test_path);
@@ -2820,20 +2899,24 @@ printf(\"Debug: %s\\n\", message);
 🚀 Status: Complete ✅
 Done."))";
 
-        auto response = db9_execute(cmd);
+        auto response = db9_execute(cmd, confirm_commands);
         assert(response.status == Db9Response::Success);
 
         // Read back and analyze
         std::string read_cmd = "(fio-read :path \"" + test_path + "\")";
         auto read_response = db9_execute(read_cmd);
 
-        std::cout << "📊 Complex content response: " << read_response.result << std::endl;
+        // uncomment for debugging
+        //std::cout << "📊 Complex content response: " << read_response.result << std::endl;
 
         // Check for various issues
         if (read_response.result.find("\"total_lines\": 4") != std::string::npos) {
             std::cout << "✅ COMPLEX CONTENT WORKING: 4 lines preserved with Unicode" << std::endl;
         } else {
             std::cout << "⚠️  COMPLEX CONTENT ISSUES: Check line preservation and Unicode handling" << std::endl;
+            std::cout << "DEBUG: Full response = [" << read_response.result << "]" << std::endl;
+            std::cout << "DEBUG: Response status = " << (int)read_response.status << std::endl;
+            assert(false);
         }
 
         std::filesystem::remove(test_path);
@@ -2905,6 +2988,7 @@ static void test_unicode_help_vs_behavior_consistency() {
             }
         } else {
             std::cout << "    ❌ ※n test command failed" << std::endl;
+            assert(false); // Should work now with proper :mode "replace"
         }
         std::filesystem::remove(test_path);
     }
@@ -2936,6 +3020,7 @@ static void test_unicode_help_vs_behavior_consistency() {
             }
         } else {
             std::cout << "    ❌ ″ test command failed" << std::endl;
+            assert(false);
         }
         std::filesystem::remove(test_path);
     }
@@ -2963,6 +3048,7 @@ static void test_unicode_help_vs_behavior_consistency() {
             } else {
                 std::cout << "    ❌ § delimiters with Unicode escapes failed" << std::endl;
                 std::cout << "    📝 Got: " << content << std::endl;
+                assert(false);
             }
         } else {
             std::cout << "    ❌ § delimiter test command failed" << std::endl;
@@ -2996,6 +3082,7 @@ static void test_unicode_help_vs_behavior_consistency() {
                 if (read_response.status == Db9Response::Success) {
                     std::cout << "    📝 Read result: " << read_response.result << std::endl;
                 }
+                assert(false);
             }
         } else {
             std::cout << "    ❌ ↵ newline test command failed" << std::endl;
