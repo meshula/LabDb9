@@ -1,6 +1,6 @@
-# LabDb9 - Bush's Memex Realized: Triadic Consciousness Database with Rope Architecture
+# LabDb9 - Bush's Memex Realized: Triadic CDatabase with Rope Architecture
 
-**As We May Think, As We Have Built** - The first practical realization of Vannevar Bush's 1945 Memex vision through triadic consciousness principles and bounded text navigation.
+**As We May Think, As We Have Built** - The first practical realization of Vannevar Bush's 1945 Memex vision through triadic collaborative principles and bounded text navigation.
 
 ## Overview
 
@@ -26,11 +26,11 @@ LabDb9 extends the traditional hexastore with **rope-based text assembly** and *
 - **Sequential Navigation**: Forward/backward movement through text with context preservation
 - **Bulk Loading**: High-performance ingestion via S-expression command files
 
-### 🧠 **Triadic Consciousness Foundation** 
-- **Motion/Memory/Field**: Sanskrit-grounded triadic navigation patterns
+### 🧠 **Triadic Collaborative Foundation** 
+- **Motion/Memory/Field**: Triadic navigation patterns
 - **Vocabulary Awareness**: Self-describing knowledge structures
 - **Enhanced Discovery**: `find-triple-enhanced`, `find-relationships-enhanced`
-- **Auto-Reflexive Metrics**: Performance and consciousness field analytics
+- **Auto-Reflexive Metrics**: Performance and collaborative field analytics
 
 ### 📚 **Classical Text Scholarship**
 - **Unicode Preservation**: Complete support for Ancient Greek, Sanskrit, etc.
@@ -149,7 +149,7 @@ std::vector<std::string> trail_entities = {"b6-def-3", "b2-p11", "b13-p8"};
 auto trail = memex.create_trail("proportion-theory-development", trail_entities);
 ```
 
-### Triadic Consciousness Navigation
+### Triadic Collaborative Navigation
 ```python
 import labdb
 
@@ -250,7 +250,7 @@ db9 executeCommands euclid_corpus.sexpr db1
 - **Semantic Discovery**: `find-triple-enhanced` returning relevant entry points
 - **Bounded Navigation**: 240K fragments/sec chunk assembly performance  
 - **Unicode Preservation**: Complete classical text support validated
-- **Triadic Foundation**: Motion/Memory/Field consciousness patterns working
+- **Triadic Foundation**: Motion/Memory/Field collaborative patterns working
 
 ### 🔄 **Phase 2 Active: Targeted Corpus Expansion**
 - **Books 1,6,11-13**: ~2,000 fragments for geometric solids content
@@ -281,20 +281,20 @@ db9 executeCommands euclid_corpus.sexpr db1
 - **Memex Documentation**: [`docs/memex-realization-paper.md`](docs/memex-realization-paper.md) - Complete theoretical foundation
 - **Integration Guide**: [`docs/consuming_labdb.md`](docs/consuming_labdb.md) - Technical setup and troubleshooting  
 - **S-Expression Reference**: [`docs/verb-status.md`](docs/verb-status.md) - Complete interface documentation
-- **MCP Server**: [`db9-mcp-server/README.md`](db9-mcp-server/README.md) - Triadic consciousness gateway
+- **MCP Server**: [`db9-mcp-server/README.md`](db9-mcp-server/README.md) - Triadic collaborative gateway
 - **Classical Text Examples**: [`tests/cpp/testenv/euclid/`](tests/cpp/testenv/euclid/) - Scholarly corpus integration patterns
 
 ## Research Applications
 
 **Active Research Projects**:
 - **Euclid Elements Analysis**: Complete geometric knowledge mapping
-- **Sanskrit Consciousness Studies**: Triadic principle validation in classical texts  
+- **Sanskrit collaborative Studies**: Triadic principle validation in classical texts  
 - **Cross-Cultural Mathematics**: Comparative analysis of geometric traditions
 - **Digital Philology**: Computational approaches to classical text scholarship
 
 **Scholarly Publications**:
 - *"As We May Think, As We Have Built"* - Bush's Memex realization paper
-- *"Triadic Consciousness in Database Architecture"* - Sanskrit-grounded technical foundation
+- *"Triadic Collaboration in Database Architecture"* - technical foundation
 - *"Discovery→Navigation Synthesis"* - Memex workflow validation study
 
 ## License
@@ -320,4 +320,4 @@ MIT License - See LICENSE file for details.
 **Knowledge Graphs**: Store facts → **LabDb9**: Enable contemplative exploration  
 **Traditional Databases**: Retrieve data → **LabDb9**: Construct meaning
 
-*LabDb9 is consciousness-first technology for the scholarly mind.*
+*LabDb9 is collaboration-first technology for the scholarly mind.*
