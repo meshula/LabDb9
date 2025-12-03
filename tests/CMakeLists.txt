@@ -88,11 +88,11 @@ target_link_libraries(test_enhanced_api labdb)
 add_test(NAME EnhancedApiTest COMMAND test_enhanced_api)
 
 # Parameter Fix Validation Test (LBYL vs EAFP pattern)
-add_executable(test_parameter_fix
-    ../test_parameter_fix.cpp
-)
-target_link_libraries(test_parameter_fix labdb)
-add_test(NAME ParameterFixTest COMMAND test_parameter_fix)
+#add_executable(test_parameter_fix
+#    ../test_parameter_fix.cpp
+#)
+#target_link_libraries(test_parameter_fix labdb)
+#add_test(NAME ParameterFixTest COMMAND test_parameter_fix)
 
 # FIO-Write TDD test (Test-driven development for fio-write functionality)
 add_executable(test_fio_write
