@@ -7,7 +7,7 @@
 
 ## Overview
 
-This document provides a comprehensive roadmap to the Euclid corpus data available in `/Users/nick/dev/Lab/LabEuclid/sources/` for implementing the Memex realization in LabDb9. All source materials have been systematically analyzed and are ready for Phase 1 ingestion.
+This document provides a comprehensive roadmap to the Euclid corpus data available in `meshula/LabEuclid` for implementing the Memex realization in LabDb9. All source materials have been systematically analyzed and are ready for Phase 1 ingestion.
 
 ## File Inventory & Analysis
 

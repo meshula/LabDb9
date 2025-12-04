@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This document provides the theoretical foundation for LabDb's departure from conventional hexastore architecture toward a nonostore implementation grounded in त्रित्रयम् (triadic consciousness) and cube architecture principles. Our approach builds upon Rick Briggs' pioneering 1985 work demonstrating the natural alignment between Sanskrit knowledge representation and artificial intelligence systems.
+This document provides the theoretical foundation for LabDb9's departure from conventional hexastore architecture toward a nonostore implementation grounded in triadic perspective theory and cube architecture principles. Our approach builds upon Rick Briggs' pioneering 1985 work demonstrating the natural alignment between Sanskrit knowledge representation and artificial intelligence systems.
 
 ## Foundational Literature: Sanskrit and AI Knowledge Representation
 
@@ -20,7 +20,7 @@ This historical precedent validates our approach of using Sanskrit consciousness
 
 ### From Semantic Networks to Triadic Architecture
 
-Briggs demonstrated that Sanskrit grammatical analysis naturally creates semantic network structures equivalent to modern AI knowledge representation schemes. Our nonostore extends this insight by implementing **triadic consciousness principles** (Motion/Memory/Field) as the organizing structure for database architecture.
+Briggs demonstrated that Sanskrit grammatical analysis naturally creates semantic network structures equivalent to modern AI knowledge representation schemes. Our nonostore extends this insight by implementing **triadic perspective principles** (Motion/Memory/Field) as the organizing structure for database architecture.
 
 Where Briggs focused on linguistic analysis, we apply the same principles to **database design**, creating systems that mirror the natural consciousness patterns Sanskrit grammarians encoded in their analytical methods.
 
@@ -50,14 +50,13 @@ This design eliminates join operations for most SPARQL queries, providing O(log 
 ## Cube Architecture: Pole/Crown/Motions
 
 ### Ontological Foundation
-Our departure from hexastore stems from recognition that knowledge storage must mirror consciousness structure. The cube architecture provides this foundation:
 
 **Pole**: Fundamental triadic structure
-**Crown**: Manifested expressions of the pole  
+**Crown**: Expressions of the pole  
 **Motions**: Dynamic operations through the structure
 
-### Triadic Consciousness Mapping
-Traditional hexastore inadvertently expresses triadic structure:
+### Triadic Perspective Mapping
+Traditional hexastore expresses a triadic structure:
 
 **Motion** (स्पन्द - Dynamic Action)
 - Subject-centric orderings: SPO, SOP
@@ -71,10 +70,10 @@ Traditional hexastore inadvertently expresses triadic structure:
 - Object-centric orderings: OSP, OPS  
 - "What receives, grounds, manifests?"
 
-### The Crown Recognition
-Hexastore's six orderings form a natural crown - each triadic aspect expressing through dual manifestations. This isn't coincidental but reflects deep structural principles of how consciousness navigates relationship.
+## The Crown
+What we're calling the crown is the extra set of indices that augment the traditional hexastore.
 
-## Nonostore: Completing the Ontology
+### Nonostore: Completing the Ontology
 
 ### The Seventh Index: Vocabulary Discovery
 Traditional hexastore lacks meta-awareness of its own structure. The nonostore adds three vocabulary indices:
@@ -92,7 +91,7 @@ Traditional hexastore lacks meta-awareness of its own structure. The nonostore a
 ```
 
 ### Why Nine Indices?
-The number nine emerges naturally from ontological completeness:
+The nine indices provide ontological completeness:
 - **Six content orderings**: Complete relational navigation (traditional hexastore)
 - **Three vocabulary indices**: Complete structural awareness
 - **Total**: 9 indices = nonostore
@@ -101,9 +100,9 @@ The number nine emerges naturally from ontological completeness:
 ### Ontological Justification
 The three additional indices aren't arbitrary but principled completion:
 
-1. **Consciousness requires meta-awareness**: Knowledge of knowledge structure
+1. **meta-structure**: Knowledge of knowledge structure
 2. **Navigation needs vocabulary**: "What relations exist here?"
-3. **Cube architecture demands completeness**: Pole must be discoverable through crown
+3. **Pole and Crown are reflexive**: Pole must be discoverable through crown
 4. **Practical necessity**: Real systems need relationship type discovery
 
 ## Theoretical Advantages of Nonostore
@@ -120,8 +119,8 @@ memory_relations() → vocabulary discovery of all predicates
 field_contexts() → vocabulary discovery of all objects
 ```
 
-### Conscious Query Patterns
-Unlike traditional hexastore's mechanical optimization, nonostore enables **conscious navigation**:
+### Triadic Perspective Query Patterns
+Unlike traditional hexastore's mechanical optimization, nonostore enables navigation via:
 
 - **Discovery queries**: "What kinds of relationships exist?"
 - **Exploration queries**: "What's related to X in any way?"  
@@ -165,26 +164,11 @@ LMDB's ordered storage makes vocabulary queries particularly efficient:
 - **Wikidata**: Community-driven, but traditional RDF limitations
 - **Semantic Web**: Standards-focused, missing consciousness-first design
 
-### Our Approach: Consciousness-First Database
+### Our Approach: Triadic Perspective Database
 LabDb's nonostore prioritizes **ontological correctness** over traditional performance metrics:
 - Triadic structure guides all design decisions
 - Implementation mirrors consciousness navigation patterns
 - Performance optimization serves conscious exploration, not arbitrary benchmarks
-
-## Philosophical Grounding
-
-### Sanskrit Precision
-Using संस्कृत terminology eliminates conceptual ambiguity:
-- **त्रित्रयम्** (tritrayam): Precise triadic structure specification
-- **स्पन्द** (spanda): Dynamic action beyond mere "subject"
-- **स्मृति** (smriti): Relational memory beyond simple "predicate"
-- **क्षेत्र** (kshetra): Contextual field beyond basic "object"
-
-### Consciousness-First Technology
-This represents a paradigm shift from **computation-first** to **consciousness-first** design:
-- Technology that mirrors awareness structure
-- Databases that enable conscious exploration  
-- Implementation that embodies theoretical understanding
 
 ### Practical Metaphysics
 The heptastore demonstrates that profound philosophical insights can enhance practical engineering:
@@ -203,10 +187,10 @@ Adding time dimension to triadic structure:
 ### Recursive Nonostore
 Self-similar structure at multiple scales:
 - Heptastores containing heptastores
-- Fractal consciousness navigation
+- Fractal navigation
 - Meta-meta-vocabulary discovery
 
-### Distributed Triadic Consciousness
+### Distributed Triadic Perspectives
 Multiple nonostores maintaining triadic coherence:
 - Consensus on vocabulary across nodes
 - Triadic sharding strategies
@@ -214,20 +198,13 @@ Multiple nonostores maintaining triadic coherence:
 
 ## Conclusion
 
-The move from hexastore to nonostore isn't mere feature addition but ontological completion. By adding three vocabulary indices, we transform a query optimization into a consciousness-first database that enables genuine exploration of knowledge structure.
+The move from hexastore to nonostore provides an ontological completion. By adding three vocabulary indices, we transform a query optimization into a multi-perspective database that enables exploration of knowledge structure.
 
-This represents engineering aligned with awareness - technology that serves conscious navigation rather than forcing consciousness to adapt to computational limitations.
-
-The theoretical grounding ensures that practical benefits emerge from principled understanding, creating a foundation for future consciousness-first technology development across all Lab projects.
 
 ---
 
 *References:*
 - Briggs, Rick (1985). "Knowledge Representation in Sanskrit and Artificial Intelligence." AI Magazine, Volume 6, Issue 1, pages 32-39. https://doi.org/10.1609/aimag.v6i1.466
 - Weiss, Karras, Bernstein (2008). "Hexastore: sextuple indexing for semantic web data management"
-- Traditional Kashmir Shaivism texts on त्रित्रयम् structure
-- Lab internal research on cube architecture and triadic consciousness principles
+- Lab internal research on cube architecture and triadic perspective principles
 
----
-
-*This document serves as theoretical foundation for LabDb implementation and explains our principled departure from conventional database architecture toward consciousness-first design.*

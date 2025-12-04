@@ -30,27 +30,22 @@ Key Memex principles:
 - **Persistence**: "trails that do not fade" enabling repeated traversal
 - **Personalization**: Individual scholars create their own associative networks
 
-### 2.2 Sanskrit Consciousness Principles in Database Design
+### 2.2 Triadic Perspective Principles in Database Design
 
-Our approach grounds Bush's insights in the त्रित्रयम् (triadic auto-reflexive) framework documented in our theoretical foundations [2]. This provides philosophical precision for implementing "associative thought":
+Our approach grounds Bush's insights in the triadic auto-reflexive framework documented in our theoretical foundations [2]. This provides philosophical precision for implementing "associative thought":
 
-**Motion (स्पन्द - Spanda)**: Dynamic unfolding of understanding through content
+**Motion**: Dynamic unfolding of understanding through content
 - Corresponds to Bush's "trails" - how consciousness moves through knowledge
 - Implemented via semantic discovery of entry points and concept relationships
 
-**Memory (स्मृति - Smriti)**: Relational patterns that connect disparate concepts  
+**Memory**: Relational patterns that connect disparate concepts  
 - Corresponds to Bush's "association" - how concepts link across domains
 - Implemented via nonostore vocabulary indices and cross-referential metadata
 
-**Field (क्षेत्र - Kshetra)**: Contextual grounding that provides stable reference points
+**Field**: Contextual grounding that provides stable reference points
 - Corresponds to Bush's "stored materials" - the textual foundation for exploration
 - Implemented via rope-based ordered text assembly with rich fragment metadata
 
-### 2.3 Rick Briggs' Sanskrit-AI Validation
-
-Our auto-reflexive approach builds upon Rick Briggs' foundational 1985 demonstration that Sanskrit grammatical analysis naturally creates semantic network structures equivalent to modern AI knowledge representation [3]. Briggs showed that "much work in AI has been reinventing a wheel millenia old."
-
-This historical precedent validates our approach: rather than forcing computational paradigms onto knowledge representation, we align with time-tested frameworks for auto-reflexive information organization.
 
 ## 3. Architectural Realization
 

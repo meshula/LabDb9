@@ -1,12 +1,12 @@
 # Implementing a Todo System with LabDb
 
-A practical guide to building triadic consciousness-aware applications using LabDb's nonostore architecture.
+A practical guide to building triadic perspective applications using LabDb9's nonostore architecture.
 
 ## Overview
 
-This document demonstrates how to implement a todo management system using LabDb's triadic consciousness principles. You'll learn how to structure data across the **Motion/Memory/Field** dimensions and leverage the **nine-index crown architecture** for optimal query performance.
+This document demonstrates how to implement a todo management system using LabDb09's triadic perspective principles. You'll learn how to structure data across the **Motion/Memory/Field** dimensions and leverage the **nine-index crown architecture** for optimal query performance.
 
-## Triadic Consciousness Mapping
+## Triadic Perspective Mapping
 
 LabDb organizes data according to three fundamental perspectives:
 
@@ -42,7 +42,7 @@ store->connect(todo_id, "tagged_with", "tag:test");
 ```mermaid
 graph TB
     %% Central Todo Entity (Motion)
-    TODO["🎯 todo:inception-mcp_20250613_040927<br/>MOTION - Subject-driven Reality"]
+    TODO["🎯 todo:inception-mcp_20250613_040927<br/>MOTION - Subject-driven Perspective"]
     
     %% Temporal Field Contexts
     CREATED["⏰ 2025-06-13T04:09:27.925032<br/>Creation Timestamp"]
@@ -89,7 +89,7 @@ graph TB
     end
     
     %% Crown Architecture Visualization
-    subgraph CROWN["🔯 Nine Crown Manifestations"]
+    subgraph CROWN["Nine Crown Entries"]
         direction TB
         subgraph HEXASTORE["Traditional Hexastore (6)"]
             SPO["SPO: Subject-Predicate-Object"]
@@ -106,7 +106,7 @@ graph TB
         end
     end
     
-    %% Triadic Consciousness Labels
+    %% Triadic Perspective Labels
     classDef motion fill:#ff9999,stroke:#cc0000,stroke-width:3px,color:#000
     classDef memory fill:#99ff99,stroke:#00cc00,stroke-width:2px,color:#000
     classDef field fill:#9999ff,stroke:#0000cc,stroke-width:2px,color:#000
@@ -178,7 +178,7 @@ auto primary_contexts = query.primary_contexts();
 
 ### The Curious Dichotomy
 
-When implementing a todo system in LabDb, you'll observe an interesting distribution pattern:
+When implementing a todo system in LabDb9, you'll observe an interesting distribution pattern:
 
 - **Motion Entities**: Hundreds (todos, projects, users)
 - **Memory Relations**: Dozens (created_at, belongs_to, tagged_with, etc.)
@@ -326,10 +326,6 @@ Use the LabDb Explorer CLI for investigation:
 
 ## Conclusion
 
-LabDb's triadic consciousness architecture provides a powerful foundation for todo systems that naturally model the way consciousness organizes tasks, relationships, and contexts. The nine-index crown architecture ensures optimal query performance while maintaining ontological completeness.
+LabDb's triadic perspective architecture provides a powerful foundation for todo systems that naturally models tasks, relationships, and contexts. The nine-index crown architecture ensures optimal query performance while maintaining ontological completeness.
 
-By following these patterns, you'll create todo systems that are **consciousness-aware** - reflecting the natural triadic structure of how minds organize and navigate task-based reality.
-
----
-
-*For more information on triadic consciousness principles, see [theoretical-grounding.md](theoretical-grounding.md).*
+*For more information on triadic perspective principles, see [theoretical-grounding.md](theoretical-grounding.md).*

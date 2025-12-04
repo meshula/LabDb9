@@ -7,8 +7,7 @@
 
 namespace LabDb {
 
-/// Triadic query interface providing conscious navigation through Motion/Memory/Field perspectives
-/// Implements त्रित्रयम् (tritrayam) - triadic consciousness navigation patterns
+/// Triadic query interface providing navigation through Motion/Memory/Field perspectives
 class TriadicQuery {
 public:
     /// Triadic perspectives for conscious navigation

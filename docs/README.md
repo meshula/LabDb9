@@ -1,14 +1,14 @@
-# Consuming LabDb in Your Project
+# Consuming LabDb9 in Your Project
 
-This guide shows you how to integrate LabDb into your C++ or Python project as a dependency. 
+This guide shows you how to integrate LabDb9 into your C++ or Python project as a dependency. 
 
 ## Overview
 
-**DB9** is a FastMCP2-powered server that exposes LabDb's TID-based triadic consciousness database through natural language queries. It enables multi-database federation where scholars can simultaneously query multiple databases; it's been designed to provide expert access to linguistic studies, historic documents, natural history collections, scene graphs, and other domain-specific knowledge repositories through a unified consciousness-aware interface.
+**DB9** is a FastMCP2-powered server that exposes LabDb9's TID-based triadic perspective database through natural language queries. It enables multi-database federation where scholars can simultaneously query multiple databases; it's been designed to provide expert access to linguistic studies, historic documents, natural history collections, scene graphs, and other domain-specific knowledge repositories through a unified consciousness-aware interface.
 
 LabDb9 provides an RDF-style database augmented with ontological information making the database self-describing.
 
-**LabDb9** is inspired by foundational AI research documented in theoretical-grounding.md that forms the basis of a "triadic consciousness" database architecture *For more information on triadic consciousness principles, see [theoretical-grounding.md](theoretical-grounding.md).* The architecture enables navigation through three perspectives:
+**LabDb9** is inspired by foundational AI research documented in theoretical-grounding.md that forms the basis of a "triadic perspective" database architecture *see [theoretical-grounding.md](theoretical-grounding.md).* The architecture enables navigation through three perspectives:
 
 - **Motion**: Subject-driven semantic information and dynamic action  
 - **Memory**: Relational connections and pattern recognition
@@ -622,7 +622,7 @@ auto memory = query.memory_relations("TYPE");
 - `get_triadic_stats()`: Comprehensive statistics
 
 
-LabDb is released under the MIT License. See `LICENSE` file for details.
+LabDb9 is released under the BSD License. See `LICENSE.txt` file for details.
 
 ---
 

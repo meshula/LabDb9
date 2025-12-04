@@ -228,7 +228,7 @@ results.as_dataframe()                # Pandas DataFrame (if available)
 
 ---
 
-## 🧘 **Triadic Consciousness Principles**
+## 🧘 **Triadic Perspective Principles**
 
 ### Motion (स्पन्द) - Subject-Driven Action
 **"What does this entity express, create, or initiate?"**
